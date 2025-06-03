@@ -3673,19 +3673,6 @@ opacity: 0.5;
         }
       }
 
-      // 4) Optionally, strip out “value=” from any <input> or <textarea> tags
-      //    in the raw HTML so that default values are never cached.
-      //    (Note: this is almost never required, because SW only caches
-      //     the original network response, not any user-filled data.)
-      //    If your server’s HTML contains default value="...", uncomment this:
-      /*
-      function stripInputValues(rawHTML) {
-        // Remove value="..." in <input ...> and remove content inside <textarea>…</textarea>
-        return rawHTML
-          .replace(/<input\b([^>]*?)\svalue=['"][^'"]*['"]([^>]*?)>/gi, '<input$1$2>')
-          .replace(/<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi, '<textarea$1></textarea>');
-      }
-      */
 
       // 5) Expose a public function to gather everything:
       window.__getAllAssets = async function () {
@@ -3700,16 +3687,9 @@ opacity: 0.5;
         // c) Parse JS for hidden asset URLs
         await scrapeJSForAssets();
 
-        // (Optional) If you really want to strip any default value="..." from the HTML:
-        // You’d have to fetch(location.href), do stripInputValues(...), then let the SW cache that. 
-        // But again, that’s almost never necessary, because what the SW stores is the original
-        // HTTP response, not any data the user typed in after load.
 
         return Array.from(window.__ALL_ASSETS.values());
       };
-
-      // (Optionally, run __getAllAssets() once on load so it's “warm” in memory)
-      // window.addEventListener('load', () => { window.__getAllAssets(); });
 
     })();
   </script>
