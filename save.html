@@ -98,11 +98,11 @@
 
     // Pages that aren’t linked anywhere can be forced here:
     const EXTRA_URLS = [
-      '/oos7/index.html',
-      '/oos7/logon.html',
-      '/oos7/miimaker.html',
-      '/oos7/returnfresh.html',
-      '/oos7/fresh.html',
+      '/oos/oos7/index.html',
+      '/oos/oos7/logon.html',
+      '/oos/oos7/miimaker.html',
+      '/oos/oos7/returnfresh.html',
+      '/oos/oos7/fresh.html',
       // …etc
     ];
 
@@ -122,7 +122,7 @@
         throw new Error('SW unsupported');
       }
       try {
-        const reg = await navigator.serviceWorker.register('/service-worker.js');
+        const reg = await navigator.serviceWorker.register('./oos/service-worker.js');
         statusTextEl.textContent = 'Service worker registered. Waiting for activation…';
         await navigator.serviceWorker.ready;
         statusTextEl.textContent = 'Service worker is active.';
