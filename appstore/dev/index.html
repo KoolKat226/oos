@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>My Apps Home</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 1rem;
+      font-family: sans-serif;
+      background: #ffffff;
+      color: #333;
+    }
+    #apps { display: grid; grid-template-columns: repeat(auto-fill, 150px); gap: 1rem; }
+    .tile {
+      border: 0px solid #ccc; padding: .5rem; text-align: center;
+      border-radius: 30px;
+      position: relative; background: #f5f5f5;
+      transition: box-shadow .3s;
+    }
+    .tile.published {
+      background: #eaffea;
+      box-shadow: 0 0 30px rgba(0,200,0,0.9);
+    }
+    .tile img { width: 100px; height: 100px; object-fit: cover; }
+    .tile button { margin: .25rem; width: 70px; }
+
+    .create-tile {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: #666; border: 2px dashed #ccc; cursor: pointer;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.5); display: none;
+      align-items:center; justify-content:center;
+    }
+    .modal {
+      background:#fff; padding:1rem; border-radius:8px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.3); text-align:center;
+    }
+    .modal button { margin:.5rem; padding:.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1 id="welcome">Your Apps</h1>
+  <button onclick=" window.location.href = '../index.html';">Return to the Appstore</button>
+  <div style="display:none">
+  <input id="creator" placeholder="Enter your creator name" />
+  <button id="loadBtn">Load</button>
+  </div>
+
+  <script>
+    // On page load, read the name from localStorage and display the welcome message
+    window.addEventListener('DOMContentLoaded', () => {
+      const name = localStorage.getItem('savedName') || '';
+      const welcomeEl = document.getElementById('welcome');
+      if (name) {
+        welcomeEl.textContent = `Welcome ${name}!`;
+      } else {
+        welcomeEl.textContent = 'Welcome!';
+      }
+    });
+  </script>
+
+  <script>
+    // On DOM ready: populate creator from localStorage & auto-load apps
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedName = localStorage.getItem('savedName') || '';
+      const creatorInput = document.getElementById('creator');
+      creatorInput.value = savedName;
+
+      // Immediately load apps with that name
+      loadApps();
+    });
+
+    // When the button is clicked: save any change and reload apps
+    document.getElementById('loadBtn').addEventListener('click', () => {
+      const creatorInput = document.getElementById('creator');
+      const name = creatorInput.value.trim();
+      localStorage.setItem('savedName', name);
+      loadApps();
+    });
+  </script>
+
+  <div id="apps"></div>
+
+  <!-- confirm modal -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <p id="modalText">Are you sure?</p>
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywq_95Mud0pCiLcYSTpJu9oA3f_brqNYtguuTUJorpwz2pH464XektHwXea51lwXcc/exec';
+    let deleteCb = null;
+
+    function loadApps() {
+      const creatorVal = document.getElementById('creator').value.trim();
+      if (!creatorVal) return alert('Type your creator name');
+      window.handleList = (res) => {
+        if (res.error) return alert(res.error);
+        const container = document.getElementById('apps');
+        container.innerHTML = '';
+        res.apps.forEach(app => {
+          const div = document.createElement('div');
+          div.className = 'tile' + (app.published==='1' ? ' published' : '');
+          div.innerHTML = `
+            <img src="${app.iconUrl}" alt="">
+            <div>${app.appName}</div>
+            <button onclick="edit('${app.appName}','${app.creator}')">Edit</button>
+            <button onclick="confirmDelete('${app.appName}','${app.creator}', this)">Del</button>
+            <button onclick="togglePub('${app.appName}','${app.creator}','${app.published}', this)">
+              ${app.published==='1' ? 'Unpublish' : 'Publish'}
+            </button>
+          `;
+          container.appendChild(div);
+        });
+        // Create new tile
+        const createDiv = document.createElement('div');
+        createDiv.className = 'tile create-tile';
+        createDiv.innerHTML = '+<br>Create';
+        createDiv.onclick = () => {
+          location = 'editor.html?creator=' + encodeURIComponent(creatorVal);
+        };
+        container.appendChild(createDiv);
+      };
+      const tag = document.createElement('script');
+      tag.src = `${SCRIPT_URL}?action=list&callback=handleList&creator=${encodeURIComponent(creatorVal)}`;
+      document.head.appendChild(tag);
+    }
+
+    function edit(name, creator) {
+      location = `editor.html?appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}`;
+    }
+
+    function confirmDelete(name, creator, btn) {
+      deleteCb = () => deleteApp(name, creator, btn);
+      document.getElementById('modalText').textContent = `Delete "${name}"?`;
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+    document.getElementById('confirmYes').onclick = () => { deleteCb(); closeModal(); };
+    document.getElementById('confirmNo').onclick  = () => closeModal();
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+      deleteCb = null;
+    }
+
+    function deleteApp(name, creator, btn) {
+      window.handleDel = res => {
+        if (res.error) return alert(res.error);
+        btn.closest('.tile').remove();
+      };
+      const tag = document.createElement('script');
+      tag.src = `${SCRIPT_URL}?action=delete&callback=handleDel&appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}`;
+      document.head.appendChild(tag);
+    }
+
+    function togglePub(name, creator, current, btn) {
+      const newFlag = current==='1' ? '0' : '1';
+      window.handlePub = res => {
+        if (res.error) return alert(res.error);
+        // refresh the grid to show updated color/button
+        loadApps();
+      };
+      const tag = document.createElement('script');
+      tag.src = `${SCRIPT_URL}?action=publish&callback=handlePub&appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}&published=${newFlag}`;
+      document.head.appendChild(tag);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Create New Data Row</title>
+  <style>
+    /* ---- Base ---- */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    /* ---- Logo ---- */
+    .logo {
+      width: 200px;
+      margin-bottom: 30px;
+    }
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* ---- Hidden fields ---- */
+    .hidden { display: none; }
+
+    /* ---- Labels & Inputs ---- */
+    .label {
+      font-size: 22px;
+      font-weight: 500;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    .hint {
+      margin-top: -10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    input[type="text"] {
+      border: none;
+      background: #d6e4f5;
+      padding: 16px 20px;
+      width: 400px;
+      border-radius: 30px;
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+      outline: none;
+      transition: 0.15s ease;
+    }
+
+    input[type="text"]:hover {
+      border-radius: 15px;
+      scale: 1.2;
+      transition: 0.15s ease;
+    }
+
+    /* ---- Buttons ---- */
+    .popup-btn, .submit-btn, .return-btn {
+      border: none;
+      border-radius: 30px;
+      padding: 15px 30px;
+      font-size: 20px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .popup-btn:hover,
+    .return-btn:hover,
+    .submit-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+    .popup-btn:active,
+    .return-btn:active,
+    .submit-btn:active:not(:disabled) {
+      transform: scale(0.9);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .submit-btn {
+      background: #def3dd;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .return-btn {
+      background: #eee;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .popup-btn {
+      background: #eee;
+      font-weight: bold;
+    }
+
+    /* ---- Overlay & Popup ---- */
+    #overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(5px);
+      display: none;
+      z-index: 900;
+    }
+    #popup {
+      position: fixed;
+      top: 50%; left: 50%;
+      width: 80%; height: 80%;
+      background: #fff;
+      border: 2px solid #888;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      border-radius: 20px;
+      display: none;
+      flex-direction: column;
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+      z-index: 1000;
+      overflow: hidden;
+      animation-fill-mode: forwards;
+    }
+    @keyframes popupIn {
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    @keyframes popupOut {
+      to { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    }
+    #popup iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+    #closePopup {
+      background: #f44;
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      padding: 8px 12px;
+      cursor: pointer;
+      align-self: flex-end;
+      margin: 10px;
+      border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Logo -->
+  <div class="logo">
+    <img src="https://cdn.glitch.global/d53e0a5c-155f-47f4-b9c5-e40fdba7d98f/oos7_blue.png?v=1748132587916"
+         alt="OOS Blue Logo">
+  </div>
+
+  <!-- Hidden configuration fields -->
+  <div class="hidden">
+    <input id="scriptUrl"
+      value="https://script.google.com/macros/s/AKfycbwSznpVPvR9uSyTigf1BJfJuZdNZ7t9PPfAAJiEtvMH3jhFNh29XG4M09FNi5H-dGKj/exec">
+
+    <label for="colB">Name:</label>
+    <input type="text" id="colB">
+
+    <label for="colH">Group:</label>
+    <input type="text" id="colH">
+
+    <!-- Hidden fields for other columns -->
+    <input type="hidden" id="colC">
+    <input type="hidden" id="colD">
+    <input type="hidden" id="colE">
+    <input type="hidden" id="colF">
+    <input type="hidden" id="colG">
+    <input type="hidden" id="colI" placeholder="Column I Data">
+  </div>
+
+  <!-- Visible form -->
+  <div class="label">Enter your OOS ID:</div>
+  <input type="text" autocomplete="off" id="idInput" maxlength="16">
+  <style>
+    .submit-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px; /* optional */
+    }
+  </style>
+
+  <div class="submit-container">
+    <button onclick="window.location.href = './logon.html';" class="return-btn">
+      Cancel
+    </button>
+  <button class="submit-btn" id="loadBtn" >
+    Log in
+  </button>
+  </div>
+  <button style="display:none" id="updateBtn">Save Changes</button>
+  <!-- Background blur overlay -->
+  <div id="overlay"></div>
+
+
+</body>
+  <script>
+
+    function loadData() {
+        const id = document.getElementById('idInput').value.trim();
+      localStorage.setItem('savedID', id);
+      window.location.href = './save.html';
+                         }
+
+
+    document.getElementById('loadBtn').addEventListener('click', loadData);
+
+
+
+
+
+
+
+
+
+  </script>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Standalone Data Updater</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      .field { margin-bottom: 10px; }
+      label { display: inline-block; width: 80px; }
+      input[type=text] { width: 200px; }
+      button { margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <h2>Standalone Data Updater</h2>
+    <p>Set your deployed script URL below:</p>
+    <div class="field">
+      <label>Script URL:</label>
+      <input type="text" value="https://script.google.com/macros/s/AKfycby8j9rKg35LTT-xTKr4pvA87PRY06QaR9IzabiGz_mIAjTgoSH1FakrI_DPv_pnPpBk/exec" id="scriptUrl" placeholder="https://.../exec">
+    </div>
+    <div class="field">
+      <label>ID:</label>
+      <input type="text" id="idInput">
+      <button id="loadBtn">Load Data</button>
+    </div>
+    <div id="dataFields" style="display:none;">
+      <!-- B-H inputs -->
+      <script>
+        ['B','C','D','E','F','G','H'].forEach(function(col) {
+          document.write('<div class="field"><label>' + col + ':</label>' +
+            '<input type="text" id="col' + col + '"></div>');
+        });
+      </script>
+      <button id="updateBtn">Update Sheet</button>
+    </div>
+
+    <script>
+      function getUrl() {
+        return document.getElementById('scriptUrl').value.trim();
+      }
+
+      document.getElementById('loadBtn').addEventListener('click', function() {
+        var url = getUrl();
+        var id = idInput.value.trim();
+        if (!url||!id) return alert('Enter script URL and ID');
+        fetch(url + '?action=get&id=' + encodeURIComponent(id))
+          .then(r=>r.json())
+          .then(data => {
+            if (data.error) return alert(data.error);
+            dataFields.style.display = 'block';
+            data.values.forEach((v,i) => {
+              document.getElementById('col' + ['B','C','D','E','F','G','H'][i]).value = v;
+            });
+          });
+      });
+
+      document.getElementById('updateBtn').addEventListener('click', function() {
+        var url = getUrl();
+        var id = idInput.value.trim();
+        var vals = [];
+        ['B','C','D','E','F','G','H'].forEach(col => vals.push(document.getElementById('col'+col).value));
+        fetch(url, {
+          method: 'POST',
+          body: JSON.stringify({action: 'update', id: id, values: vals})
+        })
+        .then(r=>r.json())
+        .then(resp => resp.error ? alert(resp.error) : alert(resp.status));
+      });
+    </script>
+  </body>
+</html>

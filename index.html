@@ -1,16 +1,3720 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wii U Style Menu</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(#d3dce6, #b0bbc6);
+      perspective: 4000px;
+      font-family: sans-serif;
+    }
+
+    .scene {
+      width: 100vw;
+      height: 100vh;
+      --zoom: 0.75;
+      transform: scale(var(--zoom)) rotateX(-20deg) rotateY(0deg);
+      transform-style: preserve-3d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      touch-action: none;
+    }
+
+    .floor {
+      position: absolute;
+      width: 1200px;
+      height: 1200px;
+      background-color: #ffffff;
+      background-image: radial-gradient(circle,
+          rgba(3, 3, 3, 0.07) 15%,
+          transparent 11%);
+      background-size: 40px 40px;
+      transform: rotateX(90deg) translateZ(-200px);
+      transform-origin: center;
+      box-shadow: 0 0 130px rgba(0, 0, 0, 0.3) inset;
+      border-radius: 150px;
+      z-index: -1;
+      /* make sure children position relative to this */
+      overflow: hidden;
+    }
+
+    /* shadow circles */
+    .floor .moving-shadow {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    .icon {
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .icon-inner {
+      width: 130px;
+      height: 130px;
+      border-radius: 30px;
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: multiply;
+      backdrop-filter: saturate(180%) blur(14px);
+      background-image:
+        linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(0, 0, 0, 0.3)),
+        var(--bg-img);
+      box-shadow: 0 30px 40px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .icon:hover .icon-inner {
+      transform: scale(1.3) translateZ(20px) rotateX(5deg) rotateY(-5deg);
+      box-shadow: 0 40px 50px rgba(0, 0, 0, 0.5);
+      z-index: 2;
+    }
+
+    @keyframes hop {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .icon-inner.hop {
+      animation: hop 0.6s ease-in-out infinite;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: black;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .logo-holder {
+      position: absolute;
+      z-index: 1000;
+      width: 100px;
+      height: 100px;
+      border-radius: 30px;
+      background: url('./images/unmomento.svg') center/contain no-repeat;
+      opacity: 0;
+      animation: fadeInOut .5s ease forwards;
+      filter: invert(1);
+    }
+
+    @keyframes fadeInOut {
+      0% {
+        opacity: 0.5
+      }
+
+      20% {
+        opacity: 0.5
+      }
+
+      80% {
+        opacity: 0.5
+      }
+
+      100% {
+        opacity: 0.5
+      }
+    }
+
+    #codeContainer {
+      position: absolute;
+      inset: 0;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .5s ease;
+      overflow: auto;
+      background: black;
+    }
+
+    iframe {
+      position: absolute;
+      inset: 0;
+      border: none;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      transition: opacity .5s ease;
+    }
+
+    iframe.visible {
+      opacity: 1
+    }
+
+    .back-button,
+    .minimize-button {
+      position: fixed;
+      bottom: 20px;
+      width: 80px;
+      height: 80px;
+      z-index: 1001;
+      cursor: pointer;
+      transition: transform .2s ease;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .back-button {
+      left: 20px;
+      background-image: url('back_unpressed.png');
+    }
+
+    .minimize-button {
+      right: 20px;
+      background-image: url('minimize_unpressed.png');
+    }
+
+    .back-button:active {
+      transform: scale(.95);
+      background-image: url('back_pressed.png');
+    }
+
+    .minimize-button:active {
+      transform: scale(.95);
+      background-image: url('minimize_pressed.png');
+    }
+
+    .mii-container {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .online-mii-container {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: auto;
+      cursor: pointer;
+      margin-bottom: 10px;
+      z-index: 3;
+    }
+
+    .emoji-head {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 10px;
+      transition: .2s;
+      z-index: 2;
+      /* Make sure it's on top */
+    }
+
+    .emoji-head.hovered {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      margin-bottom: 7px;
+      transition: .2s;
+      z-index: 2;
+      /* Make sure it's on top */
+    }
+
+    .mii-popup .emoji-head {
+      position: relative;
+      /* ensure absolute children are relative to this */
+      width: 100px;
+      /* bigger so you can see detail */
+      height: 100px;
+      margin: 0 auto 12px;
+      /* center it and give spacing below */
+    }
+
+    /* override the absolute‐fill on .emoji-layer just here */
+    .mii-popup .emoji-head .emoji-layer {
+      position: absolute;
+      /* keep stacking behavior */
+      top: 0;
+      left: 0;
+      /* align to top-left of its container */
+      width: 100%;
+      height: 100%;
+      /* fill the 100×100 box exactly */
+      object-fit: contain;
+      /* scale nicely */
+    }
+
+    .emoji-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .mii {
+      position: relative;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(2px);
+opacity: 0.5;
+      z-index: 1;
+      margin-top: -17px;
+      /* 🔽 Push it downward */
+    }
+
+    .mii-name {
+      display: inline-block;
+      position: relative;
+      opacity: 0;
+      padding: 2px 6px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 0px solid #ccc;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      transition: .2s;
+      color: #333;
+      margin-bottom: -7px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .mii-name.hovered {
+      display: inline-block;
+      position: relative;
+      opacity: 1;
+      padding: 2px 6px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 0px solid #ccc;
+      border-radius: 20px;
+      font-size: 12px;
+      transition: .2s;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: -7px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* chat bubble styling */
+    .chat-bubble {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      /* above the head */
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      transform-origin: bottom center;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 4px 8px;
+      border-radius: 35px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      font-size: 12px;
+      color: #333;
+      pointer-events: none;
+      opacity: 0;
+      transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+      z-index: 3;
+    }
+
+    .chat-bubble::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      /* at bottom of bubble */
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px 6px 0 6px;
+      border-style: solid;
+      border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+    }
+
+    .chat-bubble.visible {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+  </style>
+  <style>
+    /* Toggle button */
+    #menuToggleBtn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      z-index: 1000;
+    }
+
+    /* Hidden trigger for showing the menu */
+    #hoverTrigger {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 200px;
+      background: transparent;
+      z-index: 9999999;
+    }
+
+    /* Menu container */
+    #menuUI {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999999;
+    }
+
+    #menuUI.visible {
+      pointer-events: auto;
+    }
+
+    /* Logo in top-left corner: faster fade */
+    #logoImage {
+      position: fixed;
+      top: 0;
+      left: 30px;
+      width: 150px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+    }
+
+    #menuUI.visible #logoImage {
+      opacity: 1;
+    }
+
+    /* Bottom container */
+    #bottomContainer {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 380px;
+      margin-top: 20px;
+    }
+
+    /* Gradient: slower fade, slight delay */
+    #image3 {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 1s ease;
+      transition-delay: 0.2s;
+      z-index: 0;
+    }
+
+    #menuUI.visible #image3 {
+      opacity: 1;
+    }
+
+    /* Icon buttons slide in/out */
+    .icon-button,
+    .icon-button2,
+    .icon-button3 {
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    /* Entry delays */
+    #menuUI.visible .icon-button {
+      transition-delay: 0.3s;
+    }
+
+    #menuUI.visible .icon-button2 {
+      transition-delay: 0.6s;
+    }
+
+    #menuUI.visible .icon-button3 {
+      transition-delay: 0.6s;
+    }
+
+    /* Slide-out delays */
+    #menuUI:not(.visible) .icon-button {
+      transition-delay: 0s;
+    }
+
+    #menuUI:not(.visible) .icon-button2 {
+      transition-delay: 0.1s;
+    }
+
+    #menuUI:not(.visible) .icon-button3 {
+      transition-delay: 0.1s;
+    }
+
+    /* Sizes & spacing */
+    .icon-button {
+      width: 160px;
+      margin: 0 0 0px 0;
+    }
+
+    .icon-button2 {
+      width: 120px;
+      margin: 0 0 10px 0;
+    }
+
+    .icon-button3 {
+      width: 120px;
+      margin: 0 0 10px 0;
+    }
+
+    /* Apply show/hide transforms */
+    #menuUI.visible .icon-button,
+    #menuUI.visible .icon-button2,
+    #menuUI.visible .icon-button3 {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    #menuUI:not(.visible) .icon-button,
+    #menuUI:not(.visible) .icon-button2,
+    #menuUI:not(.visible) .icon-button3 {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+  <style>
+    .header {
+      display: flex;
+      position: fixed;
+      z-index: 3;
+      align-items: center;
+      padding: 10px 20px;
+      background: linear-gradient(to bottom right, black 0%, transparent 50%);
+    }
+
+
+
+
+    .logo img {
+      width: 200px;
+      height: auto;
+      display: block;
+      margin-right: 10px;
+    }
+
+    .say-container {
+      display: flex;
+      align-items: center;
+      margin-left: 50px;
+    }
+
+    .say-input input {
+      width: 500px;
+      padding: 20px 20px;
+      border-radius: 30px;
+      border: none;
+      font-size: 16px;
+      background: #b2c3cf;
+      color: #353a3d;
+      font-family: "Work Sans", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 500;
+      font-style: normal;
+      transition: .3s;
+    }
+
+    .say-input input:focus {
+      border-radius: 20px;
+      background-color: #9cb3e6;
+      outline: none;
+      transition: .3s;
+    }
+
+    .icon-btn {
+      background-color: #b2c3cf;
+      border: none;
+      cursor: pointer;
+      padding: 12px;
+      margin-left: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      width: 58px;
+      height: 58px;
+      transition: background-color 0.2s;
+      transition: .3s;
+    }
+
+    .icon-btn:hover {
+      background-color: #9cb3e6;
+      border-radius: 40%;
+      transition: .3s;
+    }
+
+    .icon-btn:active {
+      background-color: #b2c3cf;
+      border-radius: 30%;
+      scale: 1.1;
+      transition: .3s;
+    }
+
+    .icon-btn img {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Modal styles */
+    #settingsModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      z-index: 4;
+      justify-content: center;
+    }
+
+    .modal {
+      background: #f2f2f2;
+      border-radius: 40px;
+      padding: 40px;
+      width: 500px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal .close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .modal input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 30px;
+      border: none;
+      background-color: #ccc;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    .modal button {
+      width: 150px;
+      padding: 10px;
+      border-radius: 20px;
+      border: none;
+      background-color: #f0f0f0;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto 0;
+    }
+  </style>
+  <style>
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    video {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <style>
+    .gsUnique_overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 99999999999999999;
+    }
+
+    .gsUnique_overlay.gsUnique_show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .gsUnique_popup {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1000;
+    }
+
+    .gsUnique_overlay.gsUnique_show .gsUnique_popup {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .gsUnique_popup h3 {
+      margin-top: 0;
+    }
+
+    .gsUnique_copyBtn {
+      padding: 0.5rem 1rem;
+      background: #28a745;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .gsUnique_copyBtn:active {
+      transform: scale(0.97);
+    }
+  </style>
+  <style>
+    .toggle-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .toggle-container {
+      background: #eee;
+      padding: 1rem;
+      border-radius: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 140px;
+    }
+
+    .toggle-label {
+      margin-top: 0.5rem;
+      text-align: center;
+      color: #444;
+      font-weight: 500;
+    }
+
+    /* Switch core style */
+    .toggle-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: relative;
+      display: inline-block;
+      margin-left: 25px;
+      width: 50px;
+      height: 28px;
+      background-color: #ddd;
+      border-radius: 50px;
+      transition: 0.4s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      top: 3px;
+      background-color: #8bc34a;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #fff;
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+
+</style>
+  <style>
+
+    /* ======================================================
+       2) SPLASH OVERLAY
+       ====================================================== */
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999; /* Always on top */
+
+      /* Start fully blurred; blur-in on load (0→1s) */
+      filter: blur(20px);
+      animation: blurIn 1s forwards ease-out;
+
+      /* Prepare for exit: filter, transform, opacity transition over 2s */
+      transform: scale(1);
+      opacity: 1;
+      transition:
+        filter 2s ease-in,
+        transform 2s ease-in,
+        opacity 2s ease-in;
+      transform-origin: center;
+    }
+    @keyframes blurIn {
+      0%   { filter: blur(20px); }
+      100% { filter: blur(0);   }
+    }
+    /* On exit, intensify to 308px blur, zoom, fade over 2s */
+    #splash.exiting {
+      filter: blur(308px);
+      transform: scale(1.3);
+      opacity: 0;
+    }
+
+    /* ======================================================
+       3) LOGO CONTAINER (CENTERED)
+       ====================================================== */
+    #logo-container {
+      position: relative; /* for ripple positioning */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Each logo image transitions its own blur over 2s */
+    #logo-container img {
+      display: block;
+      max-height: 150px; /* adjust if needed */
+      margin: 0 10px;
+      transition: filter 2s ease-in;
+      filter: blur(0);
+    }
+    /* During exit, blur each image to 308px */
+    #splash.exiting #logo-container img {
+      filter: blur(308px);
+    }
+
+    /* ======================================================
+       4) BOUNCING CIRCLE (LOGO ICON)
+       ====================================================== */
+    #logo-icon {
+      animation: bounce 1s infinite ease-in-out;
+    }
+    @keyframes bounce {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-50px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* ======================================================
+       5) BLURRED BLUE RIPPLE (BEHIND LOGO)
+       ====================================================== */
+    #splash-ripple {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: rgba(0, 120, 255, 0.5);
+      transform: translate(-50%, -50%) scale(0);
+      filter: blur(8px);
+      pointer-events: none;
+      z-index: -1; /* Behind the logo images */
+    }
+    @keyframes rippleExpand {
+      0%   { transform: translate(-50%, -50%) scale(0);   opacity: 0.5; }
+      70%  { transform: translate(-50%, -50%) scale(3);   opacity: 0.2; }
+      100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0;   }
+    }
+    .animate-ripple {
+      animation: rippleExpand 0.6s forwards ease-out;
+    }
+
+    /* ======================================================
+       6) MAIN CONTENT (UNDER THE SPLASH)
+       ====================================================== */
+
+    /* ======================================================
+       7) TIMEOUT POPUP WHEN >20s
+       ====================================================== */
+    #timeout-popup {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(255,255,255,0.95);
+      border: 1px solid #ccc;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 10000;
+      display: none;
+      max-width: 300px;
+      text-align: center;
+      font-size: 16px;
+    }
+    #timeout-popup button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    (function() {
+      const STORAGE_KEY = 'savedHTMLContent';
+      let isEditorInitialized = false;
+      let observer;
+      let injectedContainer = null;
+      let injectedScripts = [];
+
+      // ───────────────────────────────────────────────────────────────────
+      // injectHTML(content):
+      //   • Removes any previously‐injected container & scripts.
+      //   • Parses “content” (which may include <style> and <script>).
+      //   • Inserts <style> tags so CSS applies immediately.
+      //   • Creates real <script> elements so JS actually executes.
+      // ───────────────────────────────────────────────────────────────────
+      function injectHTML(content) {
+        // 1) Remove previous injection if it exists:
+        if (injectedContainer) {
+          injectedContainer.remove();
+          injectedContainer = null;
+        }
+        injectedScripts.forEach(s => s.remove());
+        injectedScripts = [];
+
+        if (!content) return;
+
+        // 2) Create a new container for non‐script elements:
+        injectedContainer = document.createElement('div');
+        injectedContainer.id = 'injected-container';
+
+        // 3) Use a temporary DIV to parse the HTML string:
+        const temp = document.createElement('div');
+        temp.innerHTML = content;
+
+        // 4) Extract and handle <script> tags:
+        const scripts = temp.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+          // Copy attributes (src, type, etc.) if any:
+          for (let i = 0; i < oldScript.attributes.length; i++) {
+            const attr = oldScript.attributes[i];
+            newScript.setAttribute(attr.name, attr.value);
+          }
+          // Copy inline JS text (if present):
+          newScript.textContent = oldScript.textContent;
+          // Append the new <script> so it executes:
+          document.body.appendChild(newScript);
+          injectedScripts.push(newScript);
+          // Remove the old <script> from temp so it does not remain in innerHTML:
+          oldScript.remove();
+        });
+
+        // 5) Whatever remains in temp (including <style> tags, plain HTML, etc.)
+        //    gets moved into injectedContainer:
+        while (temp.firstChild) {
+          injectedContainer.appendChild(temp.firstChild);
+        }
+
+        // 6) Finally, place the injectedContainer into <body>:
+        document.body.appendChild(injectedContainer);
+      }
+
+      // ───────────────────────────────────────────────────────────────────
+      // initEditor():
+      //   • Populates the textarea with saved content (if any).
+      //   • Hooks up the “Save & Run” button to update localStorage + re‐inject.
+      //   • Sets isEditorInitialized = true so we don't re‐hook multiple times.
+      // ───────────────────────────────────────────────────────────────────
+      function initEditor() {
+        if (isEditorInitialized) return;
+        isEditorInitialized = true;
+
+        const textarea = document.getElementById('codeInput');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // 1) Load existing content into the textarea:
+        const existing = localStorage.getItem(STORAGE_KEY);
+
+
+        // 2) Wire up “Save & Run”:
+        if (saveBtn && textarea) {
+          saveBtn.addEventListener('click', () => {
+            const html = textarea.value;
+            localStorage.setItem(STORAGE_KEY, html);
+            injectHTML(html);
+            alert('Content saved and injected.');
+          });
+        }
+      }
+
+      // ───────────────────────────────────────────────────────────────────
+      // handleMutations(mutations):
+      //   • If <div id="editor-container"> is ADDED: call initEditor().
+      //   • If it is REMOVED: reset isEditorInitialized = false so re‐init works next time.
+      // ───────────────────────────────────────────────────────────────────
+      function handleMutations(mutationsList) {
+        for (const mutation of mutationsList) {
+          // Check for ADDED nodes:
+          for (const node of mutation.addedNodes) {
+            if (!(node instanceof HTMLElement)) continue;
+            if (node.id === 'editor-container' ||
+                node.querySelector?.('#editor-container')) {
+              initEditor();
+            }
+          }
+          // Check for REMOVED nodes:
+          for (const node of mutation.removedNodes) {
+            if (!(node instanceof HTMLElement)) continue;
+            if (node.id === 'editor-container' ||
+                node.querySelector?.('#editor-container')) {
+              isEditorInitialized = false;
+            }
+          }
+        }
+      }
+
+      // ───────────────────────────────────────────────────────────────────
+      // MAIN ENTRY POINT (on DOMContentLoaded):
+      // 1) Pull last‐saved HTML from localStorage and inject it.
+      // 2) If an editor is already in the DOM, initEditor() now.
+      // 3) Otherwise, start observing <body> for additions/removals.
+      // ───────────────────────────────────────────────────────────────────
+      window.addEventListener('DOMContentLoaded', () => {
+        // 1) Inject whatever was saved (if anything):
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          injectHTML(saved);
+        }
+
+        // 2) If the editor container is already in the page, wire it up:
+        if (document.getElementById('editor-container')) {
+          initEditor();
+        }
+
+        // 3) Otherwise, watch for the editor being added or removed:
+        observer = new MutationObserver(handleMutations);
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+    })();
+  </script>
 </head>
 
 <body>
-  Hello world
-  <script src="script.js"></script>
+  <div class="video-container">
+    <video id="skyvid" autoplay loop muted>
+      <source src="./bg.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  <!-- ============================================
+       FULL-SCREEN SPLASH OVERLAY
+     ============================================ -->
+  <div id="splash">
+    <!-- Ripple DIV sits behind the logo -->
+    <div id="splash-ripple"></div>
+
+    <!-- Logo container: two images side by side -->
+    <div id="logo-container">
+      <img id="logo-name" src="./logo1.png" alt="Logo Name" />
+      <img id="logo-icon" src="./logo2.png" alt="Logo Icon" />
+    </div>
+  </div>
+  <!-- ============================================
+       TIMEOUT POPUP
+     ============================================ -->
+  <div id="timeout-popup">
+    <p>Offline Mode enabled</p>
+    <p>You may be limited to only certain apps</p>
+    <button id="close-popup">Close</button><button onclick="location.reload();">Retry</button>
+  </div>
+  <!-- Popup overlay for Gameshare-->
+  <div id="gsUnique_overlay" class="gsUnique_overlay" onclick="gsUnique_handleOverlayClick(event)">
+    <div class="gsUnique_popup">
+      <h3>This game can now be played at:</h3>
+      <input type="text" id="gsUnique_shareLink" value="jacsyn.com/gameshare" readonly>
+      <br><br>
+      <button class="gsUnique_copyBtn" onclick="gsUnique_copyShareLink()">Copy</button>
+    </div>
+  </div>
+  <textarea style="display:none" id="gsUnique_resultOutput" rows="3" readonly placeholder="Result will appear here..."></textarea>
+  <div class="header">
+    <!-- Placeholder logo image -->
+    <div class="logo"><img src="https://cdn.glitch.global/d53e0a5c-155f-47f4-b9c5-e40fdba7d98f/oos7.png?v=1746396919162"
+        alt="OOS7"></div>
+
+    <div class="say-input">
+      <input id="sayMain" type="text" placeholder="Say something...">
+    </div>
+
+    <!-- Audio icon placeholder -->
+    <button onclick="disableBgAudioControl()" class="icon-btn" id="speakBtn" title="Speak">
+      <img id="audioIcon" src="./images/soundbtn.png" alt="Speak">
+    </button>
+
+    <!-- Settings icon placeholder -->
+    <button class="icon-btn" id="settingsBtn" title="Settings">
+      <img id="settingsIcon" src="./images/settingsbtn.png" alt="Settings">
+    </button>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal">
+    <div class="modal">
+      <div class="close" id="closeModal">&times;</div>
+      <label style="display:none;" for="scriptUrl">Script URL:</label>
+      <input style="display:none;"
+        value="https://script.google.com/macros/s/AKfycbwm1M3hiUKFhUy8VaDKTQSeqW0KO32NeFZ5oz3BYduwsikdZ4gIHPLuqJTkclhs9fYI/exec"
+        type="text" id="scriptUrl" placeholder="https://.../exec">
+
+      <label for="idInput">OOS ID:</label>
+      <input readonly type="text" id="idInput">
+
+      <label for="colB">Name:</label>
+      <input type="text" id="colB">
+
+      <label for="colH">Group:</label>
+      <input type="text" id="colH">
+
+      <!-- Hidden fields for other columns -->
+      <input type="hidden" id="colC">
+      <input type="hidden" id="colD">
+      <input type="hidden" id="colE">
+      <input type="hidden" id="colF">
+      <input type="hidden" id="colG">
+      <input type="hidden" id="colI" placeholder="Column I Data">
+      <div style="" id="controls">
+        <button style="display:none" id="goBtn">Start Watching</button>
+        <button style="display:none" onclick="startWatching()">gopls</button>
+
+        <!-- Master alerts toggle (persisted) -->
+
+
+        <!-- Toast-only toggle (off by default) -->
+        <label style="display:none">
+          <input type="checkbox" id="toastToggle" />
+          Toasts On
+        </label>
+      </div>
+      <div class="toggle-group">
+        <label class="toggle-container">
+          <input type="checkbox" id="emojiAudioToggle" />
+          <span class="slider"></span>
+          <div class="toggle-label">Talking sounds</div>
+        </label>
+
+        <label class="toggle-container">
+          <input type="checkbox" id="masterToggle" />
+          <span class="slider"></span>
+          <div class="toggle-label">Notifications</div>
+        </label>
+
+        <label class="toggle-container">
+          <input type="checkbox" id="bubbleCycleToggle" />
+          <span class="slider"></span>
+          <div class="toggle-label">Relay messages<br>on menu</div>
+        </label>
+      </div>
+       <audio style="display:none" src="./oosstartup.mp3" alt="" autoplay="autoplay"></audio>
+      <button style="display:none" id="loadBtn">Load Data</button>
+      <style>
+        .button-container {
+          display: inline-flex;
+          gap: 10px;
+        }
+
+        .center-wrapper {
+          display: flex;
+          justify-content: center;
+          margin-top: 20px; /* optional vertical spacing */
+        }
+      </style>
+
+      <div class="center-wrapper">
+        <div class="button-container">
+          <button id="updateBtn">Save Changes</button>
+          <button onclick="window.location.href = './logon.html';">Change Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function savemiimakerdata() {
+      const layersInput = document.getElementById('colC');
+      const hairInput = document.getElementById('colD');
+
+      const layersValue = layersInput?.value || '';
+      const hairValue = hairInput?.value || '';
+
+      localStorage.setItem('mii_layers', layersValue);
+      localStorage.setItem('mii_hair_color', hairValue);
+
+      if (typeof updatemyoos === 'function'); //updatemyoos();
+    }
+  </script>
+
+  <script>
+    const layersKey = 'mii_layers';
+    const hairColorKey = 'mii_hair_color';
+    const layersInput = document.getElementById('colC');
+    const hairInput = document.getElementById('colD');
+
+    // Keep previous values to detect changes
+    let prevLayersValue = localStorage.getItem(layersKey) || '';
+    let prevHairValue = localStorage.getItem(hairColorKey) || '';
+
+    // Initialize inputs
+    layersInput.value = prevLayersValue;
+    hairInput.value = prevHairValue;
+
+    function savemiimakerdata() {
+      // Save both fields explicitly
+      localStorage.setItem(layersKey, layersInput.value);
+      localStorage.setItem(hairColorKey, hairInput.value);
+      prevLayersValue = layersInput.value;
+      prevHairValue = hairInput.value;
+      if (typeof updatemyoos === 'function') updatemyoos();
+    }
+
+    function pollSync() {
+      // Layers field
+      const currentLayers = layersInput.value;
+      const storedLayers = localStorage.getItem(layersKey) || '';
+      if (currentLayers !== prevLayersValue) {
+        // changed by user or JS -> save
+        localStorage.setItem(layersKey, currentLayers);
+        prevLayersValue = currentLayers;
+        if (typeof updatemyoos === 'function') updatemyoos();
+      } else if (storedLayers !== currentLayers) {
+        // changed in storage (other tab or loadData) -> update input
+        layersInput.value = storedLayers;
+        prevLayersValue = storedLayers;
+        if (typeof updatemyoos === 'function') updatemyoos();
+      }
+
+      // Hair field
+      const currentHair = hairInput.value;
+      const storedHair = localStorage.getItem(hairColorKey) || '';
+      if (currentHair !== prevHairValue) {
+        localStorage.setItem(hairColorKey, currentHair);
+        prevHairValue = currentHair;
+        if (typeof updatemyoos === 'function') updatemyoos();
+      } else if (storedHair !== currentHair) {
+        hairInput.value = storedHair;
+        prevHairValue = storedHair;
+        if (typeof updatemyoos === 'function') updatemyoos();
+      }
+    }
+
+    // Listen for manual edits
+    layersInput.addEventListener('input', () => {
+      prevLayersValue = layersInput.value;
+    });
+    hairInput.addEventListener('input', () => {
+      prevHairValue = hairInput.value;
+    });
+
+    // Start polling every 500ms
+    setInterval(pollSync, 500);
+
+    // React to cross-tab storage events
+    window.addEventListener('storage', (e) => {
+      if (e.key === layersKey || e.key === hairColorKey) {
+        pollSync();
+      }
+    });
+
+    // Expose savemiimakerdata for external calls
+    window.savemiimakerdata = savemiimakerdata;
+  </script>
+
+
+
+  <script>
+    document.getElementById("sayMain").addEventListener("input", function () {
+      document.getElementById("colE").value = this.value;
+    });
+  </script>
+  <input style="display:none;" type="text" id="icon-url-box" placeholder="App icon URL will appear here" readonly>
+
+  <button style="display:none" id="menuToggleBtn">Toggle Menu</button>
+  <div id="hoverTrigger"></div>
+
+  <div id="menuUI">
+    <img id="logoImage" src="./images/logo.png" alt="Logo">
+    <div id="bottomContainer">
+      <img id="image3" src="./images/bggradient.png" alt="Background">
+      <img id="shareBtn" class="icon-button3" onclick="gsUnique_handleSearch()" src="./images/sharebtn.png"
+        alt="Share Button">
+      <img id="homeBtn" class="icon-button" onclick="closeApp()" src="./images/homebtn.png" alt="Home Button">
+      <img id="minimizeBtn" class="icon-button2" onclick="minimizeApp()" src="./images/minimizebtn.png"
+        alt="Minimize Button">
+    </div>
+  </div>
+  <div class="scene" id="scene">
+    <div class="floor"></div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="logo-holder" id="logoHolder"></div>
+    <div id="codeContainer"></div>
+  </div>
+
+  <div style="display:none;" class="back-button" id="backButton" onclick="closeApp()"></div>
+  <div style="display:none;" class="minimize-button" id="minimizeButton" onclick="minimizeApp()"></div>
+  <script>
+    function toggleSkyVideo() {
+      const video = document.getElementById('skyvid');
+      if (!video) return;
+
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    }
+
+  </script>
+  <script>
+    const shadowToggle = (() => {
+      const shadowMap = new Map();
+
+      function removeShadows() {
+        const elements = document.querySelectorAll('*');
+        elements.forEach(el => {
+          const style = window.getComputedStyle(el);
+          const boxShadow = style.boxShadow;
+          const filter = style.filter;
+          const backdropFilter = style.backdropFilter;
+
+          // Save original styles if any relevant filters are applied
+          if (boxShadow !== 'none' || /drop-shadow|blur/.test(filter) || /blur/.test(backdropFilter)) {
+            shadowMap.set(el, {
+              boxShadow: el.style.boxShadow,
+              filter: el.style.filter,
+              backdropFilter: el.style.backdropFilter
+            });
+
+            // Remove drop-shadow and blur from filter
+            const newFilter = filter
+              .replace(/drop-shadow\(.*?\)/g, '')
+              .replace(/blur\(.*?\)/g, '')
+              .trim();
+
+            // Remove blur from backdrop-filter
+            const newBackdropFilter = backdropFilter
+              .replace(/blur\(.*?\)/g, '')
+              .trim();
+
+            el.style.boxShadow = 'none';
+            el.style.filter = newFilter;
+            el.style.backdropFilter = newBackdropFilter || 'none';
+          }
+        });
+      }
+
+      function restoreShadows() {
+        shadowMap.forEach((original, el) => {
+          el.style.boxShadow = original.boxShadow || '';
+          el.style.filter = original.filter || '';
+          el.style.backdropFilter = original.backdropFilter || '';
+        });
+        shadowMap.clear();
+      }
+
+      let shadowsAreRemoved = false;
+
+      function toggleShadows() {
+        toggleShadowAnimation();
+        toggleSkyVideo();
+
+        if (!shadowsAreRemoved) {
+          removeShadows();
+          shadowsAreRemoved = true;
+        } else {
+          restoreShadows();
+          shadowsAreRemoved = false;
+        }
+      }
+
+      return toggleShadows;
+    })();
+  </script>
+
+
+
+  <script>
+    // === Global Control ===
+    let isAnimating = false;
+    let animationFrameId = null;
+    let shadowBlobs = [];
+    let floorEl = null;
+
+    // === Config Constants ===
+    const NUM_SHADOWS = 6;
+    const MIN_SPEED = 0.3;
+    const MAX_SPEED = 1.0;
+    const MIN_SIZE = 150;
+    const MAX_SIZE = 350;
+    const FADE_RATE = 0.02;
+
+    // === Utility ===
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    // === Initialization ===
+    function initFadingShadows() {
+      floorEl = document.querySelector('.floor');
+      createShadows();
+
+      const savedState = localStorage.getItem("shadowAnimation");
+      if (savedState === "true") {
+        isAnimating = true;
+        animateShadows();
+      }
+    }
+
+    function createShadows() {
+      for (let i = 0; i < NUM_SHADOWS; i++) {
+        const el = document.createElement('div');
+        el.classList.add('moving-shadow');
+        floorEl.appendChild(el);
+
+        const size = randomBetween(MIN_SIZE, MAX_SIZE);
+        const blob = {
+          el,
+          size,
+          x: randomBetween(-size, floorEl.clientWidth),
+          y: randomBetween(0, floorEl.clientHeight - size),
+          speed: randomBetween(MIN_SPEED, MAX_SPEED),
+          opacity: 1
+        };
+        shadowBlobs.push(blob);
+
+        el.style.width = `${size}px`;
+        el.style.height = `${size}px`;
+        el.style.transform = `translate(${blob.x}px, ${blob.y}px)`;
+        el.style.opacity = blob.opacity;
+      }
+    }
+
+    // === Animation Loop ===
+    function animateShadows() {
+      if (!isAnimating) return;
+
+      shadowBlobs.forEach(b => {
+        b.x += b.speed;
+
+        if (b.x > floorEl.clientWidth - b.size / 2) {
+          b.opacity -= FADE_RATE;
+        }
+
+        if (b.opacity <= 0) {
+          b.size = randomBetween(MIN_SIZE, MAX_SIZE);
+          b.speed = randomBetween(MIN_SPEED, MAX_SPEED);
+          b.x = -b.size;
+          b.y = randomBetween(0, floorEl.clientHeight - b.size);
+          b.opacity = 1;
+
+          b.el.style.width = `${b.size}px`;
+          b.el.style.height = `${b.size}px`;
+        }
+
+        b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
+        b.el.style.opacity = b.opacity;
+      });
+
+      animationFrameId = requestAnimationFrame(animateShadows);
+    }
+
+    // === Toggle Function (Togglable, Persistent) ===
+    function toggleShadowAnimation() {
+      isAnimating = !isAnimating;
+      localStorage.setItem("shadowAnimation", isAnimating);
+
+      if (isAnimating) {
+        animateShadows();
+      } else {
+        cancelAnimationFrame(animationFrameId);
+      }
+    }
+    toggleShadowAnimation();
+    // === Start on Page Load ===
+    window.addEventListener('DOMContentLoaded', initFadingShadows);
+  </script>
+
+  <script>
+    // Icon elements
+    const settingsIcon = document.getElementById('settingsIcon');
+    const speakBtn = document.getElementById('speakBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+
+    // Swap to pressed image on press & revert on release
+    function addPressEffect(btn, icon, normalSrc, pressedSrc) {
+      btn.addEventListener('mousedown', () => icon.src = pressedSrc);
+      btn.addEventListener('mouseup', () => icon.src = normalSrc);
+      btn.addEventListener('mouseleave', () => icon.src = normalSrc);
+    }
+
+    addPressEffect(settingsBtn, settingsIcon, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
+
+    // Modal toggle
+    const settingsModal = document.getElementById('settingsModal');
+    const closeModal = document.getElementById('closeModal');
+    settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
+    closeModal.addEventListener('click', () => settingsModal.style.display = 'none');
+
+    function getUrl() {return document.getElementById('scriptUrl').value.trim();}
+
+    function loadData() {
+      return new Promise((resolve, reject) => {
+        const url = getUrl();
+        const id = document.getElementById('idInput').value.trim();
+        if (!url || !id) {
+         // alert('Enter script URL and ID');
+          window.location.href = './logon.html';
+          return reject('Missing URL or ID');
+        }
+        localStorage.setItem('savedID', id);
+        fetch(url + '?action=get&id=' + encodeURIComponent(id))
+          .then(r => r.json())
+          .then(data => {
+            if (data.error) {
+             // alert(data.error);
+              return reject(data.error);
+            }
+            ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach((col, i) => {
+              document.getElementById('col' + col).value = data.values[i];
+            });
+            resolve(); // Data loaded successfully
+          })
+          .catch(err => {
+            window.location.href = './logon.html';
+           // console.error(err);
+            //reject(err);
+          });
+      });
+    }
+
+
+    document.getElementById('loadBtn').addEventListener('click', loadData);
+
+    let offline = false;
+
+    function setOfflineMode(state) {
+      offline = state;
+    }
+
+    // Update sheet API
+    function submitUpdate(values) {
+      if (offline) return;
+
+      const url = getUrl();
+      const id = document.getElementById('idInput').value.trim();
+      fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'update', id, values })
+      })
+        .then(r => r.json());
+      // .then(resp => alert(resp.error || resp.status));
+    }
+
+
+    // Manual update from modal
+    document.getElementById('updateBtn').addEventListener('click', () => {
+      const vals = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(col =>
+        document.getElementById('col' + col).value
+      );
+      submitUpdate(vals);
+    });
+
+    function updatemyoos() {
+      const vals = ['B', 'C', 'D', 'E', 'F', 'G', 'H'].map(col =>
+        document.getElementById('col' + col).value
+      );
+      submitUpdate(vals);
+    }
+
+
+
+    // Main input: update E and F automatically on Enter
+    document.getElementById('sayMain').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        const message = this.value.trim();
+        if (!message) return;
+        // retrieve existing B,C,D,G,H
+        const b = document.getElementById('colB').value || '';
+        const c = document.getElementById('colC').value || '';
+        const d = document.getElementById('colD').value || '';
+        const gPrev = document.getElementById('colG').value || '';
+        const h = document.getElementById('colH').value || '';
+        const i = document.getElementById('colI').value || '';
+        const today = new Date();
+        const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+        // build values: B,C,D,E=message,F=date,G=original,Gprev,H
+        const full = [b, c, d, message, dateStr, gPrev, h, i];
+        submitUpdate(full);
+        this.value = '';
+      }
+    });
+
+    function sendGameMessage() {
+      const input = document.getElementById('sayMain');
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Retrieve existing B, C, D, G, H, I
+      const b = document.getElementById('colB').value || '';
+      const c = document.getElementById('colC').value || '';
+      const d = document.getElementById('colD').value || '';
+      const gPrev = document.getElementById('colG').value || '';
+      const h = document.getElementById('colH').value || '';
+      const i = document.getElementById('colI').value || '';
+
+      const today = new Date();
+      const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+
+      // Build values: B, C, D, E=message, F=date, G=original, Gprev, H
+      const full = [b, c, d, message, dateStr, gPrev, h, i];
+
+      submitUpdate(full);
+      input.value = '';
+    }
+
+
+    // Autofill saved ID on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedID = localStorage.getItem('savedID');
+      if (savedID) document.getElementById('idInput').value = savedID;
+      loadData().then(() => {
+
+  }).catch(err => {
+   window.location.href = './logon.html';
+    });
+    });
+
+
+  </script>
+  <script>
+    function playuisound(filePath) {
+      let audio = new Audio(filePath);
+      audio.play();
+    }
+  </script>
+  <script>
+    const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const bgGainNode = bgAudioContext.createGain();
+    bgGainNode.gain.value = 0;
+
+    const bgAudioElement = new Audio('./bg.mp3');
+    bgAudioElement.loop = true;
+
+    const bgAudioSource = bgAudioContext.createMediaElementSource(bgAudioElement);
+    bgAudioSource.connect(bgGainNode).connect(bgAudioContext.destination);
+
+    const BG_FADE_DURATION = 1.5; // seconds
+
+    let realPlayBgAudio = function () {
+      bgAudioContext.resume();
+      bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+      bgGainNode.gain.setValueAtTime(0, bgAudioContext.currentTime);
+      bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
+      bgAudioElement.play();
+      document.removeEventListener("click", playBgAudio);
+      document.removeEventListener("keydown", playBgAudio);
+      document.removeEventListener("touchstart", playBgAudio);
+    };
+
+    let realPauseBgAudio = function () {
+      bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+      bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
+      bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
+      setTimeout(() => {
+        bgAudioElement.pause();
+      }, BG_FADE_DURATION * 1000);
+    };
+
+    window.playBgAudio = realPlayBgAudio;
+    window.pauseBgAudio = realPauseBgAudio;
+
+    function updateAudioIcon() {
+      const icon = document.getElementById('audioIcon');
+      if (!icon) return;
+      const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
+      icon.src = isDisabled ? './images/soundbtn_pressed.png' : './images/soundbtn.png';
+    }
+
+    function disableBgAudioControl() {
+      const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
+
+      if (!isDisabled) {
+        realPauseBgAudio();
+        window.playBgAudio = function () {};
+        window.pauseBgAudio = function () {};
+        localStorage.setItem('bgAudioDisabled', 'true');
+        console.log('Background audio disabled');
+      } else {
+        window.playBgAudio = realPlayBgAudio;
+        window.pauseBgAudio = realPauseBgAudio;
+        localStorage.removeItem('bgAudioDisabled');
+        realPlayBgAudio();
+        console.log('Background audio enabled and playing');
+      }
+
+      updateAudioIcon();
+    }
+
+    // Apply state on load
+    if (localStorage.getItem('bgAudioDisabled') === 'true') {
+      window.playBgAudio = function () {};
+      window.pauseBgAudio = function () {};
+    }
+
+    window.disableBgAudioControl = disableBgAudioControl;
+
+    // Set initial icon on load
+    window.addEventListener('DOMContentLoaded', updateAudioIcon);
+  </script>
+
+  <script>
+    const emojiStored = localStorage.getItem("emojispeekEnabled");
+    const emojiToggle = document.getElementById("emojiAudioToggle");
+    let emojispeek = emojiStored === null ? true : emojiStored === "true";
+    emojiToggle.checked = emojispeek;
+
+    emojiToggle.addEventListener("change", () => {
+      emojispeek = emojiToggle.checked;
+      localStorage.setItem("emojispeekEnabled", emojispeek.toString());
+      console.log(`Emoji audio is now ${emojispeek ? "allowed" : "prohibited"}.`);
+    });
+    
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playRandomEmojiAudio(mii) {
+      if (!emojispeek) {
+        console.log("Emoji audio is blocked.");
+        return;
+      }
+
+      const idx = Math.floor(Math.random() * 281);
+      const padded = idx.toString().padStart(4, '0');
+      const filename = `./emojiaud/${padded} [1].flac`;
+
+      fetch(filename)
+        .then(res => res.arrayBuffer())
+        .then(arrBuf => audioCtx.decodeAudioData(arrBuf))
+        .then(buffer => {
+          // If one is already playing, stop it
+          if (mii._audioSource) {
+            try {mii._audioSource.stop();} catch {}
+            mii._audioSource = null;
+          }
+
+          // Create new buffer source
+          const source = audioCtx.createBufferSource();
+          source.buffer = buffer;
+          mii._audioSource = source;
+
+          // (rest of your reverb/dry-wet setup…)
+          const dryGain = audioCtx.createGain(), wetGain = audioCtx.createGain();
+          dryGain.gain.value = 0.6; wetGain.gain.value = 0.4;
+          const delayNode = audioCtx.createDelay(), feedback = audioCtx.createGain();
+          delayNode.delayTime.value = 0.15; feedback.gain.value = 0.4;
+          delayNode.connect(feedback); feedback.connect(delayNode);
+          const masterGain = audioCtx.createGain(); masterGain.gain.value = 0.2;
+
+          source.connect(dryGain); source.connect(delayNode);
+          delayNode.connect(wetGain);
+          dryGain.connect(masterGain); wetGain.connect(masterGain);
+          masterGain.connect(audioCtx.destination);
+
+          source.start();
+          source.onended = () => {
+            if (mii._audioSource === source) {
+              mii._audioSource = null;
+            }
+          };
+        })
+        .catch(e => console.warn('Audio play failed:', e));
+    }
+
+
+
+
+    // Load saved preference from localStorage
+    const savedSetting = localStorage.getItem("emojispeekEnabled");
+    if (savedSetting !== null) {
+      emojispeek = savedSetting === "true";
+    }
+
+    // Called to allow emoji audio
+    function cheeseburger() {
+      const stored = localStorage.getItem("emojispeekEnabled");
+      if (stored === "false") {
+        console.log("cheeseburger() aborted: emoji audio is disabled.");
+        return;
+      }
+
+      emojispeek = true;
+      console.log("Emoji audio is now allowed.");
+    }
+
+    // Called to prohibit emoji audio
+    function prohibitEmojiAudio() {
+      emojispeek = false;
+      console.log("Emoji audio is now prohibited.");
+    }
+
+    // Toggle function for convenience
+    function toggleEmojiAudio() {
+      emojispeek = !emojispeek;
+      localStorage.setItem("emojispeekEnabled", emojispeek.toString());
+      console.log(`Emoji audio is now ${emojispeek ? "allowed" : "prohibited"}.`);
+    }
+  </script>
+  <!-- Yummy Toast Start -->
+
+    <style>
+      /* Toast container at bottom-right */
+      #toast-container {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      .toast {
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        max-width: 300px;
+        font-family: sans-serif;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #controls {
+        margin-bottom: 1rem;
+        font-family: sans-serif;
+      }
+      #controls label {
+        margin-left: 0.5rem;
+      }
+      #goBtn {
+        margin-left: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      #goBtn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    </style>
+
+    <p style="display:none;" id="status">Idle</p>
+    <div id="toast-container"></div>
+
+    <script>
+    (function(){
+      const BASE_URL      = "https://docs.google.com/spreadsheets/d/1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0/gviz/tq?sheet=Sheet1&tqx=out:json";
+      const POLL_INTERVAL = 10 * 1000;  // 10 seconds
+
+      let lastSeen    = {};
+      let watchGroup  = "";
+      let timerId     = null;
+      let mouseInside = false;
+
+      // Load persisted master toggle state
+      const masterToggle = document.getElementById("masterToggle");
+      const savedMaster = localStorage.getItem("gmw_master_on");
+      masterToggle.checked = savedMaster === null ? true : savedMaster === "true";
+      masterToggle.addEventListener("change", () => {
+        localStorage.setItem("gmw_master_on", masterToggle.checked);
+      });
+
+      // Toast toggle off by default
+      const toastToggle = document.getElementById("toastToggle");
+      toastToggle.checked = false;
+
+  // Expose function to toggle toasts
+  window.toasttoggle = function toasttoggle() {
+    toastToggle.checked = !toastToggle.checked;
+  };
+
+
+      // Track pointer in/out
+      document.addEventListener("mouseenter", () => { mouseInside = true; });
+      document.addEventListener("mouseleave", () => { mouseInside = false; });
+
+      // Make startWatching globally available
+      window.startWatching = function startWatching() {
+        const input = document.getElementById("colH"); // Corrected ID
+        const goBtn = document.getElementById("goBtn");
+        const g = input.value.trim().toLowerCase();
+        if (!g) return alert("Please enter a group name.");
+        watchGroup = g;
+        lastSeen   = {};
+        document.getElementById("status").innerText = `Watching “${watchGroup}”…`;
+        goBtn.disabled = true;
+        goBtn.innerText = "Watching…";
+        if (timerId) clearInterval(timerId);
+        checkSheet();
+        timerId = setInterval(checkSheet, POLL_INTERVAL);
+      };
+
+      // Attach listener AFTER defining the function
+      document.getElementById("goBtn").addEventListener("click", startWatching);
+
+
+      async function fetchSheetJson() {
+        const url = `${BASE_URL}&cb=${Date.now()}`;
+        const res = await fetch(url);
+        const txt = await res.text();
+        const json = JSON.parse(txt.replace(/^[^\(]*\(|\);?$/g, ""));
+        return json.table.rows.map(r =>
+          r.c.map(cell => (cell && cell.v != null) ? String(cell.v) : "")
+        );
+      }
+
+      function showToast(text) {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerText = text;
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add("show"));
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => container.removeChild(toast), 300);
+        }, 5000);
+      }
+
+      async function checkSheet() {
+        document.getElementById("status").innerText =
+          `Polling… (${new Date().toLocaleTimeString()})`;
+
+        let rows;
+        try {
+          rows = await fetchSheetJson();
+        } catch (err) {
+          console.error("Fetch error:", err);
+          document.getElementById("status").innerText = "Error fetching sheet.";
+          return;
+        }
+
+        const newEntries = [];
+        rows.forEach(row => {
+          const name    = (row[1] || "").trim();
+          const message = (row[4] || "").trim();
+          const group   = (row[7] || "").trim().toLowerCase();
+          if (!name || group !== watchGroup) return;
+
+          if (!(name in lastSeen)) {
+            lastSeen[name] = message;
+            return;
+          }
+
+          if (message && message !== lastSeen[name]) {
+            newEntries.push({ name, message });
+            lastSeen[name] = message;
+          }
+        });
+
+        const masterOn = masterToggle.checked;
+        const toastOn  = toastToggle.checked;
+
+        if (newEntries.length && masterOn) {
+          if (mouseInside && toastOn) {
+            newEntries.forEach(({name, message}) =>
+              showToast(`📨 ${name}: ${message}`)
+            );
+          } else if (!mouseInside) {
+            window.parent.postMessage({
+              type:    "batch-messages",
+              entries: newEntries
+            }, "*");
+          }
+        }
+
+        document.getElementById("status").innerText =
+          `Last checked @ ${new Date().toLocaleTimeString()}`;
+      }
+    })();
+    </script>
+  <script>
+    function monitorColHChanges() {
+      const input = document.getElementById("colH");
+      let debounceTimer;
+
+      // Save the original value property
+      const originalDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+
+      Object.defineProperty(input, 'value', {
+        get() {
+          return originalDescriptor.get.call(this);
+        },
+        set(newVal) {
+          originalDescriptor.set.call(this, newVal);
+          triggerDebouncedStart();
+        }
+      });
+
+      // Also listen for user input
+      input.addEventListener("input", triggerDebouncedStart);
+
+      function triggerDebouncedStart() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          if (input.value.trim()) {
+            startWatching();
+          }
+        }, 2000); // wait 2 seconds after last change
+      }
+    }
+
+    // Call this after DOM is ready
+    monitorColHChanges();
+
+  </script>
+  <!-- Yummy Toast End -->
+  <script>
+    document.addEventListener("click", playBgAudio);
+    document.addEventListener("keydown", playBgAudio);
+    document.addEventListener("touchstart", playBgAudio);
+  </script>
+  <script>
+    const scene = document.getElementById('scene');
+    const overlay = document.getElementById('overlay');
+    const logoHolder = document.getElementById('logoHolder');
+    const codeContainer = document.getElementById('codeContainer');
+
+    let lastClickedIcon = null;
+    let isMinimized = false;
+    let iconPositions = [];
+
+    // Keep track of every <script> node we inject, so we can remove them on close
+    let currentInjectedScripts = [];
+
+    // Build icons array (index 0 is the App Store, 1–8 are dynamic slots)
+    const icons = [
+      {
+        src: './appstore/appstoreicon.png',
+        color: 'orange',
+        websiteurl: `
+          <iframe 
+            name="appstore" 
+            frameborder="0" 
+            style="position:absolute;top:0;left:0;border:none;width:100%;height:100%;" 
+            src="./appstore/index.html">
+          </iframe>`
+      }
+    ];
+    for (let i = 0; i < 8; i++) {
+      icons.push({ src: './defaulticon.png', color: null, websiteurl: '' });
+    }
+
+    // Compute a dominant color by sampling a 1×1 pixel from the image
+    async function getColor(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.src = url;
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = c.height = 1;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0, 1, 1);
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+          resolve(`rgb(${r},${g},${b})`);
+        };
+        img.onerror = () => resolve('gray');
+      });
+    }
+
+    // Refresh icon data (src, color, code) from localStorage
+    async function refreshData() {
+      // Slot icons start at index 1
+      const colorPromises = [];
+      for (let i = 0; i < 8; i++) {
+        const raw = localStorage.getItem(`slot_${i}`);
+        if (raw) {
+          try {
+            const app = JSON.parse(raw);
+            icons[i + 1].src = app.icon || './defaulticon.png';
+            icons[i + 1].websiteurl = app.code || '';
+          } catch {
+            icons[i + 1].src = './defaulticon.png';
+            icons[i + 1].websiteurl = '';
+          }
+        } else {
+          icons[i + 1].src = './defaulticon.png';
+          icons[i + 1].websiteurl = '';
+        }
+        colorPromises.push(getColor(icons[i + 1].src));
+      }
+
+      // Recompute colors
+      icons[0].color = 'orange';
+      const slotColors = await Promise.all(colorPromises);
+      for (let i = 0; i < 8; i++) {
+        icons[i + 1].color = slotColors[i];
+      }
+
+      // Update each icon‐inner’s background image
+      iconEls.forEach((el, idx) => {
+        const inner = el.querySelector('.icon-inner');
+        inner.style.setProperty('--bg-img', `url('${icons[idx].src}')`);
+      });
+
+      // Update Mii torso colors
+      miis.forEach(m => {
+        m.el.querySelector('.mii').style.backgroundColor = icons[m.iconIndex].color;
+      });
+    }
+
+    const iconEls = [];
+    const miis = [];
+    // (Your existing 3D carousel / Mii logic uses these:)
+    const radius = 400, centerY = 30, centerZ = 30;
+    let rotationOffset = 0, targetRotation = 0;
+    let mouseX = 0.5, mouseY = 0.5, targetRX = -20, targetRY = 0;
+
+    async function start() {
+      await refreshData();
+      renderIcons();
+      initMiis();
+      requestAnimationFrame(animate);
+    }
+
+    function renderIcons() {
+      icons.forEach((data, i) => {
+        const ic = document.createElement('div');
+        ic.className = 'icon';
+        const inner = document.createElement('div');
+        inner.className = 'icon-inner';
+        inner.style.setProperty('--bg-img', `url('${data.src}')`);
+        ic.appendChild(inner);
+        scene.appendChild(ic);
+        iconEls.push(ic);
+        ic.addEventListener('click', () => openApp(inner, data));
+      });
+    }
+
+    let appIsOpening = false;
+
+    function openApp(inner, data) {
+      if (appIsOpening) return;
+      appIsOpening = true;
+
+      // Show clicked icon’s src in the text box (if it exists)
+      const iconUrlBox = document.getElementById('colG');
+      if (iconUrlBox) iconUrlBox.value = data.src || '';
+      updatemyoos();
+
+      // If we’re un‐minimizing the same icon:
+      if (isMinimized && inner.parentElement === lastClickedIcon) {
+        isMinimized = false;
+        inner.classList.remove('hop');
+        overlay.classList.add('active');
+        codeContainer.style.opacity = '1';
+        codeContainer.style.pointerEvents = 'auto';
+        codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
+        playuisound('./sounds/deminimize.wav');
+        prohibitAnimation();
+        prohibitEmojiAudio();
+        pauseBgAudio();
+        shadowToggle();
+        toggleMenu();
+
+        appIsOpening = false;
+        return;
+      }
+
+      // Fresh icon click
+      iconEls.forEach(e => e.querySelector('.icon-inner').classList.remove('hop'));
+      lastClickedIcon = inner.parentElement;
+      isMinimized = false;
+
+      playuisound('./sounds/open.wav');
+      prohibitAnimation();
+      prohibitEmojiAudio();
+      pauseBgAudio();
+      shadowToggle();
+      toggleMenu();
+
+      // Clone the icon-inner → animate it to full-screen
+      const r = inner.getBoundingClientRect();
+      const clone = inner.cloneNode(true);
+      Object.assign(clone.style, {
+        position: 'fixed',
+        left: `${r.left}px`,
+        top: `${r.top}px`,
+        width: `${r.width}px`,
+        height: `${r.height}px`,
+        borderRadius: '30px',
+        transition: 'all .8s ease',
+        zIndex: 998,
+        pointerEvents: 'none',
+        backgroundColor: 'black',
+        backgroundImage: 'none'
+      });
+      document.body.appendChild(clone);
+      requestAnimationFrame(() => {
+        clone.style.left = '0';
+        clone.style.top = '0';
+        clone.style.width = `${window.innerWidth}px`;
+        clone.style.height = `${window.innerHeight}px`;
+      });
+
+      logoHolder.style.display = 'block';
+      overlay.classList.add('active');
+
+      // Wait ~2s for the zoom animation, then inject code/HTML
+      setTimeout(() => {
+        logoHolder.style.display = 'none';
+
+        // Map for decoding obfuscated symbols
+        const map = {
+          '*oosqu*': '"',
+          '*oosap*': "'",
+          '*oosfsl*': '/',
+          '*oosbsl*': '\\',
+          '*oosobr*': '[',
+          '*ooscbr*': ']',
+          '*oosbrco*': '{',
+          '*oosbrcc*': '}',
+          '*oospao*': '(',
+          '*oospac*': ')',
+          '*ooseq*': '=',
+          '*oosti*': '',
+          '*ooscom*': ',',
+          '*oosscol*': ';',
+          '*ooscol*': ':',
+          '*ooslin*': '|',
+          '*oosango*': '<',
+          '*oosangc*': '>'
+        };
+
+        // Decode the stored HTML/JS from data.websiteurl
+        let html = data.websiteurl;
+        for (let k in map) {
+          html = html.split(k).join(map[k]);
+        }
+
+        // Inject decoded HTML into codeContainer
+        codeContainer.innerHTML = html;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // 1) Find every <script> inside codeContainer.
+        // 2) For each one, transform any `let ` or `const ` → `var `,
+        //    so that redeclaration on repeated opens won’t error.
+        // 3) Create a new <script> with that “safe” text (or copy src if external),
+        //    append it to <head> (which executes it globally), and track it.
+        // 4) Remove the original <script> from codeContainer.
+        // ─────────────────────────────────────────────────────────────────────
+        const inlineScripts = codeContainer.querySelectorAll('script');
+        inlineScripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+
+          if (oldScript.src) {
+            // External script: copy src, async, and defer flags
+            newScript.src = oldScript.src;
+            if (oldScript.async) newScript.async = true;
+            if (oldScript.defer) newScript.defer = true;
+          } else {
+            // Inline script: replace top-level `let`/`const` with `var`
+            const userCode = oldScript.textContent;
+            const safeCode = userCode
+              .replace(/\blet\s+/g, 'var ')
+              .replace(/\bconst\s+/g, 'var ');
+            newScript.textContent = safeCode;
+          }
+
+          // Appending to <head> causes the browser to parse+execute it immediately.
+          document.head.appendChild(newScript);
+          // Keep a reference so we can remove it later.
+          currentInjectedScripts.push(newScript);
+
+          // Remove the old <script> inside codeContainer (it never ran)
+          oldScript.remove();
+        });
+        // ─────────────────────────────────────────────────────────────────────
+
+        // Reveal codeContainer + any <iframe> inside it
+        codeContainer.style.opacity = '1';
+        codeContainer.style.pointerEvents = 'auto';
+        codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
+
+        // Remove the zoom‐clone from the DOM
+        clone.remove();
+
+        // Allow minimizeApp() and closeApp() again
+        appIsOpening = false;
+      }, 2000);
+    }
+
+    function minimizeApp() {
+      if (appIsOpening) return;
+      if (!lastClickedIcon) return;
+
+      overlay.classList.remove('active');
+      playuisound('./sounds/minimize.wav');
+      shadowToggle();
+      allowAnimation();
+      cheeseburger();
+      playBgAudio();
+      toggleMenu();
+
+      codeContainer.style.opacity = '0';
+      codeContainer.style.pointerEvents = 'none';
+      isMinimized = true;
+      lastClickedIcon.querySelector('.icon-inner').classList.add('hop');
+    }
+
+    function closeApp() {
+      if (appIsOpening) return;
+      if (!lastClickedIcon) return;
+
+      overlay.classList.remove('active');
+      playuisound('./sounds/close.wav');
+      allowAnimation();
+      shadowToggle();
+      cheeseburger();
+      playBgAudio();
+      toggleMenu();
+
+      codeContainer.style.opacity = '0';
+      codeContainer.style.pointerEvents = 'none';
+
+      // Create a full-screen black clone and animate it back into the icon
+      const inner = lastClickedIcon.querySelector('.icon-inner');
+      const r = inner.getBoundingClientRect();
+      const clone = document.createElement('div');
+      Object.assign(clone.style, {
+        position: 'fixed',
+        left: '0',
+        top: '0',
+        width: `${window.innerWidth}px`,
+        height: `${window.innerHeight}px`,
+        backgroundColor: 'black',
+        borderRadius: '30px',
+        zIndex: 998,
+        transition: 'all .8s ease'
+      });
+      document.body.appendChild(clone);
+      requestAnimationFrame(() => {
+        clone.style.left = `${r.left}px`;
+        clone.style.top = `${r.top}px`;
+        clone.style.width = `${r.width}px`;
+        clone.style.height = `${r.height}px`;
+        clone.style.filter = 'blur(40px)';
+      });
+
+      setTimeout(() => {
+        clone.remove();
+
+        // Wipe out codeContainer’s contents
+        codeContainer.innerHTML = '';
+
+        // Remove every dynamically injected <script> from <head>
+        currentInjectedScripts.forEach(s => s.remove());
+        currentInjectedScripts = [];
+
+        // If we just closed the App Store (icon index 0), refresh data
+        if (lastClickedIcon === iconEls[0]) {
+          refreshData();
+        }
+      }, 1000);
+    }
+
+
+    let emojimoveitmoveit = true;
+
+    function animate(time) {
+      if (!emojimoveitmoveit) {
+        console.log("Animation is blocked.");
+        return;
+      }
+      const styles = getComputedStyle(scene);
+      const zoom = styles.getPropertyValue('--zoom') || 1;
+      rotationOffset += (targetRotation - rotationOffset) * 0.1;
+      const sx = (mouseX - 0.5) * 40, sy = (mouseY - 0.5) * 20;
+      targetRX += ((-20 + sy) - targetRX) * 0.05;
+      targetRY += (sx - targetRY) * 0.05;
+      scene.style.transform =
+        `scale(${zoom}) rotateX(${targetRX}deg) rotateY(${targetRY}deg)`;
+      iconPositions = [];
+      iconEls.forEach((el, i) => {
+        const ang = (i / icons.length) * 2 * Math.PI + rotationOffset;
+        const x = Math.cos(ang) * radius;
+        const bob = Math.sin(time * 0.001 + i) * 5;
+        const y = centerY + bob;
+        const z = centerZ + Math.sin(ang) * radius;
+        el.style.transform = `translate3d(${x}px,${y}px,${z}px)`;
+        iconPositions.push({x, y, z});
+      });
+      updateMiis(time);
+      requestAnimationFrame(animate);
+    }
+
+
+    function prohibitAnimation() {
+      emojimoveitmoveit = false;
+      console.log("Animation is now prohibited.");
+    }
+
+    function allowAnimation() {
+      emojimoveitmoveit = true;
+      animate();
+      console.log("Animation is now allowed.");
+    }
+
+    document.addEventListener('mousemove', e => {mouseX = e.clientX / window.innerWidth; mouseY = e.clientY / window.innerHeight;});
+    document.addEventListener('wheel', e => targetRotation += e.deltaY * 0.001);
+
+    // Mii functions
+    function getRandomAsset(folder, max, chance = 1) {
+      if (Math.random() > chance) return null;
+      const idx = Math.floor(Math.random() * max) + 1;
+      return {src: `./emoji/${folder}/${idx}.png`, index: idx};
+    }
+
+    const hairFilterMap = {
+      gray: 'filter: grayscale(100%);',
+      brown: 'filter: hue-rotate(280deg) contrast(200%) brightness(150%);',
+      black: 'filter: brightness(0%);',
+      blonde: 'filter: hue-rotate(290deg) contrast(120%) brightness(300%);',
+      red: 'filter: hue-rotate(260deg) contrast(190%) brightness(300%);'
+    };
+
+    function getRandomHairFilter() {
+      const r = Math.random();
+      if (r < 0.2) return hairFilterMap.gray;
+      if (r < 0.4) return hairFilterMap.brown;
+      if (r < 0.8) return hairFilterMap.black;
+      if (r < 0.95) return hairFilterMap.blonde;
+      return hairFilterMap.red;
+    }
+
+    function getSheetHairFilter(rawColor) {
+      if (rawColor && hairFilterMap[rawColor]) {
+        return hairFilterMap[rawColor];
+      }
+      return getRandomHairFilter();
+    }
+
+    function initMiis() {
+      createMiis();
+    }
+
+    function createMiis() {
+      for (let i = 0; i < 50; i++) {
+        const iconIndex = Math.floor(Math.random() * icons.length);
+        const color = icons[iconIndex].color;
+        const roamFar = Math.random() < 0.02;
+        const active = Math.random() < 0.3 ? 1 : 0;
+        const offsetX = (Math.random() - 0.5) * 200;
+        const offsetZ = (Math.random() - 0.5) * 200;
+
+        const miiContainer = document.createElement('div');
+        miiContainer.className = 'mii-container';
+
+        const emojiHead = document.createElement('div');
+        emojiHead.className = 'emoji-head';
+
+        const orb = getRandomAsset('orbs', 4);
+        const mouth = getRandomAsset('mouths', 4);
+        const eyes = getRandomAsset('eyes', 7);
+        const hair = getRandomAsset('hairs', 9);
+        const eyewear = getRandomAsset('eyewear', 6, 0.2);
+        const hat = getRandomAsset('hats', 9, 0.3);
+
+        const invertForWhite = orb && orb.index === 3;
+        const hairFilter = getRandomHairFilter();
+
+        const layers = [
+          { data: orb },
+          { data: mouth, class: invertForWhite ? 'emoji-layer invert' : 'emoji-layer' },
+          { data: eyes, class: invertForWhite ? 'emoji-layer invert' : 'emoji-layer' },
+          { data: hair },
+          { data: eyewear },
+          { data: hat }
+        ];
+
+        layers.forEach(({ data, class: cls }) => {
+          if (!data) return;
+          const img = document.createElement('img');
+          img.src = data.src;
+          img.className = cls || 'emoji-layer';
+
+          // Apply hair filter if it's a hair image
+          if (data.src.includes('hairs')) {
+            img.style = hairFilter;
+          }
+
+          emojiHead.appendChild(img);
+        });
+
+        const mii = document.createElement('div');
+        mii.className = 'mii';
+        mii.style.backgroundColor = color;
+
+        miiContainer.appendChild(emojiHead);
+        miiContainer.appendChild(mii);
+        scene.appendChild(miiContainer);
+
+        miis.push({
+          el: miiContainer,
+          iconIndex,
+          roamFar,
+          active,
+          baseX: offsetX,
+          baseZ: offsetZ,
+          x: 0,
+          z: 0,
+          yOffset: Math.random() * 100,
+          speedX: (Math.random() * 0.5 - 0.25) * active,
+          speedZ: (Math.random() * 0.5 - 0.25) * active,
+          smoothFactor: 0.05,
+          transitionTimer: Math.random() * 5000 + 3000,
+          transitioning: false,
+          targetActive: active
+        });
+      }
+    }
+
+    function updateMiis(time) {
+      miis.forEach(m => {
+        m.transitionTimer -= 16.6;
+        if (m.transitionTimer <= 0) {
+          m.transitionTimer = Math.random() * 5000 + 3000;
+          m.transitioning = true;
+          m.targetActive = 1 - m.targetActive;
+        }
+        if (m.transitioning) {
+          m.active += (m.targetActive - m.active) * 0.05;
+          if (Math.abs(m.active - m.targetActive) < 0.01) {
+            m.active = m.targetActive;
+            m.transitioning = false;
+            m.speedX = (Math.random() * 0.5 - 0.25) * m.active;
+            m.speedZ = (Math.random() * 0.5 - 0.25) * m.active;
+          }
+        }
+        const ico = iconPositions[m.iconIndex];
+        if (!ico) return;
+        const range = m.roamFar ? 180 : 90;
+        if (m.active > 0.01) {
+          m.baseX += m.speedX;
+          m.baseZ += m.speedZ;
+          if (Math.abs(m.baseX) > range) m.speedX *= -1;
+          if (Math.abs(m.baseZ) > range) m.speedZ *= -1;
+        }
+        const tx = ico.x + m.baseX, tz = ico.z + m.baseZ;
+        m.x += (tx - m.x) * m.smoothFactor;
+        m.z += (tz - m.z) * m.smoothFactor;
+        const hopH = Math.abs(Math.sin(time * 0.003 + m.yOffset)) * 10 * m.active;
+        const y = 150 + hopH;
+        const frontZ = m.z + 70;
+        m.el.style.transform = `translate3d(${m.x}px,${y}px,${frontZ}px)`;
+      });
+    }
+
+    start();
+  </script>
+
+  <script>
+    function startMiiBehavior() {
+      const heads = document.querySelectorAll('.emoji-head');
+
+      // Store original eye and mouth srcs for restoration
+      heads.forEach(head => {
+        const eyeImg = Array.from(head.querySelectorAll('img')).find(img => img.src.includes('/eyes/'));
+        const mouthImg = Array.from(head.querySelectorAll('img')).find(img => img.src.includes('/mouths/'));
+        head.dataset.originalEyes = eyeImg ? eyeImg.src : '';
+        head.dataset.originalMouth = mouthImg ? mouthImg.src : '';
+        head.dataset.isTalking = 'false';
+      });
+
+      // Blinking logic
+      function blinkMii(head) {
+        const eyeImg = Array.from(head.querySelectorAll('img')).find(img => img.src.includes('/eyes/') || img.src.includes('blink.png'));
+        if (!eyeImg) return;
+
+        const originalSrc = head.dataset.originalEyes;
+        eyeImg.src = './emoji/eyes/blink.png';
+
+        setTimeout(() => {
+          eyeImg.src = originalSrc;
+        }, 150); // Blink duration
+
+        const nextBlink = Math.random() * 4000 + 2000; // 2–6s
+        setTimeout(() => blinkMii(head), nextBlink);
+      }
+
+      // Start blinking for each head
+      heads.forEach(head => {
+        const delay = Math.random() * 4000 + 2000; // 1–4s
+        setTimeout(() => blinkMii(head), delay);
+      });
+
+      // Talking animation flicker
+      function flickerMouth(head) {
+        if (!emojimoveitmoveit) {
+          console.log("Animation is blocked.");
+          return;
+        }
+        const mouthImg = Array.from(head.querySelectorAll('img')).find(img => img.src.includes('/mouths/') || img.src.includes('talk.png'));
+        if (!mouthImg || head.dataset.isTalking !== 'true') return;
+
+        mouthImg.src = mouthImg.src.includes('talk.png') ? head.dataset.originalMouth : './emoji/mouths/talk.png';
+
+        setTimeout(() => flickerMouth(head), 200 + Math.random() * 100); // Flicker every 200–300ms
+      }
+
+    }
+  </script>
+  <script>
+    // Compute dominant color of an image URL
+    async function getDominantColor(imgUrl) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.src = imgUrl;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, 1, 1);
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+          resolve(`rgb(${r},${g},${b})`);
+        };
+        img.onerror = () => resolve('gray');
+      });
+    }
+
+    const existingMiiIds = new Set();
+    const miiGroupMap = {}; // Track each Mii's group
+
+    async function createMiisFromSheet(sheetId, sheetName = 'Sheet1') {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq`
+        + `?sheet=${encodeURIComponent(sheetName)}&tqx=out:json`;
+      const res = await fetch(url);
+      const txt = await res.text();
+      const data = JSON.parse(txt.replace(/^[^(]*\(|\);?$/g, ''));
+      const rows = data.table.rows;
+      function isToday(md) {
+        const [m, d] = md.split('/').map(n => parseInt(n, 10));
+        const t = new Date();
+        return t.getMonth() + 1 === m && t.getDate() === d;
+      }
+
+      const filterValue = document.getElementById('colH')?.value?.trim() || '';
+
+      const validIds = new Set();
+      const entries = [];
+
+      for (let row of rows) {
+        const [idC, nameC, layersC, hairC, msgC, dateC, iconC, groupC] = row.c;
+        if (!idC || !nameC || !layersC || !iconC) continue;
+
+        const id = idC.v.toString().trim();
+        const name = nameC.v;
+        const layers = layersC.v.split(',').map(s => s.trim());
+        const rawColor = hairC?.v?.toString().trim().toLowerCase();
+        const message = msgC?.v?.toString().trim() || '';
+        const dateStr = dateC?.v?.toString().trim() || '';
+        const group = groupC?.v?.toString().trim() || '';
+
+        if (filterValue && group !== filterValue) continue;
+
+        validIds.add(id);
+
+        if (existingMiiIds.has(id)) continue; // Already on screen
+
+        const showChat = dateStr && isToday(dateStr);
+        const iconUrl = iconC.v.trim();
+        const iconIndex = icons.findIndex(ic => ic.src === iconUrl);
+        const finalIconIndex = iconIndex < 0
+          ? icons.findIndex(ic => ic.src === './appstore/appstoreicon.png')
+          : iconIndex;
+        const iconColor = await getDominantColor(iconUrl);
+
+        entries.push({
+          id, name, layers, rawColor,
+          message, showChat,
+          iconIndex: finalIconIndex,
+          iconColor,
+          group
+        });
+      }
+
+      const groups = {};
+      entries.forEach(e => (groups[e.iconIndex] ||= []).push(e));
+      Object.values(groups).forEach(group => {
+        const n = group.length, R = 80, J = 10;
+        group.forEach((e, i) => {
+          const θ = i / n * 2 * Math.PI;
+          e.baseX = Math.cos(θ) * R + (Math.random() * J - J / 2);
+          e.baseZ = Math.sin(θ) * R + (Math.random() * J - J / 2);
+        });
+      });
+
+      // Add new matching Miis
+      entries.forEach(e => {
+        const {id, name, layers, rawColor, message, showChat, iconIndex, iconColor, baseX, baseZ, group} = e;
+
+        const cont = document.createElement('div');
+        cont.className = 'online-mii-container';
+        cont.dataset.miiId = id;
+
+        const lbl = document.createElement('div');
+        lbl.className = 'mii-name';
+        lbl.textContent = name;
+        cont.appendChild(lbl);
+        cont.addEventListener('mouseenter', () => lbl.classList.add('hovered'));
+        cont.addEventListener('mouseleave', () => lbl.classList.remove('hovered'));
+
+        const head = document.createElement('div');
+        head.className = 'emoji-head';
+        layers.forEach(src => {
+          if (!src) return;
+          const img = document.createElement('img');
+          img.src = src;
+          img.className = 'emoji-layer';
+          if (src.includes('/hairs/')) {
+            img.style.cssText += getSheetHairFilter(rawColor);
+          }
+          head.appendChild(img);
+        });
+        cont.appendChild(head);
+        cont.addEventListener('mouseenter', () => head.classList.add('hovered'));
+        cont.addEventListener('mouseleave', () => head.classList.remove('hovered'));
+
+        const dot = document.createElement('div');
+        dot.className = 'mii';
+        dot.style.backgroundColor = iconColor;
+        cont.appendChild(dot);
+
+        if (showChat && message) {
+          const bubble = document.createElement('div');
+          bubble.className = 'chat-bubble';
+          bubble.textContent = message;
+          cont.appendChild(bubble);
+          (function animateBubble() {
+            const delayIn = Math.random() * 5000 + 2000;
+            const showFor = Math.random() * 3000 + 2000;
+            setTimeout(() => {
+              bubble.classList.add('visible');
+              setTimeout(() => {
+                bubble.classList.remove('visible');
+                animateBubble();
+              }, showFor);
+            }, delayIn);
+          })();
+        }
+
+        scene.appendChild(cont);
+
+        cont.addEventListener('click', () => showMiiDetailsPopup(id));
+
+        miis.push({
+          el: cont,
+          iconIndex, baseX, baseZ,
+          x: 0, z: 0,
+          yOffset: Math.random() * 100,
+          verticalOffset: -20,
+          speedX: Math.random() * 0.2 - 0.1,
+          speedZ: Math.random() * 0.2 - 0.1,
+          roamFar: false, active: 1,
+          smoothFactor: 0.05,
+          transitionTimer: Math.random() * 5000 + 3000,
+          transitioning: false, targetActive: 1
+        });
+
+        existingMiiIds.add(id);
+        miiGroupMap[id] = group;
+      });
+
+      // Remove unmatched Miis
+      existingMiiIds.forEach(id => {
+        if (!validIds.has(id)) {
+          const el = scene.querySelector(`[data-mii-id="${id}"]`);
+          if (el) el.remove();
+          existingMiiIds.delete(id);
+          delete miiGroupMap[id];
+        }
+      });
+    }
+
+    // Run once and set polling
+    setInterval(() => createMiisFromSheet('1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0'), 5000);
+
+
+
+    // Popup for details
+    async function showMiiDetailsPopup(miiId) {
+      const sheetId = '1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0';
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=Sheet1&tqx=out:json`;
+      const res = await fetch(url);
+      const txt = await res.text();
+      const data = JSON.parse(txt.replace(/^[^(]*\(|\);?$/g, ''));
+      const row = data.table.rows.find(r => r.c[0]?.v.toString() === miiId);
+      if (!row) return alert(`No data for Mii ID ${miiId}`);
+
+      const [, nameC, layersC, hairC, msgC, dateC, iconC] = row.c;
+      const name = nameC.v;
+      const layers = layersC.v.split(',').map(s => s.trim());
+      const rawColor = hairC?.v?.toString().trim().toLowerCase();
+      const message = msgC?.v?.toString().trim() || '—';
+      const dateStr = dateC?.v?.toString().trim() || '—';
+      const iconUrl = iconC.v.trim();
+      const iconColor = await getDominantColor(iconUrl);
+
+      // Build modal
+      const overlay = document.createElement('div');
+      overlay.className = 'mii-popup-overlay';
+      const box = document.createElement('div');
+      box.className = 'mii-popup';
+      box.innerHTML = `
+      <button class="mii-popup-close">&times;</button>
+      <h2>${name} <small>(${miiId.slice(0, 3)})</small></h2>
+      <div class="mii-graphic"></div>
+      <p><strong>Last said:</strong> ${message}</p>
+    `;
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      box.querySelector('.mii-popup-close').onclick = () => overlay.remove();
+
+      // Render graphic
+      const graphic = box.querySelector('.mii-graphic');
+      const head = document.createElement('div');
+      head.className = 'emoji-head';
+      layers.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'emoji-layer';
+        if (src.includes('/hairs/')) {
+          const map = {
+            gray: 'filter: grayscale(100%);',
+            brown: 'filter: hue-rotate(280deg) contrast(200%) brightness(150%);',
+            black: 'filter: brightness(0%);',
+            blonde: 'filter: hue-rotate(290deg) contrast(120%) brightness(300%);',
+            red: 'filter: hue-rotate(260deg) contrast(190%) brightness(300%);'
+          };
+          img.style.cssText += getSheetHairFilter(rawColor);
+        }
+        head.appendChild(img);
+      });
+      const dot = document.createElement('div');
+      dot.className = 'mii';
+      dot.style.backgroundColor = iconColor;
+      dot.style.marginTop = '-20px';
+      dot.style.width = '45px';  // Adjust size as needed
+      dot.style.height = '45px';
+      graphic.appendChild(head);
+      graphic.appendChild(dot);
+    }
+
+    // Inject popup & bubble CSS
+    const style = document.createElement('style');
+    style.textContent = `
+  .chat-bubble {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    transform-origin: bottom center;
+    background: rgba(255,255,255,0.95);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: transform 200ms ease, opacity 200ms ease;
+    z-index: 3;
+  }
+  .chat-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0;
+    border-style: solid;
+    border-color: rgba(255,255,255,0.95) transparent transparent transparent;
+  }
+  .chat-bubble.visible {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  .mii-popup-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000;
+  }
+  .mii-popup {
+    background: white;
+    padding: 20px;
+    border-radius: 28px;
+    max-width: 320px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .mii-popup-close {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; font-size: 1.2em; cursor: pointer;
+  }
+  .mii-popup h2 { margin-top: 0; }
+  .mii-graphic {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 12px 0;
+  }
+  `;
+    document.head.appendChild(style);
+
+
+  </script>
+  <script>
+    // Function to block comma input
+    function preventCommas(event) {
+      if (event.key === ",") {
+        event.preventDefault();
+      }
+    }
+
+    // Apply listener to each input by ID
+    document.addEventListener("DOMContentLoaded", () => {
+      const inputs = [document.getElementById("colB"), document.getElementById("colH")];
+
+      inputs.forEach(input => {
+        if (input) {
+          input.addEventListener("keydown", preventCommas);
+          input.addEventListener("input", () => {
+            // Also remove commas if pasted
+            input.value = input.value.replace(/,/g, '');
+          });
+        }
+      });
+    });
+  </script>
+
+  <script>
+    const bubbleToggle = document.getElementById("bubbleCycleToggle");
+    const bubbleStored = localStorage.getItem("bubbleCycleEnabled");
+    let bubbleCycleEnabled = bubbleStored === null ? true : bubbleStored === "true";
+
+
+    bubbleToggle.checked = bubbleCycleEnabled;
+
+    bubbleToggle.addEventListener("change", () => {
+      toggleBubbleCycle(); // Call this function when switch changes
+    });
+
+
+    function toggleBubbleCycle() {
+      bubbleCycleEnabled = bubbleToggle.checked;
+      localStorage.setItem('bubbleCycleEnabled', bubbleCycleEnabled);
+
+      if (bubbleCycleEnabled) {
+        restartAllBubbleCycles();
+      } else {
+        miis.forEach(mii => {
+          clearTimeout(mii._nextShowTimeout);
+          mii._nextShowTimeout = null;
+        });
+      }
+    }
+
+    function restartAllBubbleCycles() {
+      miis.forEach(mii => {
+        const hasMessage = mii.currentMessage && mii.currentDateStr;
+        const noPendingTimeout = !mii._nextShowTimeout;
+        if (hasMessage && noPendingTimeout) {
+          const version = mii._messageVersion || 0;
+          const delay = 6000 + Math.random() * 14000;
+          mii._nextShowTimeout = setTimeout(() => {
+            showBubbleOnce(version);
+          }, delay);
+        }
+      });
+    }
+
+
+
+
+    function startSheetPolling(sheetId, sheetName = 'Sheet1') {
+      const fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq`
+        + `?sheet=${encodeURIComponent(sheetName)}&tqx=out:json`;
+
+      // Read sheet into a map: miiId → { iconUrl, message, dateStr }
+      async function fetchSheetMap() {
+        const res = await fetch(fetchUrl);
+        const txt = await res.text();
+        const json = JSON.parse(txt.replace(/^[^(]*\(|\);?$/g, ''));
+        const rows = json.table.rows;
+        const map = {};
+        rows.forEach(r => {
+          const [idC, , , , msgC, dateC, iconC, colHC] = r.c;  // ← add 8th column here
+          if (!idC) return;
+          map[idC.v.toString()] = {
+            message: msgC?.v?.toString().trim() || '',
+            dateStr: dateC?.v?.toString().trim() || '',
+            iconUrl: iconC?.v?.toString().trim() || '',
+            colH: colHC?.v?.toString().trim() || ''  // ← add this line
+          };
+        });
+        return map;
+      }
+
+
+      // helper: check if "M/D" is today
+      function isToday(md) {
+        const [m, d] = md.split('/').map(n => parseInt(n, 10));
+        const t = new Date();
+        return t.getMonth() + 1 === m && t.getDate() === d;
+      }
+
+
+      // The updater
+      async function updateMiisFromSheet() {
+        const sheet = await fetchSheetMap();
+        const filterValue = document.getElementById('colH')?.value.trim() || '';
+
+        // Remove Miis that no longer have a valid colH
+        for (let i = miis.length - 1; i >= 0; i--) {
+          const mii = miis[i];
+          const id = mii.el.dataset.miiId;
+          const el = mii.el;                   // make sure "el" is defined
+          const data = sheet[id];
+
+          // if filterValue is empty, nobody is invalid (unless the row really went away)
+          const invalid = !data
+            || (filterValue !== '' && data.colH !== filterValue);
+
+
+          if (invalid && el.classList.contains('online-mii-container')) {
+            // Remove any chat bubble and stop its timers
+            const bubble = el.querySelector('.chat-bubble');
+            if (bubble) bubble.remove();
+            clearTimeout(mii._nextShowTimeout);
+            clearInterval(mii._flickerInterval);
+
+            // Stop any playing audio
+            if (mii._audioSource) {
+              try {mii._audioSource.stop();} catch {}
+              mii._audioSource = null;
+            }
+
+            el.remove();
+            miis.splice(i, 1);
+          }
+        }
+
+
+        miis.forEach(async mii => {
+          const id = mii.el.dataset.miiId;
+          const data = sheet[id];
+          if (!data) return;
+
+          // 1) ICON CHANGES (unchanged)
+          if (data.iconUrl !== mii.currentIconUrl) {
+            let idx = icons.findIndex(ic => ic.src === data.iconUrl);
+            if (idx < 0) idx = icons.findIndex(ic => ic.src === './appstore/appstoreicon.png');
+            mii.iconIndex = idx;
+            mii.currentIconUrl = data.iconUrl;
+
+            mii.baseX = (Math.random() - 0.5) * 60;
+            mii.baseZ = (Math.random() - 0.5) * 60;
+            const newColor = await getDominantColor(data.iconUrl);
+            mii.el.querySelector('.mii').style.backgroundColor = newColor;
+          }
+
+          const newMsg = data.message;
+          const newDate = data.dateStr;
+          const matchesFilter = (filterValue === '') || (data.colH === filterValue);
+
+          const isValid = newMsg
+            && newDate
+            && isToday(newDate)
+            && matchesFilter;
+
+          const messageChanged = newMsg !== mii.currentMessage || newDate !== mii.currentDateStr;
+
+          if (messageChanged || !isValid) {
+            // Update stored values
+            mii.currentMessage = isValid ? newMsg : null;
+            mii.currentDateStr = isValid ? newDate : null;
+
+            // Remove bubble + clear timers
+            const old = mii.el.querySelector('.chat-bubble');
+            if (old) old.remove();
+            clearTimeout(mii._nextShowTimeout);
+            clearInterval(mii._flickerInterval);
+
+            // Bump message version to invalidate any pending animations
+            mii._messageVersion = (mii._messageVersion || 0) + 1;
+          }
+
+          if (!isValid) return;
+
+          // Start new bubble cycle only if message just changed
+          if (messageChanged) {
+            const currentVersion = mii._messageVersion;
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.textContent = newMsg;
+            mii.el.appendChild(bubble);
+
+            if (getComputedStyle(mii.el).position === 'static') {
+              mii.el.style.position = 'relative';
+            }
+
+            const head = mii.el.querySelector('.emoji-head');
+            const mouthImg = head ? Array.from(head.querySelectorAll('img'))
+              .find(img => img.src.includes('/mouths/')) : null;
+            const origSrc = mouthImg?.src;
+            const talkSrc = './emoji/mouths/talk.png';
+
+            function showBubbleOnce(version) {
+              // 1) Bail out if version outdated:
+              if (version !== mii._messageVersion) return;
+
+              // 2) Bail out if Mii was removed from DOM:
+              if (!document.body.contains(mii.el)) return;
+
+              // 3) Only enforce colH when filterValue is non-empty:
+              const filterValue = document.getElementById('colH')?.value.trim() || '';
+              const data = sheet[mii.el.dataset.miiId] || {};
+              const matchesFilter = (filterValue === '') || (data.colH === filterValue);
+              if (!matchesFilter) return;
+
+              if (!mii.el.contains(bubble)) mii.el.appendChild(bubble);
+              bubble.getBoundingClientRect();
+              bubble.classList.add('visible');
+              if (mii._currentAudio) {
+                mii._currentAudio.pause();
+                mii._currentAudio = null;
+              }
+              mii._currentAudio = playRandomEmojiAudio(mii);
+
+
+              if (mouthImg) {
+                mii._flickerInterval = setInterval(() => {
+                  if (version !== mii._messageVersion) {
+                    clearInterval(mii._flickerInterval);
+                    return;
+                  }
+                  mouthImg.src = mouthImg.src.includes('talk.png') ? origSrc : talkSrc;
+                }, 150 + Math.random() * 100);
+              }
+
+              setTimeout(() => {
+                if (version !== mii._messageVersion) return;
+
+                bubble.classList.remove('visible');
+                if (mouthImg) {
+                  clearInterval(mii._flickerInterval);
+                  mouthImg.src = origSrc;
+                }
+
+                const delay = 6000 + Math.random() * 14000;
+                if (bubbleCycleEnabled) {
+                  mii._nextShowTimeout = setTimeout(() => {
+                    showBubbleOnce(version);
+                  }, delay);
+                }
+
+              }, 3000);
+            }
+
+            showBubbleOnce(currentVersion);
+          }
+        });
+      }
+
+
+      // kick it off
+      updateMiisFromSheet();
+      setInterval(updateMiisFromSheet, 2000);
+    }
+
+
+    // now start polling:
+    startSheetPolling('1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0');
+  </script>
+  <script>
+    function startOnlineMiiBehavior() {
+      // only grab the sheet-loaded heads
+      const onlineHeads = Array.from(document.querySelectorAll('.online-mii-container .emoji-head'));
+
+      // stash original srcs
+      onlineHeads.forEach(head => {
+        const eyeImg = head.querySelector('img[src*="/eyes/"]');
+        const mouthImg = head.querySelector('img[src*="/mouths/"]');
+        head.dataset.originalEyes = eyeImg ? eyeImg.src : '';
+        head.dataset.originalMouth = mouthImg ? mouthImg.src : '';
+        head.dataset.isTalking = 'false';
+      });
+
+      // blinking (unchanged)
+      function blinkMii(head) {
+        const eyeImg = head.querySelector('img[src*="/eyes/"], img[src*="blink.png"]');
+        if (!eyeImg) return;
+        eyeImg.src = './emoji/eyes/blink.png';
+        setTimeout(() => eyeImg.src = head.dataset.originalEyes, 150);
+        setTimeout(() => blinkMii(head), Math.random() * 4000 + 2000);
+      }
+      onlineHeads.forEach(head => {
+        setTimeout(() => blinkMii(head), Math.random() * 4000 + 2000);
+      });
+
+      // talking flicker
+      function flickerMouth(head) {
+        if (head.dataset.isTalking !== 'true') return;
+        const mouthImg = head.querySelector('img[src*="/mouths/"], img[src*="talk.png"]');
+        if (!mouthImg) return;
+        mouthImg.src = mouthImg.src.includes('talk.png')
+          ? head.dataset.originalMouth
+          : './emoji/mouths/talk.png';
+        setTimeout(() => flickerMouth(head), 200 + Math.random() * 100);
+      }
+
+      // proximity check against all heads
+      const talkDistance = 40; // px, adjust as needed
+      function updateTalking() {
+        // grab every head on the page each frame
+        const allHeads = Array.from(document.querySelectorAll('.emoji-head'));
+        onlineHeads.forEach(headA => {
+          const rA = headA.getBoundingClientRect();
+          const cA = {x: rA.left + rA.width / 2, y: rA.top + rA.height / 2};
+          let nearAny = false;
+
+          allHeads.forEach(headB => {
+            if (headA === headB) return;
+            const rB = headB.getBoundingClientRect();
+            const cB = {x: rB.left + rB.width / 2, y: rB.top + rB.height / 2};
+            if (Math.hypot(cA.x - cB.x, cA.y - cB.y) < talkDistance) {
+              nearAny = true;
+            }
+          });
+
+          if (nearAny && headA.dataset.isTalking !== 'true') {
+            headA.dataset.isTalking = 'true';
+            flickerMouth(headA);
+          } else if (!nearAny && headA.dataset.isTalking !== 'false') {
+            headA.dataset.isTalking = 'false';
+            const mouthImg = headA.querySelector('img[src*="/mouths/"], img[src*="talk.png"]');
+            if (mouthImg) mouthImg.src = headA.dataset.originalMouth;
+          }
+        });
+
+        // requestAnimationFrame(updateTalking);
+      }
+
+      // requestAnimationFrame(updateTalking);
+    }
+
+    window.addEventListener('load', startOnlineMiiBehavior);
+  </script>
+  <script>
+    const toggleBtn = document.getElementById('menuToggleBtn');
+    const menuUI = document.getElementById('menuUI');
+    const hoverTrigger = document.getElementById('hoverTrigger');
+    const homeBtn = document.getElementById('homeBtn');
+
+    let menuEnabled = false;
+    const hintDuration = 2000; // ms to show the menu on toggle
+
+    function toggleMenu() {
+      toasttoggle();
+      if (!menuEnabled) {
+        // Enable and briefly show as a hint
+        menuEnabled = true;
+        menuUI.classList.add('visible');
+        setTimeout(() => {
+          // hide after hintDuration without disabling hover enablement
+          if (menuEnabled) menuUI.classList.remove('visible');
+        }, hintDuration);
+      } else {
+        // Disable fully
+        menuUI.classList.remove('visible');
+        menuEnabled = false;
+      }
+    }
+
+    toggleBtn.addEventListener('click', toggleMenu);
+
+    hoverTrigger.addEventListener('mouseenter', () => {
+      if (menuEnabled) menuUI.classList.add('visible');
+    });
+    menuUI.addEventListener('mouseleave', () => {
+      if (menuEnabled) menuUI.classList.remove('visible');
+    });
+
+    // Button press feedback
+    homeBtn.addEventListener('mousedown', () => homeBtn.src = './images/homebtn_pressed.png');
+    homeBtn.addEventListener('mouseup', () => homeBtn.src = './images/homebtn.png');
+    minimizeBtn.addEventListener('mousedown', () => minimizeBtn.src = './images/minimizebtn_pressed.png');
+    minimizeBtn.addEventListener('mouseup', () => minimizeBtn.src = './images/minimizebtn.png');
+    shareBtn.addEventListener('mousedown', () => shareBtn.src = './images/sharebtn_pressed.png');
+    shareBtn.addEventListener('mouseup', () => shareBtn.src = './images/sharebtn.png');
+  </script>
+  <!-- Include PapaParse -->
+  <script src="./appstore/papaparse.min.js"></script>
+
+  <script>
+    const gsUnique_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSbEFnVd9-meryPcq40T7btzywuJZdrzkfIOFfbFDmym131n1YXDvMmGCcHapIT1h868dBFKsNB1ZtK/pub?output=csv";
+
+    async function gsUnique_handleSearch() {
+      const iconUrl = document.getElementById("colG").value.trim();
+      const resultBox = document.getElementById("sayMain");
+
+      if (!iconUrl) {
+        alert("Please enter an App Icon URL.");
+        return;
+      }
+
+      try {
+        const response = await fetch(gsUnique_CSV_URL);
+        const csvText = await response.text();
+
+        const parsed = Papa.parse(csvText, {
+          header: false,
+          skipEmptyLines: true,
+        });
+
+        const rows = parsed.data;
+
+        const matchedRow = rows.find(row =>
+          row[1]?.trim() === iconUrl || row[4]?.trim() === iconUrl
+        );
+
+        if (matchedRow) {
+          const appName = matchedRow[0]?.trim();
+          const creator = matchedRow[3]?.trim();
+          resultBox.value = `I am currently sharing "${appName}" by "${creator}" on Gameshare!`;
+          gsUnique_showPopup();
+          sendGameMessage();
+        } else {
+          resultBox.value = ``;
+        }
+
+      } catch (err) {
+        alert("Failed to fetch data from Google Sheets.");
+        console.error(err);
+      }
+    }
+
+    function gsUnique_showPopup() {
+      document.getElementById("gsUnique_overlay").classList.add("gsUnique_show");
+    }
+
+    function gsUnique_handleOverlayClick(event) {
+      const popup = document.querySelector(".gsUnique_popup");
+      if (!popup.contains(event.target)) {
+        document.getElementById("gsUnique_overlay").classList.remove("gsUnique_show");
+      }
+    }
+
+    function gsUnique_copyShareLink() {
+      const linkInput = document.getElementById("gsUnique_shareLink");
+      linkInput.select();
+      linkInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+    }
+  </script>
+
+  <textarea style="display:none" id="codeInput" placeholder="Type JavaScript code here..."></textarea>
+  <br>
+  <button style="display:none" onclick="saveAndRunCode()">Save Code</button>
+
+  <script>
+    const textarea = document.getElementById('codeInput');
+    const storageKey = 'savedJSCode';
+    let injectedScript = null;
+
+    function injectScript(code) {
+      if (injectedScript) {
+        injectedScript.remove(); // Remove previous script if exists
+      }
+      injectedScript = document.createElement('script');
+      injectedScript.textContent = code;
+      document.body.appendChild(injectedScript);
+    }
+
+    function saveAndRunCode() {
+      const code = textarea.value;
+      localStorage.setItem(storageKey, code);
+      injectScript(code);
+      alert('Code saved and executed!');
+    }
+
+    // Load and execute code on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedCode = localStorage.getItem(storageKey);
+      if (savedCode) {
+        textarea.value = savedCode;
+        injectScript(savedCode);
+      }
+    });
+  </script>
+  <!-- ============================================
+       JAVASCRIPT: RIPPLE, POLLING INPUT, HOLD & EXIT, TIMEOUT
+     ============================================ -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const splash       = document.getElementById("splash");
+      const logoIcon     = document.getElementById("logo-icon");
+      const splashRipple = document.getElementById("splash-ripple");
+      const triggerInput = document.getElementById("colB");
+      const timeoutPopup = document.getElementById("timeout-popup");
+      const closePopupBtn = document.getElementById("close-popup");
+
+      let rippleIntervalId;
+      function triggerRipple() {
+        splashRipple.classList.add("animate-ripple");
+        splashRipple.addEventListener(
+          "animationend",
+          () => splashRipple.classList.remove("animate-ripple"),
+          { once: true }
+        );
+      }
+
+      setTimeout(() => {
+        triggerRipple();
+        rippleIntervalId = setInterval(triggerRipple, 1000);
+      }, 900);
+
+      let exitScheduled = false;
+
+      function scheduleExit(showPopup = false) {
+        if (exitScheduled) return;
+        exitScheduled = true;
+
+        if (showPopup) {
+          timeoutPopup.style.display = "block";
+        }
+
+        const onFloor = () => {
+          logoIcon.removeEventListener("animationiteration", onFloor);
+          logoIcon.style.animation = "none";
+          logoIcon.style.transform = "translateY(0)";
+          clearInterval(rippleIntervalId);
+          setTimeout(startExitProcess, 2000);
+        };
+        logoIcon.addEventListener("animationiteration", onFloor);
+      }
+
+      function startExitProcess() {
+        splash.classList.add("exiting");
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 2000);
+      }
+
+      const pollIntervalId = setInterval(() => {
+        if (!exitScheduled && triggerInput.value.trim() !== "") {
+          clearInterval(pollIntervalId);
+          scheduleExit(false);
+        }
+      }, 200);
+
+      // ✅ New: Manual trigger function for timeout behavior
+      function triggerTimeoutBehavior() {
+        if (!exitScheduled) {
+          clearInterval(pollIntervalId);
+          scheduleExit(true);
+          setOfflineMode(true);
+        }
+      }
+
+      // ✅ Detect if loaded from a Service Worker and trigger immediately
+      // Detect if controlled by SW AND offline, then trigger
+      if (navigator.serviceWorker && navigator.serviceWorker.controller && !navigator.onLine) {
+        triggerTimeoutBehavior();
+      }
+
+
+      // 20s automatic timeout
+      setTimeout(triggerTimeoutBehavior, 20000);
+
+      closePopupBtn.addEventListener("click", () => {
+        timeoutPopup.style.display = "none";
+      });
+
+      // Optional: expose the function globally for manual call
+      window.triggerTimeoutBehavior = triggerTimeoutBehavior;
+    });
+  </script>
+
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <!-- Put this in the <head> of EVERY HTML page you want to cache offline -->
+  <!-- It exposes window.__getAllAssets(), which returns all same-origin assets: -->
+  <!--  • DOM/CSS assets (images, fonts, background-images, etc.)          -->
+  <!--  • “Hidden” assets in JS (images, audio, video, etc.)                -->
+  <!--  • External CSS imports & CSS url(...) references                   -->
+  <!--  • External JS files (scanned for .png / .mp3 / .aac / .flac / etc.)-->
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+  <script>
+    (function () {
+      // A Set to collect *all* asset URLs:
+      window.__ALL_ASSETS = new Set();
+
+      // Helper to normalize a possibly-relative URL to an absolute, same-origin URL
+      function normalize(raw) {
+        try {
+          const abs = new URL(raw, location.href).href;
+          if (abs.startsWith(location.origin)) {
+            return abs;
+          }
+        } catch (_) {}
+        return null;
+      }
+
+      // 1) Scrape the DOM for <img>, <video>, <audio>, <link>, CSS url(...) in inline <style>
+      function scrapeDOM() {
+        // a) <img src>
+        document.querySelectorAll('img[src]').forEach(img => {
+          const u = normalize(img.getAttribute('src'));
+          if (u) window.__ALL_ASSETS.add(u);
+        });
+
+        // b) <video src>, <audio src>, <source src> (media tags)
+        document.querySelectorAll('video[src], audio[src], source[src]').forEach(el => {
+          const u = normalize(el.getAttribute('src'));
+          if (u) window.__ALL_ASSETS.add(u);
+        });
+
+        // c) <link rel="stylesheet" href>, <link rel="icon" href>, <link rel="manifest" href>
+        document.querySelectorAll('link[rel][href]').forEach(link => {
+          const rel = (link.getAttribute('rel') || '').toLowerCase();
+          if (
+            rel.includes('stylesheet') ||
+            rel.includes('icon') ||
+            rel.includes('manifest')
+          ) {
+            const u = normalize(link.getAttribute('href'));
+            if (u) window.__ALL_ASSETS.add(u);
+          }
+        });
+
+        // d) Inline <style> tags → look for url(...) 
+        document.querySelectorAll('style').forEach(styleTag => {
+          const text = styleTag.textContent || '';
+          const urlRegex = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
+          let m;
+          while ((m = urlRegex.exec(text)) !== null) {
+            const rawUrl = m[1];
+            const u = normalize(rawUrl);
+            if (u) window.__ALL_ASSETS.add(u);
+          }
+        });
+      }
+
+      // 2) Scrape every external CSS file for url(...) and @import
+      async function scrapeExternalCSS() {
+        const cssLinks = Array.from(
+          document.querySelectorAll('link[rel="stylesheet"][href]')
+        ).map(l => l.getAttribute('href'));
+
+        for (let href of cssLinks) {
+          const absCss = normalize(href);
+          if (!absCss) continue;
+          try {
+            const resp = await fetch(absCss, { credentials: 'same-origin' });
+            if (!resp.ok) continue;
+            const text = await resp.text();
+
+            // a) url(...) inside CSS
+            const urlRegex = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
+            let match;
+            while ((match = urlRegex.exec(text)) !== null) {
+              const raw = match[1];
+              const u = normalize(raw);
+              if (u) window.__ALL_ASSETS.add(u);
+            }
+
+            // b) @import "foo.css"
+            const importRegex = /@import\s+['"]([^'"]+)['"]/gi;
+            while ((match = importRegex.exec(text)) !== null) {
+              const rawImp = match[1];
+              const u2 = normalize(rawImp);
+              if (u2) window.__ALL_ASSETS.add(u2);
+            }
+          } catch (e) {
+            // Possibly CORS-blocked or 404—skip it
+            console.warn('Could not fetch CSS for asset scan:', absCss);
+          }
+        }
+      }
+
+      // 3) Scrape all inline <script> and external JS for hidden asset URLs
+      async function scrapeJSForAssets() {
+        // This regex now includes:
+        // • common image extensions: png|jpe?g|gif|svg|webp 
+        // • common audio: mp3|wav|ogg|aac|m4a|flac|opus 
+        // • common video: mp4|webm 
+        const ASSET_REGEX = /['"]([^'"]+\.(?:png|jpe?g|gif|svg|webp|mp3|wav|ogg|aac|m4a|flac|opus|mp4|webm))['"]/gi;
+
+        // a) Inline <script> blocks
+        const inlineScripts = Array.from(
+          document.querySelectorAll('script:not([src])')
+        ).map(s => s.textContent || '');
+
+        for (let code of inlineScripts) {
+          let m;
+          while ((m = ASSET_REGEX.exec(code)) !== null) {
+            const rawUrl = m[1];
+            const u = normalize(rawUrl);
+            if (u) window.__ALL_ASSETS.add(u);
+          }
+        }
+
+        // b) External JS files
+        const externalJSSrcs = Array.from(
+          document.querySelectorAll('script[src]')
+        ).map(s => s.getAttribute('src'));
+
+        for (let jsPath of externalJSSrcs) {
+          const absJs = normalize(jsPath);
+          if (!absJs) continue;
+          try {
+            const resp = await fetch(absJs, { credentials: 'same-origin' });
+            if (!resp.ok) continue;
+            const jsText = await resp.text();
+            let m;
+            while ((m = ASSET_REGEX.exec(jsText)) !== null) {
+              const rawUrl = m[1];
+              const u = normalize(rawUrl);
+              if (u) window.__ALL_ASSETS.add(u);
+            }
+          } catch (e) {
+            console.warn('Could not fetch JS for asset scan:', absJs);
+          }
+        }
+      }
+
+      // 4) Optionally, strip out “value=” from any <input> or <textarea> tags
+      //    in the raw HTML so that default values are never cached.
+      //    (Note: this is almost never required, because SW only caches
+      //     the original network response, not any user-filled data.)
+      //    If your server’s HTML contains default value="...", uncomment this:
+      /*
+      function stripInputValues(rawHTML) {
+        // Remove value="..." in <input ...> and remove content inside <textarea>…</textarea>
+        return rawHTML
+          .replace(/<input\b([^>]*?)\svalue=['"][^'"]*['"]([^>]*?)>/gi, '<input$1$2>')
+          .replace(/<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi, '<textarea$1></textarea>');
+      }
+      */
+
+      // 5) Expose a public function to gather everything:
+      window.__getAllAssets = async function () {
+        window.__ALL_ASSETS.clear();
+
+        // a) Scrape the live DOM/CSS/inline styles
+        scrapeDOM();
+
+        // b) Fetch & parse external CSS
+        await scrapeExternalCSS();
+
+        // c) Parse JS for hidden asset URLs
+        await scrapeJSForAssets();
+
+        // (Optional) If you really want to strip any default value="..." from the HTML:
+        // You’d have to fetch(location.href), do stripInputValues(...), then let the SW cache that. 
+        // But again, that’s almost never necessary, because what the SW stores is the original
+        // HTTP response, not any data the user typed in after load.
+
+        return Array.from(window.__ALL_ASSETS.values());
+      };
+
+      // (Optionally, run __getAllAssets() once on load so it's “warm” in memory)
+      // window.addEventListener('load', () => { window.__getAllAssets(); });
+
+    })();
+  </script>
+  <!-- ──────────────────────────────────────────────────────────────────── -->
+
 </body>
 
 </html>

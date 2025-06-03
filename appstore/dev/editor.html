@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Edit/Create App</title>
+  <style>
+    html, body {
+      height: 100vh;
+      margin: 0;
+    }
+    body {
+      background: #ffffff;
+      font-family: sans-serif;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative; /* for absolute positioning of templateContainer */
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+    }
+    #templateContainer {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      flex-direction: row;
+      gap: 1rem;
+    }
+    .templateBox {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      width: 120px;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fafafa;
+    }
+    .templateBox img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 0.5rem;
+    }
+    #mainEditor {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    #container {
+      display: flex;
+      gap: 1rem;
+      height: 60vh;
+    }
+    #editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    #preview-container {
+      flex: 1;
+      border: 1px solid #ccc;
+    }
+    #preview {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="display:none" id="pageTitle">Edit/Create App</h1>
+
+  <!-- Load the templates.js file -->
+  <script src="templates.js"></script>
+
+  <!-- Template selection container (centered in viewport) -->
+  <div id="templateContainer">
+    <!-- App 1 template box -->
+    <div class="templateBox" data-template="1">
+      <img src="" alt="App 1 Preview">
+      <span>App 1</span>
+    </div>
+    <!-- App 2 template box -->
+    <div class="templateBox" data-template="2">
+      <img src="" alt="App 2 Preview">
+      <span>App 2</span>
+    </div>
+    <!-- Blank Template box -->
+    <div class="templateBox" data-template="blank">
+      <img src="" alt="Blank Template Preview">
+      <span>Blank Template</span>
+    </div>
+  </div>
+
+  <!-- Main editor, hidden until a template is chosen (or in edit mode) -->
+  <div id="mainEditor">
+    <input id="appName" placeholder="App Name" />
+    <input id="iconUrl" placeholder="Icon URL" />
+    <input id="previewUrl" placeholder="Preview Image URL" />
+
+    <div id="container">
+      <div id="editor">
+        <label for="appCodePreview">HTML/CSS/JS Code:</label>
+        <textarea id="appCodepreview" rows="10" placeholder="Enter your HTML, CSS, and JS here"></textarea>
+        <textarea style="display:none" id="appCode" rows="10" placeholder="Enter your HTML, CSS, and JS here"></textarea>
+        <button id="saveBtn">Save</button>
+        <button id="exitBtn">Return to home</button>
+
+        <script>
+          // 1. Define the reverse mapping for decoding
+          const reverseMap = {
+            '*oosqu*': '"',
+            '*oosap*': "'",
+            '*oosfsl*': '/',
+            '*oosbsl*': '\\',
+            '*oosobr*': '[',
+            '*ooscbr*': ']',
+            '*oosbrco*': '{',
+            '*oosbrcc*': '}',
+            '*oospao*': '(',
+            '*oospac*': ')',
+            '*ooseq*': '=',
+            '*oosti*': '`',
+            '*ooscom*': ',',
+            '*oosscol*': ';',
+            '*ooscol*': ':',
+            '*ooslin*': '|',
+            '*oosango*': '<',
+            '*oosangc*': '>'
+          };
+
+          const escapedKeys = Object.keys(reverseMap).map(key =>
+            key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+          );
+          const decodePattern = new RegExp(escapedKeys.join('|'), 'g');
+
+          function decodeAppCode() {
+            const raw = document.getElementById('appCode').value;
+            const decoded = raw.replace(decodePattern, matched => reverseMap[matched]);
+            document.getElementById('appCodepreview').value = decoded;
+            updatePreview();
+          }
+        </script>
+
+        <script>
+          // 2. Define encoding logic so that any special char typed into #appCodepreview
+          //    gets transformed into e.g. "*oosqu*" before being stored in #appCode
+          const textarea = document.getElementById('appCode');
+
+          const charMap = {
+            '"': '*oosqu*',
+            "'": '*oosap*',
+            '/': '*oosfsl*',
+            '\\': '*oosbsl*',
+            '[': '*oosobr*',
+            ']': '*ooscbr*',
+            '{': '*oosbrco*',
+            '}': '*oosbrcc*',
+            '(': '*oospao*',
+            ')': '*oospac*',
+            '=': '*ooseq*',
+            '`': '*oosti*',
+            ',': '*ooscom*',
+            ';': '*oosscol*',
+            ':': '*ooscol*',
+            '|': '*ooslin*',
+            '<': '*oosango*',
+            '>': '*oosangc*'
+          };
+
+          const specialChars = new RegExp(
+            `[${Object.keys(charMap).map(c => '\\' + c).join('')}]`,
+            'g'
+          );
+
+          function encodeSpecialChars(text) {
+            return text.replace(specialChars, char => charMap[char] || char);
+          }
+
+          function updateEncodedText() {
+            const original = textarea.value;
+            const encoded = encodeSpecialChars(original);
+
+            if (original !== encoded) {
+              const pos = textarea.selectionStart;
+              textarea.value = encoded;
+              textarea.setSelectionRange(pos, pos);
+            }
+          }
+
+          textarea.addEventListener('keydown', function(e) {
+            if (charMap[e.key]) {
+              e.preventDefault();
+              const encoded = charMap[e.key];
+              const start = textarea.selectionStart;
+              const end = textarea.selectionEnd;
+              const currentValue = textarea.value;
+              textarea.value =
+                currentValue.slice(0, start) +
+                encoded +
+                currentValue.slice(end);
+              const newCaret = start + encoded.length;
+              textarea.setSelectionRange(newCaret, newCaret);
+            }
+          });
+
+          textarea.addEventListener('input', updateEncodedText);
+
+          const observer = new MutationObserver(updateEncodedText);
+          observer.observe(textarea, {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+          });
+
+          setInterval(updateEncodedText, 300);
+        </script>
+
+        <script>
+          document
+            .getElementById("exitBtn")
+            .addEventListener("click", function() {
+              window.location.href = "./index.html";
+            });
+        </script>
+      </div>
+
+      <div id="preview-container">
+        <iframe
+          id="preview"
+          sandbox="allow-scripts allow-same-origin"
+        ></iframe>
+      </div>
+    </div>
+
+    <input
+      style="display:none"
+      id="creator"
+      disabled
+      placeholder="Creator Name"
+    />
+  </div>
+
+  <script>
+    // ─── Configuration ─────────────────────────────────────────────
+    const SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbxIdvaXfwQ-KsxzAqXoI7kmr8cCfI1cb-ksya_7BHaDR30VtqEmM_P5zVi6yzL4wajD/exec";
+
+    const appNameInput = document.getElementById("appName");
+    const iconUrlInput = document.getElementById("iconUrl");
+    const previewUrlInput = document.getElementById("previewUrl");
+    const codeTextarea = document.getElementById("appCode");
+    const codeTextareaPrev = document.getElementById("appCodepreview");
+    const previewFrame = document.getElementById("preview");
+    const creatorInput = document.getElementById("creator");
+    const saveBtn = document.getElementById("saveBtn");
+    const pageTitle = document.getElementById("pageTitle");
+    const templateContainer = document.getElementById("templateContainer");
+    const templateBoxes = document.querySelectorAll(".templateBox");
+    const mainEditor = document.getElementById("mainEditor");
+
+    function updatePreview() {
+      previewFrame.srcdoc = codeTextareaPrev.value;
+    }
+    codeTextareaPrev.addEventListener("input", updatePreview);
+    codeTextareaPrev.addEventListener("input", () => {
+      // When the visible textarea changes, re-encode into #appCode
+      codeTextarea.value = codeTextareaPrev.value;
+    });
+
+    function getParam(key) {
+      return new URLSearchParams(location.search).get(key);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const nameParam = getParam("appName");
+      const creatorParam = getParam("creator");
+
+      if (!creatorParam) {
+        alert("Creator missing");
+        return;
+      }
+      creatorInput.value = creatorParam;
+
+      if (nameParam) {
+        // ─── EDIT MODE ─────────────────────────────────────────────────
+        pageTitle.textContent = "Edit App";
+        appNameInput.value = nameParam;
+        appNameInput.disabled = true;
+
+        // Show editor immediately, hide templates
+        mainEditor.style.display = "flex";
+        templateContainer.style.display = "none";
+
+        window.handleList = (res) => {
+          if (res.error) {
+            alert(res.error);
+            return;
+          }
+          const app = res.apps.find(
+            (a) => a.appName === nameParam && a.creator === creatorParam
+          );
+          if (!app) {
+            alert("App not found");
+            return;
+          }
+          iconUrlInput.value = app.iconUrl;
+          previewUrlInput.value = app.previewUrl || "";
+          codeTextarea.value = app.appCode;
+          decodeAppCode();
+        };
+        const tag = document.createElement("script");
+        tag.src =
+          SCRIPT_URL +
+          "?action=list" +
+          "&callback=handleList" +
+          "&creator=" +
+          encodeURIComponent(creatorParam);
+        document.head.appendChild(tag);
+      } else {
+        // ─── CREATE NEW MODE ─────────────────────────────────────────────
+        pageTitle.textContent = "Create New App";
+        appNameInput.disabled = false;
+
+        // Show only templates at first, hide editor
+        templateContainer.style.display = "flex";
+        mainEditor.style.display = "none";
+
+        // When a template box is clicked, put data into #appCode and decode into preview
+        templateBoxes.forEach((box) => {
+          box.addEventListener("click", () => {
+            const templateType = box.getAttribute("data-template");
+            // Grab the placeholder from templates.js
+            const placeholderContent = templates[templateType] || "";
+
+            // Put placeholder into the hidden #appCode (raw)
+            codeTextarea.value = placeholderContent;
+            // Decode and populate #appCodepreview, then update iframe
+            decodeAppCode();
+
+            // Hide templates and show editor inputs + preview
+            templateContainer.style.display = "none";
+            mainEditor.style.display = "flex";
+          });
+        });
+      }
+    });
+
+    // ─── SAVE BUTTON LOGIC ────────────────────────────────────────────
+    saveBtn.addEventListener("click", () => {
+      const name = appNameInput.value.trim();
+      const icon = iconUrlInput.value.trim();
+      const preview = previewUrlInput.value.trim();
+      const code = codeTextarea.value;
+      const creator = creatorInput.value;
+
+      if (!name || !icon || !preview || !code) {
+        return alert("Fill in all fields");
+      }
+
+      const formData = new FormData();
+      formData.append("action", "create");
+      formData.append("appName", name);
+      formData.append("iconUrl", icon);
+      formData.append("previewUrl", preview);
+      formData.append("appCode", code);
+      formData.append("creator", creator);
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        body: formData
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not OK: " + response.statusText);
+          }
+          return response.json();
+        })
+        .then((payload) => {
+          if (payload.error) {
+            return alert("Error from server: " + payload.error);
+          }
+          window.location.href = "./index.html";
+        })
+        .catch((err) => {
+          console.error("Fetch error:", err);
+          alert("An error occurred while saving. See console for details.");
+        });
+    });
+  </script>
+</body>
+</html>

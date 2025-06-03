@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ID Checker with Name Saving</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      background: linear-gradient(to bottom right, #ffffff, #f1f1f1);
+      color: #333;
+    }
+    label, input, button {
+      font-size: 1.2rem;
+      margin: 0.5rem;
+    }
+    #status {
+      margin-top: 1rem;
+      color: #c00;
+    }
+  </style>
+</head>
+<body>
+  <h1>Checking ID...</h1>
+
+  <div style="display:none">
+  <label for="idInput">Enter ID:</label>
+  <input type="text" id="idInput" placeholder="e.g. iGWtDg" />
+  <button id="checkBtn">Check</button>
+  </div>
+  
+  <!-- Hidden input for the name (column B) -->
+  <input type="hidden" id="nameInput" />
+
+  <div id="status"></div>
+
+  <script>
+    const JSON_URL =
+      'https://docs.google.com/spreadsheets/d/1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0/gviz/tq?sheet=Sheet1&tqx=out:json';
+
+    // Fetch, parse, save name to localStorage, then redirect
+    async function loadData() {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = '';
+      
+      const rawId = document.getElementById('idInput').value.trim();
+      if (!rawId) {
+        statusEl.textContent = 'Please enter an ID.';
+        return;
+      }
+      // Save the ID
+      localStorage.setItem('savedID', rawId);
+
+      const id = rawId.toLowerCase();
+      try {
+        const res = await fetch(JSON_URL);
+        if (!res.ok) throw new Error('Network error');
+        const text = await res.text();
+
+        // Strip the gviz wrapper
+        const start = text.indexOf('{');
+        const end   = text.lastIndexOf('}');
+        if (start < 0 || end < 0) throw new Error('Unexpected response format');
+        const jsonText = text.substring(start, end + 1);
+        const data = JSON.parse(jsonText);
+        const rows = data.table.rows;
+
+        // Default to Google if not found or not 'dev'
+        let target = './index.html';
+
+        for (const r of rows) {
+          const idCell = r.c[0];  // column A
+          if (!idCell) continue;
+          if (String(idCell.v).trim().toLowerCase() === id) {
+            // Save the name (column B) into the hidden input & localStorage
+            const nameCell = r.c[1];
+            const nameVal = nameCell ? String(nameCell.v).trim() : '';
+            document.getElementById('nameInput').value = nameVal;
+            localStorage.setItem('savedName', nameVal);
+
+            // Check column I for "dev"
+            const flagCell = r.c[8];
+            const flag = flagCell ? String(flagCell.v).trim().toLowerCase() : '';
+            if (flag === 'dev') {
+              target = './dev/index.html';
+            }
+            break;
+          }
+        }
+
+        window.location.href = target;
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Error fetching or parsing sheet.';
+      }
+    }
+
+    // Button click triggers the check
+    document.getElementById('checkBtn').addEventListener('click', loadData);
+
+    // On load: populate ID & name from localStorage and auto-check
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedID = localStorage.getItem('savedID');
+      const savedName = localStorage.getItem('savedName');
+      if (savedID) {
+        document.getElementById('idInput').value = savedID;
+        if (savedName) {
+          document.getElementById('nameInput').value = savedName;
+        }
+        loadData();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gameshare Lobby</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 2rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+      gap: 1.5rem;
+    }
+    .tile {
+      position: relative;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      text-align: center;
+    }
+    .tile img.app-icon {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+    .tile button {
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* ── floating emoji + drop shadow ───────────────────────── */
+    @keyframes float {
+      0%   { transform: translateX(-50%) translateY(0); }
+      50%  { transform: translateX(-50%) translateY(-10px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+    .emoji-container {
+      position: absolute;
+      top: -60px; left: 50%;
+      width: 120px; height: 120px;
+      pointer-events: none;
+      animation: float 3s ease-in-out infinite;
+    }
+    .emoji-container img {
+      position: absolute;
+      width: 100px; height: 100px;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      /* drop shadow under each layer */
+      filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
+    }
+
+    /* ── overlay ──────────────────────────────────────────────── */
+    #overlay {
+      position: fixed; top:0; left:0;
+      width:100vw; height:100vh;
+      background:white; display:none;
+      z-index:9999;
+    }
+    #overlay iframe {
+      width:100%; height:100%; border:none;
+    }
+    #closeBtn {
+      position:absolute; top:10px; right:10px;
+      background:red; color:white; border:none;
+      padding:0.5rem 1rem; font-size:1rem;
+      cursor:pointer; border-radius:4px;
+      z-index:10000;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="display:none">Gameshare Lobby</h1>
+<br><br>
+  <p id="emptyMessage" style="font-size: 1.2rem; color: #666; display: none;">
+    There are no games being shared right now.
+  </p>
+  <div class="grid" id="lobbyGrid"></div>
+
+  <!-- full-screen runner overlay -->
+  <div id="overlay">
+    <button id="closeBtn" onclick="closeOverlay()">Close</button>
+    <iframe id="appFrame"></iframe>
+  </div>
+  <script src="./appstore/papaparse.min.js"
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    // ─── CONFIG ─────────────────────────────────────────────────────────────────
+    const APPS_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSbEFnVd9-meryPcq40T7btzywuJZdrzkfIOFfbFDmym131n1YXDvMmGCcHapIT1h868dBFKsNB1ZtK/pub?output=csv';
+    const USERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSaBDFzjOsd8sjrvo0bzHf7CfEsSmJVzp-2htZG6d0U9_a6biy1lsvx1odlb_-Mae5u_8T4YogMw59p/pub?output=csv';
+
+    // ─── CSV LOADING (with PapaParse) ─────────────────────────────────
+    async function fetchCsv(url) {
+      const txt = await fetch(url).then(r => r.text());
+      // skipEmptyLines: true  → ignores blank lines
+      // quoteChar: '"'        → default
+      const parsed = Papa.parse(txt.trim(), { skipEmptyLines: true });
+      return parsed.data;  // array-of-arrays
+    }
+
+    // reuse your decoder map
+    const reverseMap = {
+      '*oosqu*': '"', '*oosap*': "'", '*oosfsl*': '/', '*oosbsl*': '\\',
+      '*oosobr*': '[', '*ooscbr*': ']', '*oosbrco*': '{', '*oosbrcc*': '}',
+      '*oospao*': '(', '*oospac*': ')', '*ooseq*': '=', '*oosti*': '`',
+      '*ooscom*': ',', '*oosscol*': ';', '*ooscol*': ':', '*ooslin*': '|',
+      '*oosango*': '<', '*oosangc*': '>'
+    };
+    function reverseConvert(text) {
+      return Object.entries(reverseMap)
+                   .reduce((acc,[code,sym]) => acc.split(code).join(sym), text);
+    }
+
+    // ─── BOOTSTRAP ────────────────────────────────────────────────────────────────
+    // get today as M/D (e.g. "5/26")
+    const today = new Date();
+    const todayStr = (today.getMonth()+1) + '/' + today.getDate();
+
+    Promise.all([ fetchCsv(APPS_CSV_URL), fetchCsv(USERS_CSV_URL) ])
+    .then(([appsRows, usersRows]) => {
+      const appsIndex = buildLookup(appsRows, 0, 3);
+      let gamesFound = 0; // Track how many games we find
+
+      usersRows.forEach(user => {
+        const userDate = (user[5] || '').trim();
+        if (!userDate || userDate !== todayStr) return;
+
+        const status = user[4] || '';
+        const m = /I am currently sharing\s+"([^"]+)"\s+by\s+"([^"]+)"/.exec(status);
+        if (!m) return;
+
+        const key = m[1] + '___' + m[2];
+        if (appsIndex[key]) {
+          renderTile(user, appsIndex[key]);
+          gamesFound++;
+        }
+      });
+
+      // Show message if none found
+      if (gamesFound === 0) {
+        document.getElementById('emptyMessage').style.display = 'block';
+      }
+    });
+
+
+
+    // build lookup: key = colA + '___' + colD  → row
+    function buildLookup(rows, colA, colD) {
+      const idx = {};
+      rows.forEach(r => {
+        idx[r[colA] + '___' + r[colD]] = r;
+      });
+      return idx;
+    }
+
+    // ─── RENDERING ────────────────────────────────────────────────────────────────
+    function renderTile(userRow, appRow) {
+      const grid = document.getElementById('lobbyGrid');
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+
+      // 1) floating emoji
+      const emojiUrls = (userRow[2] || '').split(',').map(u => u.trim());
+      const hairColor = (userRow[3] || '').toLowerCase();
+
+      const emojiWrap = document.createElement('div');
+      emojiWrap.className = 'emoji-container';
+
+      // Define hair filters
+      const hairFilters = {
+        gray: 'grayscale(100%)',
+        brown: 'hue-rotate(280deg) contrast(200%) brightness(150%)',
+        black: 'brightness(0%)',
+        blonde: 'hue-rotate(290deg) contrast(120%) brightness(300%)',
+        red: 'hue-rotate(260deg) contrast(190%) brightness(300%)'
+      };
+
+      // Add CSS for floating effect and shadow
+      const style = document.createElement('style');
+      style.textContent = `
+        .emoji-container {
+          position: absolute;
+          bottom: -100px;
+          left: 50%;
+          transform: translateX(-50%);
+          animation: floatY 3s ease-in-out infinite;
+          filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2));
+          width: 100px;
+          height: 100px;
+        }
+        .emoji-container img {
+          position: absolute;
+          width: 100px;
+          height: 100px;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+        }
+        @keyframes floatY {
+          0% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(-10px); }
+          100% { transform: translateX(-50%) translateY(0); }
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Build emoji layers
+      emojiUrls.forEach((url, i) => {
+        if (!url) return;
+        const img = document.createElement('img');
+        img.src = url;
+
+        // Apply hair filter to second-to-last layer (usually the hair layer)
+        if (i === emojiUrls.length - 3) {
+          img.style.filter = hairFilters[hairColor] || '';
+        }
+
+        emojiWrap.appendChild(img);
+      });
+
+      tile.appendChild(emojiWrap);
+
+
+      // 2) app icon
+      const icon = document.createElement('img');
+      icon.className = 'app-icon';
+      icon.src = appRow[1] || appRow[4];  // B or E
+      tile.appendChild(icon);
+
+      // 3) Run button
+      const btn = document.createElement('button');
+      btn.textContent = 'Play';
+      btn.onclick = () => {
+        const encoded = appRow[2];              // col C = encoded code
+        const decoded = reverseConvert(encoded);
+        const blob = new Blob([decoded], { type:'text/html' });
+        document.getElementById('appFrame').src = URL.createObjectURL(blob);
+        document.getElementById('overlay').style.display = 'block';
+      };
+      tile.appendChild(btn);
+
+      grid.appendChild(tile);
+    }
+
+    // ─── OVERLAY ─────────────────────────────────────────────────────────────────
+    function closeOverlay() {
+      const ov = document.getElementById('overlay');
+      document.getElementById('appFrame').src = '';
+      ov.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

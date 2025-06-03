@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mii Maker</title>
+  <style>
+    :root {
+      /* Global sizing */
+      --emoji-size: 200px;
+      --torso-size: 100px;
+      /* Positions relative to preview center */
+      --head-top-offset: calc(50% - var(--emoji-size) / 2);
+      --torso-top-offset: calc( var(--head-top-offset) + var(--emoji-size) - var(--torso-size) / 2 );
+    }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #sidebar {
+      width: 250px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: #f0f0f0;
+      box-sizing: border-box;
+    }
+    #main { flex: 1; display: flex; flex-direction: column; }
+    #config {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      gap: 1rem;
+    }
+    #config input { flex: 1; padding: 0.25rem; }
+    #content { flex: 1; display: flex; overflow: hidden; }
+    #preview {
+      flex: 1;
+      position: relative;
+      background: #fff;
+    }
+    /* Head, mouth, eyes, etc. all share this fixed centered position */
+    #preview img {
+      position: absolute;
+      width: var(--emoji-size);
+      height: var(--emoji-size);
+      top: var(--head-top-offset);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    /* Torso dot in fixed relation to head */
+    #torso-dot {
+      position: absolute;
+      width: var(--torso-size);
+      height: var(--torso-size);
+      top: var(--torso-top-offset);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      border-radius: 50%;
+    }
+    .control-group { margin-bottom: 1rem; }
+    .control-group h4 { margin: 0 0 0.5rem; font-size: 0.9rem; }
+    .options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .options img, .options .dot {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s;
+    }
+    .options img:active, .options .dot:active { transform: scale(0.8); }
+    .options img.selected, .options .dot.selected { border-color: #007bff; }
+    .dot { border-radius: 50%; }
+    #layersText, #hairColorText { width: 100%; }
+    @keyframes sparkle {
+      0% { opacity: 1; transform: scale(0.5) rotate(0deg); }
+      100% { opacity: 0; transform: scale(2) rotate(45deg); }
+    }
+    .sparkle {
+      position: absolute;
+      /* center over emoji */
+      top: 50%; left: 50%;
+      width: var(--emoji-size);\
+
+      height: var(--emoji-size);
+      background: url('sparkle.png') center/contain no-repeat;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: sparkle 0.6s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="main">
+    <div style="display:none" id="config">
+      <input type="text" id="layersText" placeholder="Layer list will appear here"/>
+      <input type="text" id="hairColorText" placeholder="Hair color will appear here"/>
+    </div>
+    <div id="content">
+      <div id="preview">
+        <div id="torso-dot"></div>
+      </div>
+      <div id="sidebar"></div>
+    </div>
+  </div>
+
+  <script>
+    const categories = ['orbs','mouths','eyes','hairs','eyewear','hats'];
+    const counts = { orbs: 4, mouths: 4, eyes: 7, hairs: 9, eyewear: 6, hats: 9 };
+    const layerKey = 'mii_layers';
+    const hairColorKey = 'mii_hair_color';
+
+    const sidebar = document.getElementById('sidebar');
+    const preview = document.getElementById('preview');
+    const layersText = document.getElementById('layersText');
+    const hairColorText = document.getElementById('hairColorText');
+
+    const previewImgs = {};
+    categories.forEach(cat => {
+      const img = document.createElement('img');
+      img.id = `preview_${cat}`;
+      preview.appendChild(img);
+      previewImgs[cat] = img;
+    });
+
+    const hairFilters = {
+      gray: 'grayscale(100%)',
+      brown: 'hue-rotate(280deg) contrast(200%) brightness(150%)',
+      black: 'brightness(0%)',
+      blonde: 'hue-rotate(290deg) contrast(120%) brightness(300%)',
+      red: 'hue-rotate(260deg) contrast(190%) brightness(300%)'
+    };
+
+    function getSavedLayers() {
+      const text = layersText.value.trim();
+      if (text) return text.split(',').map(s => s.trim());
+      const saved = localStorage.getItem(layerKey);
+      if (saved) return saved.split(',').map(s => s.trim());
+      return categories.map(cat => `./emoji/${cat}/1.png`);
+    }
+
+    function getSavedHairColor() {
+      return localStorage.getItem(hairColorKey) || 'gray';
+    }
+
+    function saveAndUpdateLayers(layers) {
+      layersText.value = layers.join(', ');
+      localStorage.setItem(layerKey, layers.join(', '));
+      updatePreview(layers);
+      updateControls(layers);
+      showSparkle();
+    }
+
+    function saveAndUpdateHairColor(color) {
+      hairColorText.value = color;
+      localStorage.setItem(hairColorKey, color);
+      previewImgs['hairs'].style.filter = hairFilters[color] || '';
+      updateHairColorControls(color);
+      showSparkle();
+    }
+
+    function updatePreview(layers) {
+      layers.forEach((url, idx) => {
+        const cat = categories[idx];
+        previewImgs[cat].src = url;
+      });
+      const savedColor = getSavedHairColor();
+      previewImgs['hairs'].style.filter = hairFilters[savedColor];
+    }
+
+    function updateControls(layers) {
+      categories.forEach((cat, idx) => {
+        const groupDiv = document.querySelector(`#group_${cat}`);
+        if (!groupDiv) return;
+        groupDiv.querySelectorAll('img').forEach(img => {
+          img.classList.toggle('selected', img.dataset.url === layers[idx]);
+        });
+      });
+    }
+
+    function updateHairColorControls(selected) {
+      document.querySelectorAll('.dot').forEach(dot => {
+        dot.classList.toggle('selected', dot.dataset.color === selected);
+      });
+    }
+
+    function onOptionClick(cat, url) {
+      const layers = getSavedLayers();
+      layers[categories.indexOf(cat)] = url;
+      saveAndUpdateLayers(layers);
+    }
+    function onHairColorClick(color) {
+      saveAndUpdateHairColor(color);
+    }
+
+    function showSparkle() {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      preview.appendChild(s);
+      setTimeout(() => preview.removeChild(s), 600);
+    }
+
+    // build controls
+    categories.forEach(cat => {
+      const group = document.createElement('div');
+      group.className = 'control-group';
+      group.id = `group_${cat}`;
+      const title = document.createElement('h4');
+      title.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      group.appendChild(title);
+      const opts = document.createElement('div'); opts.className = 'options';
+      for (let i = 1; i <= counts[cat]; i++) {
+        const img = document.createElement('img');
+        const url = `./emoji/${cat}/${i}.png`;
+        img.src = url; img.dataset.url = url;
+        img.addEventListener('click', () => onOptionClick(cat, url));
+        opts.appendChild(img);
+      }
+      group.appendChild(opts);
+      sidebar.appendChild(group);
+      if (cat === 'hairs') {
+        const colorGroup = document.createElement('div');
+        colorGroup.className = 'control-group';
+        colorGroup.id = 'group_haircolor';
+        const t2 = document.createElement('h4'); t2.textContent = 'Hair Color';
+        colorGroup.appendChild(t2);
+        const opts2 = document.createElement('div'); opts2.className = 'options';
+        Object.keys(hairFilters).forEach(color => {
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          dot.style.background = color === 'blonde' ? 'yellow' : color;
+          dot.dataset.color = color;
+          dot.addEventListener('click', () => onHairColorClick(color));
+          opts2.appendChild(dot);
+        });
+        colorGroup.appendChild(opts2);
+        sidebar.appendChild(colorGroup);
+      }
+    });
+
+    // blink logic
+    function blinkCycle() {
+      const eyeImg = previewImgs['eyes'];
+      const original = eyeImg.src;
+      eyeImg.src = './emoji/eyes/blink.png';
+      setTimeout(() => { eyeImg.src = original; }, 200);
+      setTimeout(blinkCycle, 2000 + Math.random() * 3000);
+    }
+
+    layersText.addEventListener('change', () => {
+      const layers = getSavedLayers();
+      if (layers.length === categories.length) saveAndUpdateLayers(layers);
+    });
+    hairColorText.addEventListener('change', () => {
+      const color = hairColorText.value.trim();
+      if (hairFilters[color]) saveAndUpdateHairColor(color);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      saveAndUpdateLayers(getSavedLayers());
+      saveAndUpdateHairColor(getSavedHairColor());
+      setTimeout(blinkCycle, 3000 + Math.random() * 2000);
+    });
+  </script>
+</body>
+</html>

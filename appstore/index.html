@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern App Store</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      font-size: 20px;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      width: 100px;
+      height: 100vh;
+      background: #f0f0f0;
+      padding: 1.5rem 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: fixed;
+      top: 0;
+      left: 0;
+      gap: 1.5rem;
+      transition: width 0.3s ease;
+      z-index: 10;
+    }
+
+    .navbar.expanded {
+      width: 240px;
+    }
+
+    .nav-item {
+      width: 70px;
+      height: 70px;
+      background: #fff;
+      border-radius: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      margin-left: 20px;
+    }
+
+    .nav-item:hover {
+      width: 200px;
+      justify-content: flex-start;
+      padding-left: 15px;
+    }
+
+    .nav-item img {
+      width: 40px;
+      height: 40px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item:hover .nav-label,
+    .nav-item:hover input {
+      display: inline;
+    }
+
+    .nav-item input {
+      margin-left: 15px;
+      border: none;
+      outline: none;
+      padding: 0.5rem 0.7rem;
+      border-radius: 15px;
+      width: 120px;
+      display: none;
+      font-size: 1rem;
+    }
+
+    .nav-label {
+      margin-left: 15px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      display: none;
+      transition: opacity 0.3s ease;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+    .container {
+      margin-left: 120px;
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .app-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3rem;
+      justify-content: center;
+    }
+
+    .app-tile {
+      width: 360px;
+      height: 300px;
+      background: #fff;
+      border-radius: 25px;
+      box-shadow: 0 30px 50px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      will-change: transform;
+    }
+
+    .app-tile:hover {
+      box-shadow: 0 40px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      padding: 1.5rem 0;
+    }
+
+    .app-img {
+      width: 60px;
+      height: 60px;
+      background: #ddd;
+      border-radius: 15px;
+    }
+
+    .app-info {
+      flex-grow: 1;
+      margin-left: 1.5rem;
+      overflow: hidden;
+    }
+
+    .app-info h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 12ch;
+    }
+
+    .app-info p {
+      margin: 0;
+      color: gray;
+      font-size: 1.1rem;
+    }
+
+    .get-btn {
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .get-btn.installed {
+      background: #ccc;
+      color: #555;
+      cursor: default;
+    }
+
+    .preview {
+      width: 90%;
+      height: 150px;
+      background: #f1f1f1;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      color: #333;
+      font-size: 1.2rem;
+    }
+
+    #slot-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .slot-wrapper {
+      text-align: center;
+      background: white;
+      padding: 4rem;
+      border-radius: 20px;
+      transform: scale(1.2);
+    }
+
+    .slot-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 3rem;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slot {
+      width: 100px;
+      height: 100px;
+      background: #efefef;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 40px 60px rgba(0, 0, 0, 0.35);
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      overflow: hidden;
+      padding: 0;
+      transform-style: preserve-3d;
+    }
+
+    .slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+
+    .cancel-btn {
+      margin-top: 3rem;
+      padding: 0.75rem 2.5rem;
+      border-radius: 20px;
+      border: 1px solid #aaa;
+      background: #eee;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+#toast-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  background-color: #333;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: auto;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+  </style>
+</head>
+<body>
+  <div class="navbar" id="navbar">
+    <div class="nav-item">
+      <img src="./appstoreicon.png" alt="Logo">
+      <span class="nav-label">OOS Store</span>
+    </div>
+    <div class="nav-item" id="search-nav">
+      <img src="./searchapp.png" alt="Search">
+      <input type="text" id="search-input-nav" placeholder="Search apps..." autocomplete="off">
+    </div>
+    <div class="nav-item">
+      <img src="./updateapp.png" alt="Updates">
+      <span class="nav-label">Update Status</span>
+    </div>
+    <div onclick=" window.location.href = './requestdev.html';" class="nav-item">
+      <img src="./createapp.png" alt="Dev">
+      <span class="nav-label">Add an App</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="app-grid" id="app-list"></div>
+  </div>
+
+  <div id="slot-overlay">
+    <div class="slot-wrapper">
+      <div class="slot-title">Select a Slot:</div>
+      <div class="slot-grid" id="slot-grid"></div>
+      <button class="cancel-btn" onclick="document.getElementById('slot-overlay').style.display = 'none'">Cancel</button>
+    </div>
+  </div>
+
+<div id="toast-container"></div>
+
+  <!-- Include PapaParse via CDN so we can see exactly what PapaParse thinks the CSV is -->
+  <!-- ────────────────────────────────────────────────────────────────────────────── -->
+  <script src="./papaparse.min.js"></script>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 1) URL of your published CSV
+    // ─────────────────────────────────────────────────────────────────────────────
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1Z8LDlVn2QTlbkE87PAwJK5pjVnQFFsrle480GJCNhjY/export?format=csv&gid=0';
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 2) Load sheet ⇒ window.appstore & render (with debugging)
+    // ─────────────────────────────────────────────────────────────────────────────
+    async function loadAppStoreFromSheet() {
+      Papa.parse(SHEET_CSV_URL, {
+        download: true,
+        skipEmptyLines: true,
+        header: false,      // “false” means PapaParse will return an array of arrays
+        newline: "\n",      // ensure newline is handled consistently
+        complete: function(results) {
+          // 2a) Log the raw CSV text (for debugging):
+          console.log('‣ [DEBUG] PapaParse raw results.data (array of rows):');
+          console.log(results.data);
+
+          // 2b) Convert each row-array into an “app object”:
+          const allRows = results.data.map(cols => ({
+            name:      (cols[0] || '').trim(),
+            icon:      (cols[1] || '').trim(),
+            code:      (cols[2] || ''),          // do NOT trim code—keep interior newlines/spaces
+            developer: (cols[3] || '').trim(),
+            preview:   (cols[4] || '').trim(),
+            published: (cols[5] || '').trim()     // trim whitespace around published
+          }));
+
+          // 2c) Log all rows-object (with .published as a string):
+          console.log('‣ [DEBUG] All parsed “app” objects (before filtering):');
+          console.log(allRows);
+
+          // 2d) (Optional) If you want to see how many rows we have:
+          console.log(`‣ [DEBUG] Total rows parsed (including unpublished): ${allRows.length}`);
+
+          // 2e) Filter only published==='1' **after trimming**:
+          window.appstore = allRows.filter(app => {
+            // Log each app’s published value to ensure it really is '1'
+            if (app.published !== '1') {
+              console.warn(`‣ [DEBUG] Row "${app.name}" skipped (published="${app.published}")`);
+            }
+            return app.published === '1';
+          });
+
+          // 2f) Log the final filtered array:
+          console.log(`‣ [DEBUG] After filtering published==='1', window.appstore.length = ${window.appstore.length}`);
+          console.log(window.appstore);
+
+          // 2g) Now that we have window.appstore as an array, render it:
+          renderApps();
+          checkForUpdates();
+        },
+        error: function(err) {
+          console.error('PapaParse error:', err);
+        }
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 3) YOUR EXISTING slot/save/update/render logic, unchanged
+    // ─────────────────────────────────────────────────────────────────────────────
+    const NUM_SLOTS = 8;
+    let currentInstallingApp = null;
+
+    function saveToSlot(app, index) {
+      const appWithCode = appstore.find(a => a.name === app.name);
+      if (appWithCode) {
+        localStorage.setItem(`slot_${index}`, JSON.stringify(appWithCode));
+      }
+    }
+
+    function loadSlots() {
+      const grid = document.getElementById('slot-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < NUM_SLOTS; i++) {
+        const slotData = localStorage.getItem(`slot_${i}`);
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        slot.dataset.index = i;
+        if (slotData) {
+          const app = JSON.parse(slotData);
+          slot.innerHTML = `<img src="${app.icon}" alt="App Icon">`;
+        } else {
+          slot.textContent = 'Empty';
+        }
+        slot.addEventListener('click', () => {
+          saveToSlot(currentInstallingApp, i);
+          document.getElementById('slot-overlay').style.display = 'none';
+          showToast('App Installed!');
+          renderApps();
+        });
+        grid.appendChild(slot);
+      }
+    }
+
+    function appsAreDifferent(a, b) {
+      return a.icon !== b.icon || a.preview !== b.preview || a.code !== b.code;
+    }
+
+    function checkForUpdates() {
+      let hasUpdates = false;
+      for (let i = 0; i < NUM_SLOTS; i++) {
+        const stored = localStorage.getItem(`slot_${i}`);
+        if (!stored) continue;
+        try {
+          const installedApp = JSON.parse(stored);
+          const storeApp = appstore.find(a => a.name === installedApp.name);
+          if (storeApp && appsAreDifferent(installedApp, storeApp)) {
+            hasUpdates = true;
+            break;
+          }
+        } catch (e) {
+          console.error('Error parsing slot data', e);
+        }
+      }
+      const updatesNav = document.querySelectorAll('.nav-item')[2];
+      updatesNav.style.boxShadow = hasUpdates ? '0 0 20px #007aff' : 'none';
+      return hasUpdates;
+    }
+
+    function renderApps() {
+      const appList = document.getElementById('app-list');
+      appList.innerHTML = '';
+      const updatesNeeded = {};
+      for (let i = 0; i < NUM_SLOTS; i++) {
+        const stored = localStorage.getItem(`slot_${i}`);
+        if (!stored) continue;
+        try {
+          const installedApp = JSON.parse(stored);
+          const storeApp = appstore.find(a => a.name === installedApp.name);
+          if (storeApp && appsAreDifferent(installedApp, storeApp)) {
+            updatesNeeded[storeApp.name] = true;
+          }
+        } catch {}
+      }
+      appstore.forEach(app => {
+        const isInstalled = Object.keys(localStorage).some(key => {
+          const val = localStorage.getItem(key);
+          try { return val && JSON.parse(val).name === app.name; }
+          catch { return false; }
+        });
+        const tile = document.createElement('div');
+        tile.className = 'app-tile';
+        tile.setAttribute('data-name', app.name);
+
+        let buttonState = '';
+        if (updatesNeeded[app.name])       buttonState = '<button class="get-btn">Update</button>';
+        else if (isInstalled)              buttonState = '<button class="get-btn installed" disabled>Installed</button>';
+        else                               buttonState = '<button class="get-btn">Get</button>';
+
+        tile.innerHTML = `
+          <div class="app-header">
+            <div class="app-img"><img src="${app.icon}" width="60" height="60" style="border-radius:10px"></div>
+            <div class="app-info">
+              <h3>${app.name}</h3>
+              <p>${app.developer}</p>
+            </div>
+            ${buttonState}
+          </div>
+          <div class="preview">
+            <img src="${app.preview}" alt="${app.name} preview"
+                 style="width:100%;height:100%;object-fit:cover;border-radius:20px;">
+          </div>
+        `;
+
+        const button = tile.querySelector('.get-btn:not(.installed)');
+        if (button) {
+          button.addEventListener('click', () => {
+            currentInstallingApp = app;
+            let foundSlot = -1;
+            for (let j = 0; j < NUM_SLOTS; j++) {
+              const s = localStorage.getItem(`slot_${j}`);
+              if (!s) continue;
+              try {
+                if (JSON.parse(s).name === app.name) {
+                  foundSlot = j;
+                  break;
+                }
+              } catch {}
+            }
+            if (foundSlot !== -1) {
+              saveToSlot(app, foundSlot);
+              renderApps();
+              showToast('App Updated!');
+            } else {
+              loadSlots();
+              document.getElementById('slot-overlay').style.display = 'flex';
+            }
+          });
+        }
+
+        appList.appendChild(tile);
+      });
+      checkForUpdates();
+    }
+
+    // mouse-tilt, search, toasts, update-button wiring… all unchanged
+    document.addEventListener('mousemove', e => {
+      document.querySelectorAll('.slot, .app-tile').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX - rect.left  - rect.width/2;
+        const y = e.clientY - rect.top   - rect.height/2;
+        const intensity = el.classList.contains('slot') ? 10 : 90;
+        el.style.transform = `perspective(600px) rotateX(${-y/intensity}deg) rotateY(${x/intensity}deg)`;
+      });
+    });
+
+    document.getElementById('search-input-nav').addEventListener('input', function(){
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('.app-tile').forEach(tile => {
+        tile.style.display =
+          tile.getAttribute('data-name').toLowerCase().includes(filter) ? 'flex' : 'none';
+      });
+    });
+
+    document.querySelector('#search-nav img').addEventListener('click', () =>
+      document.getElementById('search-input-nav').focus()
+    );
+
+    function showToast(message) {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast'; t.textContent = message;
+      c.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => c.removeChild(t), 300);
+      }, 3000);
+    }
+
+    window.onload = () => {
+      loadAppStoreFromSheet();  // ← kicks off CSV load & render
+      // wire up the global “Updates” nav-button:
+      const btn = document.querySelectorAll('.nav-item')[2];
+      btn.addEventListener('click', () => {
+        let updatedAny = false;
+        for (let i = 0; i < NUM_SLOTS; i++) {
+          const s = localStorage.getItem(`slot_${i}`);
+          if (!s) continue;
+          try {
+            const inst = JSON.parse(s);
+            const storeApp = appstore.find(a => a.name === inst.name);
+            if (storeApp && appsAreDifferent(inst, storeApp)) {
+              localStorage.setItem(`slot_${i}`, JSON.stringify(storeApp));
+              showToast(`App Updated: ${storeApp.name}`);
+              updatedAny = true;
+            }
+          } catch {}
+        }
+        if (updatedAny) {
+          renderApps();
+          checkForUpdates();
+        }
+      });
+    };
+  </script>
+
+
+</body>
+</html>

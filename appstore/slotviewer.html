@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Installed Slots Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .slot {
+      background: #fff;
+      margin-bottom: 2rem;
+      padding: 1.5rem 2rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .slot img {
+      width: 80px;
+      height: 80px;
+      border-radius: 15px;
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .slot-content {
+      flex-grow: 1;
+    }
+
+    .slot h2 {
+      margin-top: 0;
+      font-size: 1.4rem;
+      color: #007aff;
+    }
+
+    .meta {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    .code-block {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 1rem;
+      border-radius: 10px;
+      font-family: monospace;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      color: #999;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Installed Apps in Slots</h1>
+  <div id="slots-container"></div>
+
+  <script>
+    const NUM_SLOTS = 8;
+
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function renderSlots() {
+      const container = document.getElementById('slots-container');
+      container.innerHTML = "";
+
+      for (let i = 0; i < NUM_SLOTS; i++) {
+        const rawData = localStorage.getItem(`slot_${i}`);
+        const slotDiv = document.createElement("div");
+        slotDiv.className = "slot";
+
+        if (!rawData) {
+          slotDiv.innerHTML = `
+            <div class="slot-content">
+              <h2>Slot ${i}</h2>
+              <div class="empty">No app installed in this slot.</div>
+            </div>
+          `;
+        } else {
+          try {
+            const app = JSON.parse(rawData);
+            slotDiv.innerHTML = `
+              <img src="${app.icon}" alt="App Icon">
+              <div class="slot-content">
+                <h2>Slot ${i}</h2>
+                <div class="meta"><strong>${app.name}</strong> by ${app.developer}</div>
+                <div class="code-block">${escapeHTML(app.code || "No code available")}</div>
+              </div>
+            `;
+          } catch (e) {
+            slotDiv.innerHTML = `
+              <div class="slot-content">
+                <h2>Slot ${i}</h2>
+                <div class="empty">Corrupted data in this slot.</div>
+              </div>
+            `;
+          }
+        }
+
+        container.appendChild(slotDiv);
+      }
+    }
+
+    renderSlots();
+  </script>
+</body>
+</html>
