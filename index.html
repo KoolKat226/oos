@@ -1541,7 +1541,6 @@ opacity: 0.5;
         const id = document.getElementById('idInput').value.trim();
         if (!url || !id) {
          // alert('Enter script URL and ID');
-          window.location.href = './logon.html';
           return reject('Missing URL or ID');
         }
         localStorage.setItem('savedID', id);
@@ -1558,7 +1557,6 @@ opacity: 0.5;
             resolve(); // Data loaded successfully
           })
           .catch(err => {
-            window.location.href = './logon.html';
            // console.error(err);
             //reject(err);
           });
@@ -1658,7 +1656,6 @@ opacity: 0.5;
       loadData().then(() => {
 
   }).catch(err => {
-   window.location.href = './logon.html';
     });
     });
 
