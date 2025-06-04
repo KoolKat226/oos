@@ -15,33 +15,30 @@ self.addEventListener('activate', (evt) => {
 });
 
 // Utility: Given a Response object for HTML, return a new Response
-// where only <input id="colB" value="…"> or <input id="colD" value="…">
-// have their value stripped. All other <input> and <textarea> content is kept.
+// with all <input value="…"> stripped (except id="scriptUrl"), and blank out any <textarea>
 async function stripFormDefaultsIfHTML(response) {
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
-    // Not HTML → return original.
     return response;
   }
 
   const text = await response.text();
 
-  // 1) Strip value="…" only if the <input> has id="colB" or id="colD".
-  //    Any other <input> (even if it has a value) is returned unchanged.
-  const stripValues = text.replace(
-    /<input\b([^>]*?)\svalue=['"][^'"]*['"]([^>]*?)>/gi,
-    (match, beforeAttrs, afterAttrs) => {
-      if (/\bid=['"](colB|colD)['"]/.test(match)) {
-        return `<input${beforeAttrs}${afterAttrs}>`;
-      }
+  // 1) Remove value="…" from every <input> unless id="scriptUrl"
+  const stripInputs = text.replace(/<input\b[^>]*>/gi, (match) => {
+    if (/\bid=['"]scriptUrl['"]/.test(match)) {
       return match;
     }
+    return match.replace(/\svalue=['"][^'"]*['"]/i, '');
+  });
+
+  // 2) Blank out any <textarea>…</textarea>
+  const stripTextareas = stripInputs.replace(
+    /<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi,
+    '<textarea$1></textarea>'
   );
 
-  // 2) Leave all <textarea> defaults intact.
-  const finalHTML = stripValues;
-
-  return new Response(finalHTML, {
+  return new Response(stripTextareas, {
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,
@@ -50,22 +47,29 @@ async function stripFormDefaultsIfHTML(response) {
 
 self.addEventListener('fetch', (evt) => {
   const req = evt.request;
+  const url = new URL(req.url);
+  const accept = req.headers.get('accept') || '';
 
-  // If this is a navigation (i.e. HTML page), fetch from network and strip as above
+  // ── 1) Never cache any Google Sheets “gviz/tq” requests ──
+  //    (URLs like https://docs.google.com/spreadsheets/d/.../gviz/tq?...)
   if (
-    req.mode === 'navigate' ||
-    (req.headers.get('accept') || '').includes('text/html')
+    url.hostname === 'docs.google.com' &&
+    url.pathname.startsWith('/spreadsheets/d/') &&
+    url.pathname.includes('/gviz/tq')
   ) {
     evt.respondWith(
       fetch(req)
-        .then((networkResponse) => stripFormDefaultsIfHTML(networkResponse))
+        .then(networkResponse => {
+          // Return fresh data; do NOT cache it under any circumstances
+          return networkResponse;
+        })
         .catch(() => {
-          // Offline fallback: serve cached page if available
-          return caches.match(req).then((cached) => {
+          // If offline or network fails, optionally return a cached copy if it exists
+          return caches.match(req).then(cached => {
             if (cached) return cached;
-            return new Response('Offline and no cached page.', {
+            return new Response('Offline and no cached sheet data.', {
               status: 503,
-              statusText: 'Offline',
+              statusText: 'Offline'
             });
           });
         })
@@ -73,17 +77,59 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // For all other requests (CSS, JS, images, etc.), serve from cache first, then network
+  // ── 2) If this is your “?action=get” endpoint (e.g. Apps Script), also skip caching ──
+  if (
+    url.searchParams.has('action') &&
+    url.searchParams.get('action') === 'get'
+  ) {
+    evt.respondWith(
+      fetch(req)
+        .then(networkResponse => networkResponse)
+        .catch(() => {
+          return caches.match(req).then(cached => {
+            if (cached) return cached;
+            return new Response('Offline and no cached data.', {
+              status: 503,
+              statusText: 'Offline'
+            });
+          });
+        })
+    );
+    return;
+  }
+
+  // ── 3) HTML navigations: fetch from network and strip form defaults ──
+  if (req.mode === 'navigate' || accept.includes('text/html')) {
+    evt.respondWith(
+      fetch(req)
+        .then(networkResponse => stripFormDefaultsIfHTML(networkResponse))
+        .catch(() => {
+          return caches.match(req).then(cached => {
+            if (cached) return cached;
+            return new Response('Offline and no cached page.', {
+              status: 503,
+              statusText: 'Offline'
+            });
+          });
+        })
+    );
+    return;
+  }
+
+  // ── 4) All other requests (CSS, JS, images, fonts, etc.): cache‐first ──
   evt.respondWith(
-    caches.match(req).then((cached) => {
+    caches.match(req).then(cached => {
       if (cached) {
         return cached;
       }
-      return fetch(req).then((networkResponse) => {
-        // Only cache GET requests with status 200
-        if (req.method === 'GET' && networkResponse && networkResponse.status === 200) {
+      return fetch(req).then(networkResponse => {
+        if (
+          req.method === 'GET' &&
+          networkResponse &&
+          networkResponse.status === 200
+        ) {
           const copy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
+          caches.open(CACHE_NAME).then(cache => {
             cache.put(req, copy);
           });
         }
@@ -91,7 +137,7 @@ self.addEventListener('fetch', (evt) => {
       }).catch(() => {
         return new Response('Offline: resource not cached.', {
           status: 503,
-          statusText: 'Offline',
+          statusText: 'Offline'
         });
       });
     })
