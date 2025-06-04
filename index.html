@@ -1145,12 +1145,12 @@ opacity: 0.5;
       <input type="text" id="colH">
 
       <!-- Hidden fields for other columns -->
-      <input type="hidden" id="colC">
-      <input type="hidden" id="colD">
-      <input type="hidden" id="colE">
-      <input type="hidden" id="colF">
-      <input type="hidden" id="colG">
-      <input type="hidden" id="colI" placeholder="Column I Data">
+      <input style="display:none" id="colC">
+      <input style="display:none" id="colD">
+      <input style="display:none" id="colE">
+      <input style="display:none" id="colF">
+      <input style="display:none" id="colG">
+      <input style="display:none" id="colI" placeholder="Column I Data">
       <div style="" id="controls">
         <button style="display:none" id="goBtn">Start Watching</button>
         <button style="display:none" onclick="startWatching()">gopls</button>
@@ -1206,95 +1206,135 @@ opacity: 0.5;
       </div>
     </div>
   </div>
-  <script>
-    function savemiimakerdata() {
-      const layersInput = document.getElementById('colC');
-      const hairInput = document.getElementById('colD');
 
-      const layersValue = layersInput?.value || '';
-      const hairValue = hairInput?.value || '';
-
-      localStorage.setItem('mii_layers', layersValue);
-      localStorage.setItem('mii_hair_color', hairValue);
-
-      if (typeof updatemyoos === 'function'); //updatemyoos();
-    }
-  </script>
 
   <script>
-    const layersKey = 'mii_layers';
+    // Keys in localStorage
+    const layersKey    = 'mii_layers';
     const hairColorKey = 'mii_hair_color';
+
+    // Grab the two inputs
     const layersInput = document.getElementById('colC');
-    const hairInput = document.getElementById('colD');
+    const hairInput   = document.getElementById('colD');
 
-    // Keep previous values to detect changes
-    let prevLayersValue = localStorage.getItem(layersKey) || '';
-    let prevHairValue = localStorage.getItem(hairColorKey) || '';
-
-    // Initialize inputs
-    layersInput.value = prevLayersValue;
-    hairInput.value = prevHairValue;
-
-    function savemiimakerdata() {
-      // Save both fields explicitly
-      localStorage.setItem(layersKey, layersInput.value);
-      localStorage.setItem(hairColorKey, hairInput.value);
-      prevLayersValue = layersInput.value;
-      prevHairValue = hairInput.value;
-      if (typeof updatemyoos === 'function') updatemyoos();
+    if (!layersInput || !hairInput) {
+      console.error('Missing #colC or #colD in the DOM:', {
+        layersInput,
+        hairInput
+      });
     }
+
+    // 1) On load, pull the “correct” values from localStorage
+    const storedLayers = localStorage.getItem(layersKey) || '';
+    const storedHair   = localStorage.getItem(hairColorKey) || '';
+
+    layersInput.value = storedLayers;
+    hairInput.value   = storedHair;
+
+    // 2) Initialize “previous” snapshots to exactly what was in localStorage
+    let prevLayersValue = storedLayers;
+    let prevHairValue   = storedHair;
+
+    // 3) Skip the very first pollSync so we don’t accidentally treat 
+    //    the initial load as “new data.” After that, canSave isn’t needed.
+    let skipFirstSync = true;
 
     function pollSync() {
-      // Layers field
-      const currentLayers = layersInput.value;
-      const storedLayers = localStorage.getItem(layersKey) || '';
+      if (skipFirstSync) {
+        // Ensure the inputs match whatever is in localStorage right now,
+        // then set prev… to those values, and bail out.
+        const sLayers = localStorage.getItem(layersKey) || '';
+        const sHair   = localStorage.getItem(hairColorKey) || '';
+
+        layersInput.value   = sLayers;
+        hairInput.value     = sHair;
+        prevLayersValue     = sLayers;
+        prevHairValue       = sHair;
+        skipFirstSync       = false;
+
+        console.log('Initial sync complete. Loaded values:', {
+          layers: sLayers,
+          hair:   sHair
+        });
+        return;
+      }
+
+      // —— LAYERS FIELD ——
+      const currentLayers    = layersInput.value;
+      const storedLayersNow  = localStorage.getItem(layersKey) || '';
+
       if (currentLayers !== prevLayersValue) {
-        // changed by user or JS -> save
+        // 🖉 The user (or JS) typed something new into “layers”:
+        console.log('User entered new layers data:', currentLayers);
+
         localStorage.setItem(layersKey, currentLayers);
+        console.log('Saved layers to localStorage:', currentLayers);
+
         prevLayersValue = currentLayers;
         if (typeof updatemyoos === 'function') updatemyoos();
-      } else if (storedLayers !== currentLayers) {
-        // changed in storage (other tab or loadData) -> update input
-        layersInput.value = storedLayers;
-        prevLayersValue = storedLayers;
+
+      } else if (storedLayersNow !== prevLayersValue) {
+        // ↻ Some other tab (or code) changed “mii_layers” in localStorage:
+        console.log('Detected external update for layers:', storedLayersNow);
+
+        layersInput.value = storedLayersNow;
+        prevLayersValue   = storedLayersNow;
         if (typeof updatemyoos === 'function') updatemyoos();
       }
 
-      // Hair field
-      const currentHair = hairInput.value;
-      const storedHair = localStorage.getItem(hairColorKey) || '';
+      // —— HAIR FIELD ——
+      const currentHair   = hairInput.value;
+      const storedHairNow = localStorage.getItem(hairColorKey) || '';
+
       if (currentHair !== prevHairValue) {
+        // 🖉 The user (or JS) typed something new into “hair”:
+        console.log('User entered new hair data:', currentHair);
+
         localStorage.setItem(hairColorKey, currentHair);
+        console.log('Saved hair to localStorage:', currentHair);
+
         prevHairValue = currentHair;
         if (typeof updatemyoos === 'function') updatemyoos();
-      } else if (storedHair !== currentHair) {
-        hairInput.value = storedHair;
-        prevHairValue = storedHair;
+
+      } else if (storedHairNow !== prevHairValue) {
+        // ↻ Some other tab (or code) changed “mii_hair_color” in localStorage:
+        console.log('Detected external update for hair:', storedHairNow);
+
+        hairInput.value = storedHairNow;
+        prevHairValue   = storedHairNow;
         if (typeof updatemyoos === 'function') updatemyoos();
       }
     }
 
-    // Listen for manual edits
-    layersInput.addEventListener('input', () => {
-      prevLayersValue = layersInput.value;
-    });
-    hairInput.addEventListener('input', () => {
-      prevHairValue = hairInput.value;
-    });
-
-    // Start polling every 500ms
+    // 4) Run pollSync() every 500ms
     setInterval(pollSync, 500);
 
-    // React to cross-tab storage events
+    // 5) Also respond immediately if a storage event comes from another tab
     window.addEventListener('storage', (e) => {
       if (e.key === layersKey || e.key === hairColorKey) {
+        console.log('Storage event detected:', e.key, '→', e.newValue);
         pollSync();
       }
     });
 
-    // Expose savemiimakerdata for external calls
-    window.savemiimakerdata = savemiimakerdata;
+    // 6) Optional manual save function (always writes what’s currently in the inputs)
+    window.savemiimakerdata = function () {
+      const cLayers = layersInput.value;
+      const cHair   = hairInput.value;
+
+      console.log('Manual save called with values:', {
+        layers: cLayers,
+        hair:   cHair
+      });
+
+      localStorage.setItem(layersKey, cLayers);
+      localStorage.setItem(hairColorKey, cHair);
+
+      prevLayersValue = cLayers;
+      prevHairValue   = cHair;
+    };
   </script>
+
 
 
 
@@ -1559,7 +1599,7 @@ opacity: 0.5;
           })
           .catch(err => {
             window.location.href = './logon.html';
-            console.error(err);
+           // console.error(err);
             //reject(err);
           });
       });
