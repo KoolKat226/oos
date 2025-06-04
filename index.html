@@ -1133,7 +1133,7 @@ opacity: 0.5;
       <label style="display:none;" for="scriptUrl">Script URL:</label>
       <input style="display:none;"
         value="https://script.google.com/macros/s/AKfycbwm1M3hiUKFhUy8VaDKTQSeqW0KO32NeFZ5oz3BYduwsikdZ4gIHPLuqJTkclhs9fYI/exec"
-        type="password" id="scriptUrl" placeholder="https://.../exec">
+        type="text" id="scriptUrl" placeholder="https://.../exec">
 
       <label for="idInput">OOS ID:</label>
       <input readonly type="text" id="idInput">
@@ -1541,7 +1541,7 @@ opacity: 0.5;
         const id = document.getElementById('idInput').value.trim();
         if (!url || !id) {
          // alert('Enter script URL and ID');
-         // window.location.href = './logon.html';
+          window.location.href = './logon.html';
           return reject('Missing URL or ID');
         }
         localStorage.setItem('savedID', id);
@@ -1558,9 +1558,9 @@ opacity: 0.5;
             resolve(); // Data loaded successfully
           })
           .catch(err => {
-           // window.location.href = './logon.html';
-            console.error(err);
-            reject(err);
+            window.location.href = './logon.html';
+           // console.error(err);
+            //reject(err);
           });
       });
     }
@@ -1658,7 +1658,7 @@ opacity: 0.5;
       loadData().then(() => {
 
   }).catch(err => {
-  // window.location.href = './logon.html';
+   window.location.href = './logon.html';
     });
     });
 
