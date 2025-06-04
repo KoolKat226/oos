@@ -1207,6 +1207,16 @@ opacity: 0.5;
     </div>
   </div>
 
+<script>
+function logincheck() {
+  if (navigator.onLine) {
+    window.location.href = './logon.html';
+  } else {
+    // Device is offline, do nothing
+    console.log("No internet connection. Staying on current page.");
+  }
+}
+</script>
 
   <script>
     // Keys in localStorage
@@ -1581,7 +1591,7 @@ opacity: 0.5;
         const id = document.getElementById('idInput').value.trim();
         if (!url || !id) {
          // alert('Enter script URL and ID');
-          window.location.href = './logon.html';
+          logincheck();
           return reject('Missing URL or ID');
         }
         localStorage.setItem('savedID', id);
@@ -1598,7 +1608,7 @@ opacity: 0.5;
             resolve(); // Data loaded successfully
           })
           .catch(err => {
-            window.location.href = './logon.html';
+            logincheck();
            // console.error(err);
             //reject(err);
           });
@@ -1698,7 +1708,7 @@ opacity: 0.5;
       loadData().then(() => {
 
   }).catch(err => {
-   window.location.href = './logon.html';
+   logincheck();
     });
     });
 
