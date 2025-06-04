@@ -14,8 +14,7 @@ self.addEventListener('activate', (evt) => {
   evt.waitUntil(self.clients.claim());
 });
 
-// Utility: Given a Response object for HTML, return a new Response
-// with all <input value="…"> stripped (except id="scriptUrl"), and blank out any <textarea>
+// Utility to strip form defaults from HTML (unchanged from before)
 async function stripFormDefaultsIfHTML(response) {
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
@@ -50,24 +49,24 @@ self.addEventListener('fetch', (evt) => {
   const url = new URL(req.url);
   const accept = req.headers.get('accept') || '';
 
-  // ── 1) Never cache any Google Sheets “gviz/tq” requests ──
-  //    (URLs like https://docs.google.com/spreadsheets/d/.../gviz/tq?...)
+  // ── 1) NEVER cache any Google-Sheets CSV export requests ──
+  //    e.g. "https://docs.google.com/spreadsheets/d/.../export?format=csv..."
   if (
     url.hostname === 'docs.google.com' &&
     url.pathname.startsWith('/spreadsheets/d/') &&
-    url.pathname.includes('/gviz/tq')
+    url.searchParams.get('format') === 'csv'
   ) {
     evt.respondWith(
       fetch(req)
         .then(networkResponse => {
-          // Return fresh data; do NOT cache it under any circumstances
+          // Always return fresh CSV data; do NOT write it into cache.
           return networkResponse;
         })
         .catch(() => {
-          // If offline or network fails, optionally return a cached copy if it exists
+          // If offline, fall back to any previously cached copy (if available)
           return caches.match(req).then(cached => {
             if (cached) return cached;
-            return new Response('Offline and no cached sheet data.', {
+            return new Response('Offline and no cached CSV data.', {
               status: 503,
               statusText: 'Offline'
             });
@@ -77,7 +76,7 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // ── 2) If this is your “?action=get” endpoint (e.g. Apps Script), also skip caching ──
+  // ── 2) NEVER cache any “?action=get” endpoints (Apps Script) ──
   if (
     url.searchParams.has('action') &&
     url.searchParams.get('action') === 'get'
@@ -98,7 +97,7 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // ── 3) HTML navigations: fetch from network and strip form defaults ──
+  // ── 3) HTML navigations: fetch & strip form defaults ──
   if (req.mode === 'navigate' || accept.includes('text/html')) {
     evt.respondWith(
       fetch(req)
@@ -116,7 +115,7 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // ── 4) All other requests (CSS, JS, images, fonts, etc.): cache‐first ──
+  // ── 4) Everything else (CSS/JS/images/fonts/etc.): cache-first ──
   evt.respondWith(
     caches.match(req).then(cached => {
       if (cached) {
