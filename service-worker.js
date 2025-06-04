@@ -15,41 +15,33 @@ self.addEventListener('activate', (evt) => {
 });
 
 // Utility: Given a Response object for HTML, return a new Response
-// where only <input id="colB" value="…"> has its value stripped.
-// All other <input> (and <textarea>) default values remain as-is.
+// where only <input id="colB" value="…"> or <input id="colD" value="…">
+// have their value stripped. All other <input> and <textarea> content is kept.
 async function stripFormDefaultsIfHTML(response) {
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
-    return response; // Not HTML → return original.
+    // Not HTML → return original.
+    return response;
   }
 
   const text = await response.text();
 
-  // 1) Strip value="…" only if the <input> has id="colB".
-  //    Any other <input> (regardless of having a value=…) is left untouched.
-  const stripColBInputs = text.replace(
+  // 1) Strip value="…" only if the <input> has id="colB" or id="colD".
+  //    Any other <input> (even if it has a value) is returned unchanged.
+  const stripValues = text.replace(
     /<input\b([^>]*?)\svalue=['"][^'"]*['"]([^>]*?)>/gi,
     (match, beforeAttrs, afterAttrs) => {
-      // If this input has id="colB", remove its value="…"; else keep it as-is.
-      if (/\bid=['"]colB['"]/.test(match)) {
+      if (/\bid=['"](colB|colD)['"]/.test(match)) {
         return `<input${beforeAttrs}${afterAttrs}>`;
       }
       return match;
     }
   );
 
-  // 2) Leave all <textarea> defaults intact (no change to textarea).
-  //    If you still want to clear <textarea> defaults, uncomment below:
-  //
-  // const stripTextareas = stripColBInputs.replace(
-  //   /<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi,
-  //   '<textarea$1></textarea>'
-  // );
-  //
-  // But since we want to "save all except id='colB'", we skip textarea stripping:
-  const stripTextareas = stripColBInputs;
+  // 2) Leave all <textarea> defaults intact.
+  const finalHTML = stripValues;
 
-  return new Response(stripTextareas, {
+  return new Response(finalHTML, {
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,
@@ -59,7 +51,7 @@ async function stripFormDefaultsIfHTML(response) {
 self.addEventListener('fetch', (evt) => {
   const req = evt.request;
 
-  // If this is a navigation (i.e. HTML page), we fetch from network and strip only colB’s value.
+  // If this is a navigation (i.e. HTML page), fetch from network and strip as above
   if (
     req.mode === 'navigate' ||
     (req.headers.get('accept') || '').includes('text/html')
@@ -68,6 +60,7 @@ self.addEventListener('fetch', (evt) => {
       fetch(req)
         .then((networkResponse) => stripFormDefaultsIfHTML(networkResponse))
         .catch(() => {
+          // Offline fallback: serve cached page if available
           return caches.match(req).then((cached) => {
             if (cached) return cached;
             return new Response('Offline and no cached page.', {
@@ -80,13 +73,14 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // For all other requests (CSS, JS, images, etc.), serve from cache-first, fallback to network.
+  // For all other requests (CSS, JS, images, etc.), serve from cache first, then network
   evt.respondWith(
     caches.match(req).then((cached) => {
       if (cached) {
         return cached;
       }
       return fetch(req).then((networkResponse) => {
+        // Only cache GET requests with status 200
         if (req.method === 'GET' && networkResponse && networkResponse.status === 200) {
           const copy = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
