@@ -15,8 +15,8 @@ self.addEventListener('activate', (evt) => {
 });
 
 // Utility: Given a Response object for HTML, return a new Response
-// with all <input value="…"> and <textarea>…</textarea> stripped.
-// If you don’t need to strip defaults, just return the original response.
+// with all <input value="…"> and <textarea>…</textarea> stripped,
+// EXCEPT if the <input> has id="scriptUrl" (in which case we leave its value alone).
 async function stripFormDefaultsIfHTML(response) {
   // Clone the response so we can read+modify it without consuming the original
   const contentType = response.headers.get('Content-Type') || '';
@@ -28,15 +28,28 @@ async function stripFormDefaultsIfHTML(response) {
   // Read the HTML as text
   const text = await response.text();
 
-  // Remove value="…" from <input> and clear out <textarea>…</textarea>
-  const stripped = text
-    // 1) <input ... value="something" ...> → <input ... >
-    .replace(/<input\b([^>]*?)\svalue=['"][^'"]*['"]([^>]*?)>/gi, '<input$1$2>')
-    // 2) <textarea ...>some default</textarea> → <textarea ...></textarea>
-    .replace(/<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi, '<textarea$1></textarea>');
+  // 1) For <input> tags: use a replace callback that checks for id="scriptUrl".
+  //    If an <input> has id="scriptUrl", return it unmodified; otherwise strip its value="…".
+  const stripInputs = text.replace(
+    /<input\b([^>]*?)\svalue=['"][^'"]*['"]([^>]*?)>/gi,
+    (match, beforeAttrs, afterAttrs) => {
+      // If this input tag contains id="scriptUrl", leave it alone:
+      if (/\bid=['"]scriptUrl['"]/.test(match)) {
+        return match;
+      }
+      // Otherwise strip out the entire value="…" portion:
+      return `<input${beforeAttrs}${afterAttrs}>`;
+    }
+  );
+
+  // 2) For <textarea>…</textarea>, clear out any default text between tags.
+  const stripTextareas = stripInputs.replace(
+    /<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi,
+    '<textarea$1></textarea>'
+  );
 
   // Return a new Response with exactly the same headers/status, but with stripped HTML
-  return new Response(stripped, {
+  return new Response(stripTextareas, {
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,
@@ -47,7 +60,10 @@ self.addEventListener('fetch', (evt) => {
   const req = evt.request;
 
   // If this is a navigation (i.e. HTML page), we fetch from network and strip form values
-  if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
+  if (
+    req.mode === 'navigate' ||
+    (req.headers.get('accept') || '').includes('text/html')
+  ) {
     evt.respondWith(
       fetch(req)
         .then((networkResponse) => stripFormDefaultsIfHTML(networkResponse))
