@@ -1100,7 +1100,7 @@ opacity: 0.5;
   <div id="gsUnique_overlay" class="gsUnique_overlay" onclick="gsUnique_handleOverlayClick(event)">
     <div class="gsUnique_popup">
       <h3>This game can now be played at:</h3>
-      <input type="text" id="gsUnique_shareLink" value="jacsyn.com/gameshare" readonly>
+      <input type="text" id="gsUnique_shareLink" value="https://sites.google.com/view/jacsyn/gameshare" readonly>
       <br><br>
       <button class="gsUnique_copyBtn" onclick="gsUnique_copyShareLink()">Copy</button>
     </div>
@@ -3420,7 +3420,7 @@ function logincheck() {
       const resultBox = document.getElementById("sayMain");
 
       if (!iconUrl) {
-        alert("Please enter an App Icon URL.");
+        //alert("Please enter an App Icon URL.");
         return;
       }
 
@@ -3450,7 +3450,7 @@ function logincheck() {
         }
 
       } catch (err) {
-        alert("Failed to fetch data from Google Sheets.");
+        //alert("Failed to fetch data from Google Sheets.");
         console.error(err);
       }
     }
