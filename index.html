@@ -1214,26 +1214,28 @@ opacity: 0.5;
       </div>
     </div>
   </div>
-  <script>
-    function updateColBReadonlyStatus() {
-      const colI = document.getElementById("colI");
-      const colB = document.getElementById("colB");
-      if (!colI || !colB) return;
+<script>
+  function updateColBReadonlyStatus() {
+    const colI = document.getElementById("colI");
+    const colB = document.getElementById("colB");
+    if (!colI || !colB) return;
 
-      if (colI.value.trim() !== "") {
-        colB.readOnly = true;
-      } else {
-        colB.readOnly = false;
-      }
+    const val = colI.value.trim();
+    if (val !== "" && val !== "undefined") {
+      colB.readOnly = true;
+    } else {
+      colB.readOnly = false;
     }
+  }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      updateColBReadonlyStatus();
+  window.addEventListener("DOMContentLoaded", () => {
+    updateColBReadonlyStatus();
 
-      // Also check for JS-driven changes every 200ms
-      setInterval(updateColBReadonlyStatus, 200);
-    });
-  </script>
+    // Also check for JS-driven changes every 200ms
+    setInterval(updateColBReadonlyStatus, 200);
+  });
+</script>
+
 
 
 <script>
