@@ -15,7 +15,7 @@ self.addEventListener('activate', (evt) => {
 });
 
 // Utility to strip form defaults from HTML, while exempting
-// <input id="scriptUrl"> and <input id="gsUnique_shareLink"> from having their value removed.
+// <input id="scriptUrl">, <input id="gsUnique_shareLink">, and <input id="creator">
 async function stripFormDefaultsIfHTML(response) {
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
@@ -24,9 +24,9 @@ async function stripFormDefaultsIfHTML(response) {
 
   const text = await response.text();
 
-  // 1) Remove value="…" from every <input> unless its id is "scriptUrl" or "gsUnique_shareLink"
+  // 1) Remove value="…" from every <input> unless its id is "scriptUrl", "gsUnique_shareLink", or "creator"
   const stripInputs = text.replace(/<input\b[^>]*>/gi, (match) => {
-    if (/\bid=['"](scriptUrl|gsUnique_shareLink)['"]/.test(match)) {
+    if (/\bid=['"](scriptUrl|gsUnique_shareLink|creator)['"]/.test(match)) {
       return match;
     }
     return match.replace(/\svalue=['"][^'"]*['"]/i, '');
