@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preinstalled AppStore (One-Time Install)</title>
+  <style>
+    /* ────────────────────────────────────────────────────────────────── */
+    /* Basic grid styling for the eight slots */
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+    }
+    #slot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .slot {
+      width: 100%;
+      padding-top: 100%;
+      position: relative;
+      background: #f0f0f0;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #666;
+      cursor: default;
+    }
+    .slot img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60%;
+      height: 60%;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      border-radius: 10px;
+    }
+    .slot.empty {
+      background: #fafafa;
+      border: 2px dashed #ccc;
+    }
+    #reset-btn {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #007aff;
+      color: white;
+      cursor: pointer;
+    }
+    #reset-btn:hover {
+      background: #005fcc;
+    }
+    #toast-container {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>My Preinstalled App Slots (One-Time Install)</h2>
+
+  <!-- 1) Grid for eight slots -->
+  <div id="slot-grid"></div>
+
+  <!-- 2) Reset button -->
+  <button id="reset-btn">Reset Preinstalled Apps</button>
+
+  <!-- 3) Toast container (hidden until needed) -->
+  <div id="toast-container"></div>
+
+  <!-- 4) Include your preinstalledapps.js file -->
+  <script src="preinstalledapps.js"></script>
+
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────────
+    // Helper: show a quick toast in the top-right corner
+    // ─────────────────────────────────────────────────────────────────────
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.background = 'rgba(0,0,0,0.8)';
+      toast.style.color = '#fff';
+      toast.style.padding = '0.5rem 1rem';
+      toast.style.marginTop = '0.5rem';
+      toast.style.borderRadius = '4px';
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s ease';
+      container.appendChild(toast);
+      // Fade in
+      requestAnimationFrame(() => { toast.style.opacity = '1'; });
+      // Fade out after 2 sec
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => container.removeChild(toast), 300);
+      }, 2000);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Constants
+    // ─────────────────────────────────────────────────────────────────────
+    const NUM_SLOTS = 8;
+    const FLAG_KEY = 'preinstall_done'; // marks that the one-time install has run
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Install the first 8 preinstalledapps into localStorage (overwrites each slot)
+    // Sets the FLAG_KEY when finished
+    // ─────────────────────────────────────────────────────────────────────
+    function installPreinstalledApps() {
+      if (!Array.isArray(preinstalledapps)) {
+        console.error('preinstalledapps is not defined or not an array.');
+        return;
+      }
+      for (let i = 0; i < NUM_SLOTS; i++) {
+        const app = preinstalledapps[i];
+        if (app && app.name) {
+          // Write the entire app object into localStorage under slot_i
+          localStorage.setItem(`slot_${i}`, JSON.stringify(app));
+        } else {
+          // If fewer than 8 entries, remove that slot
+          localStorage.removeItem(`slot_${i}`);
+        }
+      }
+      // Mark that we've done the one-time install
+      localStorage.setItem(FLAG_KEY, '1');
+      showToast('Preinstalled apps have been installed.');
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Render all 8 slots based on what's in localStorage
+    // ─────────────────────────────────────────────────────────────────────
+    function renderSlots() {
+      const grid = document.getElementById('slot-grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < NUM_SLOTS; i++) {
+        const slotDiv = document.createElement('div');
+        slotDiv.className = 'slot';
+
+        const raw = localStorage.getItem(`slot_${i}`);
+        if (raw) {
+          try {
+            const app = JSON.parse(raw);
+            const img = document.createElement('img');
+            img.src = app.icon;
+            img.alt = app.name + ' icon';
+            slotDiv.appendChild(img);
+          } catch (err) {
+            console.error(`Error parsing slot_${i} data:`, err);
+            slotDiv.textContent = 'Error';
+          }
+        } else {
+          slotDiv.classList.add('empty');
+          slotDiv.textContent = 'Empty';
+        }
+
+        grid.appendChild(slotDiv);
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Reset function:
+    // 1) Remove the "preinstall_done" flag
+    // 2) Reinstall the 8 preinstalled apps
+    // 3) Re-render slots
+    // ─────────────────────────────────────────────────────────────────────
+    function resetPreinstalledApps() {
+      localStorage.removeItem(FLAG_KEY);
+      installPreinstalledApps();
+      renderSlots();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // On window load:
+    // - If FLAG_KEY is not set, do a one-time install.
+    // - Always render slots afterward.
+    // - Wire up the Reset button.
+    // ─────────────────────────────────────────────────────────────────────
+    window.onload = () => {
+      if (!localStorage.getItem(FLAG_KEY)) {
+        installPreinstalledApps();
+      }
+      renderSlots();
+
+      // Wire the reset button
+      document.getElementById('reset-btn')
+              .addEventListener('click', resetPreinstalledApps);
+    };
+  </script>
+
+</body>
+</html>
