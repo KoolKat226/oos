@@ -14,7 +14,7 @@ self.addEventListener('activate', (evt) => {
   evt.waitUntil(self.clients.claim());
 });
 
-// Utility to strip form defaults from HTML (unchanged from before)
+// Utility to strip form defaults from HTML
 async function stripFormDefaultsIfHTML(response) {
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
@@ -59,11 +59,11 @@ self.addEventListener('fetch', (evt) => {
     evt.respondWith(
       fetch(req)
         .then(networkResponse => {
-          // Always return fresh CSV data; do NOT write it into cache.
+          // Always return fresh CSV; do NOT cache.
           return networkResponse;
         })
         .catch(() => {
-          // If offline, fall back to any previously cached copy (if available)
+          // If offline, fall back to any cached copy
           return caches.match(req).then(cached => {
             if (cached) return cached;
             return new Response('Offline and no cached CSV data.', {
@@ -76,7 +76,34 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // ── 2) NEVER cache any “?action=get” endpoints (Apps Script) ──
+  // ── 2) NEVER cache any Google-Sheets "gviz/tq" requests ──
+  //    e.g. "https://docs.google.com/spreadsheets/d/.../gviz/tq?..."
+  if (
+    url.hostname === 'docs.google.com' &&
+    url.pathname.startsWith('/spreadsheets/d/') &&
+    url.pathname.includes('/gviz/tq')
+  ) {
+    evt.respondWith(
+      fetch(req)
+        .then(networkResponse => {
+          // Always return fresh JsonP; do NOT cache.
+          return networkResponse;
+        })
+        .catch(() => {
+          // If offline, fall back to any cached copy
+          return caches.match(req).then(cached => {
+            if (cached) return cached;
+            return new Response('Offline and no cached sheet data.', {
+              status: 503,
+              statusText: 'Offline'
+            });
+          });
+        })
+    );
+    return;
+  }
+
+  // ── 3) NEVER cache any “?action=get” endpoints ──
   if (
     url.searchParams.has('action') &&
     url.searchParams.get('action') === 'get'
@@ -97,7 +124,7 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // ── 3) HTML navigations: fetch & strip form defaults ──
+  // ── 4) HTML navigations: fetch & strip form defaults ──
   if (req.mode === 'navigate' || accept.includes('text/html')) {
     evt.respondWith(
       fetch(req)
@@ -115,7 +142,7 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
-  // ── 4) Everything else (CSS/JS/images/fonts/etc.): cache-first ──
+  // ── 5) Everything else (CSS/JS/images/fonts/etc.): cache-first ──
   evt.respondWith(
     caches.match(req).then(cached => {
       if (cached) {
