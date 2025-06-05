@@ -404,16 +404,24 @@ opacity: 0.5;
       pointer-events: auto;
     }
 
-    /* Logo in top-left corner: faster fade */
+    /* Outer container with larger size */
     #logoImage {
       position: fixed;
       top: 0;
-      left: 30px;
-      width: 150px;
+      left: 0;
+      width: 50%;
+      height: 50%; /* This gives you a larger mouse zone */
       opacity: 0;
       transition: opacity 0.4s ease;
       z-index: 1000;
     }
+
+    /* Preserve visual style — don't stretch header */
+    #logoImage .header {
+      height: auto; /* Only as tall as content */
+    }
+
+
 
     #menuUI.visible #logoImage {
       opacity: 1;
@@ -611,7 +619,7 @@ opacity: 0.5;
       height: 100vh;
       background: rgba(0, 0, 0, 0.5);
       align-items: center;
-      z-index: 4;
+      z-index: 9999999999999999999999999999999999999999999;
       justify-content: center;
     }
 
@@ -1372,15 +1380,42 @@ function logincheck() {
   <script>
     document.getElementById("sayMain").addEventListener("input", function () {
       document.getElementById("colE").value = this.value;
+      document.getElementById("sayMain2").value = this.value;
     });
   </script>
+
   <input style="display:none;" type="text" id="icon-url-box" placeholder="App icon URL will appear here" readonly>
 
   <button style="display:none" id="menuToggleBtn">Toggle Menu</button>
   <div id="hoverTrigger"></div>
 
   <div id="menuUI">
-    <img id="logoImage" src="./images/logo.png" alt="Logo">
+    <!-- Outer wrapper with desired height -->
+    <div id="logoImage">
+      <!-- Original header as-is -->
+      <div class="header">
+        <div class="logo">
+          <img src="https://cdn.glitch.global/d53e0a5c-155f-47f4-b9c5-e40fdba7d98f/oos7.png?v=1746396919162" alt="OOS7">
+        </div>
+
+        <div class="say-input">
+          <input autocomplete="off" id="sayMain2" type="text" placeholder="Say something...">
+        </div>
+
+        <button style="display:none" onclick="disableBgAudioControl()" class="icon-btn" id="speakBtn2" title="Speak">
+          <img id="audioIcon" src="./images/soundbtn.png" alt="Speak">
+        </button>
+
+        <button class="icon-btn" id="settingsBtn2" title="Settings">
+          <img id="settingsIcon2" src="./images/settingsbtn.png" alt="Settings">
+        </button>
+      </div>
+    </div>
+    <script>
+      document.getElementById("sayMain2").addEventListener("input", function () {
+        document.getElementById("sayMain").value = this.value;
+      });
+    </script>
     <div id="bottomContainer">
       <img id="image3" src="./images/bggradient.png" alt="Background">
       <img id="shareBtn" class="icon-button3" onclick="gsUnique_handleSearch()" src="./images/sharebtn.png"
@@ -1586,8 +1621,10 @@ function logincheck() {
   <script>
     // Icon elements
     const settingsIcon = document.getElementById('settingsIcon');
+    const settingsIconDos = document.getElementById('settingsIcon2');
     const speakBtn = document.getElementById('speakBtn');
     const settingsBtn = document.getElementById('settingsBtn');
+    const settingsBtnDos = document.getElementById('settingsBtn2');
 
     // Swap to pressed image on press & revert on release
     function addPressEffect(btn, icon, normalSrc, pressedSrc) {
@@ -1598,10 +1635,13 @@ function logincheck() {
 
     addPressEffect(settingsBtn, settingsIcon, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
 
+    addPressEffect(settingsBtnDos, settingsIconDos, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
+
     // Modal toggle
     const settingsModal = document.getElementById('settingsModal');
     const closeModal = document.getElementById('closeModal');
     settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
+    settingsBtnDos.addEventListener('click', () => settingsModal.style.display = 'flex');
     closeModal.addEventListener('click', () => settingsModal.style.display = 'none');
 
     function getUrl() {return document.getElementById('scriptUrl').value.trim();}
@@ -1695,6 +1735,29 @@ function logincheck() {
         const full = [b, c, d, message, dateStr, gPrev, h, i];
         submitUpdate(full);
         this.value = '';
+        document.getElementById('sayMain2').value = '';
+      }
+    });
+
+    // Main input: update E and F automatically on Enter
+    document.getElementById('sayMain2').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        const message = this.value.trim();
+        if (!message) return;
+        // retrieve existing B,C,D,G,H
+        const b = document.getElementById('colB').value || '';
+        const c = document.getElementById('colC').value || '';
+        const d = document.getElementById('colD').value || '';
+        const gPrev = document.getElementById('colG').value || '';
+        const h = document.getElementById('colH').value || '';
+        const i = document.getElementById('colI').value || '';
+        const today = new Date();
+        const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+        // build values: B,C,D,E=message,F=date,G=original,Gprev,H
+        const full = [b, c, d, message, dateStr, gPrev, h, i];
+        submitUpdate(full);
+        this.value = '';
+        document.getElementById('sayMain').value = '';
       }
     });
 
@@ -3369,6 +3432,7 @@ function logincheck() {
   <script>
     const toggleBtn = document.getElementById('menuToggleBtn');
     const menuUI = document.getElementById('menuUI');
+    const menuUIchat = document.getElementById('logoImage');
     const hoverTrigger = document.getElementById('hoverTrigger');
     const homeBtn = document.getElementById('homeBtn');
 
@@ -3397,9 +3461,33 @@ function logincheck() {
     hoverTrigger.addEventListener('mouseenter', () => {
       if (menuEnabled) menuUI.classList.add('visible');
     });
-    menuUI.addEventListener('mouseleave', () => {
-      if (menuEnabled) menuUI.classList.remove('visible');
+    let isOverMenu = false;
+    let isOverChat = false;
+
+    menuUI.addEventListener('mouseenter', () => {
+      isOverMenu = true;
     });
+
+    menuUI.addEventListener('mouseleave', () => {
+      isOverMenu = false;
+      checkIfShouldHide();
+    });
+
+    menuUIchat.addEventListener('mouseenter', () => {
+      isOverChat = true;
+    });
+
+    menuUIchat.addEventListener('mouseleave', () => {
+      isOverChat = false;
+      checkIfShouldHide();
+    });
+
+    function checkIfShouldHide() {
+      if (!isOverMenu && !isOverChat && menuEnabled) {
+        menuUI.classList.remove('visible');
+      }
+    }
+
 
     // Button press feedback
     homeBtn.addEventListener('mousedown', () => homeBtn.src = './images/homebtn_pressed.png');
