@@ -3,10 +3,25 @@
 <head>
   <meta charset="utf-8">
   <title>Create New Data Row</title>
+  <link href="./fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
   <style>
     /* ---- Base ---- */
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Nunito Sans', sans-serif;
+      background: linear-gradient(120deg, #f9f9f9, #dcdcdc);
+      font-weight: 700; /* Try 200–1000 */
+      font-style: normal; /* or italic */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -14,7 +29,6 @@
       margin: 0;
       height: 100vh;
       overflow: hidden;
-      background: #fff;
     }
 
     /* ---- Logo ---- */
@@ -34,7 +48,7 @@
     /* ---- Labels & Inputs ---- */
     .label {
       font-size: 22px;
-      font-weight: 500;
+      font-weight: 800;
       margin-bottom: 5px;
       text-align: center;
     }
@@ -46,7 +60,7 @@
     }
     input[type="text"] {
       border: none;
-      background: #d6e4f5;
+      background: #f9f9f9;
       padding: 16px 20px;
       width: 400px;
       border-radius: 30px;
@@ -59,6 +73,7 @@
 
     input[type="text"]:hover {
       border-radius: 15px;
+      background: #d6e4f5;
       scale: 1.2;
       transition: 0.15s ease;
     }
@@ -68,6 +83,8 @@
       border: none;
       border-radius: 30px;
       padding: 15px 30px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-weight: 600;
       font-size: 20px;
       cursor: pointer;
       margin-bottom: 20px;
@@ -77,6 +94,7 @@
     .return-btn:hover,
     .submit-btn:hover:not(:disabled) {
       transform: scale(1.05);
+      box-shadow: 0 10px 15px rgba(0,0,0,0.2);
     }
     .popup-btn:active,
     .return-btn:active,
@@ -85,12 +103,10 @@
       box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
     }
     .submit-btn {
-      background: #def3dd;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      background: #e0eeffff;
     }
     .return-btn {
-      background: #eee;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      background: #f9f9f9;
     }
     .submit-btn:disabled {
       background: #ccc;
@@ -100,7 +116,7 @@
     }
     .popup-btn {
       background: #eee;
-      font-weight: bold;
+      font-weight: 600;
     }
 
     /* ---- Overlay & Popup ---- */
@@ -183,12 +199,12 @@
 
   <!-- Visible form -->
   <div class="label">Enter your OOS ID:</div>
-  <input type="text" autocomplete="off" id="idInput" maxlength="16">
+  <input type="text" autocomplete="off" id="idInput" maxlength="8">
   <style>
     .submit-container {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 20px;
       margin-top: 20px; /* optional */
     }
   </style>
