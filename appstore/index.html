@@ -4,10 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Modern App Store</title>
+  <link href="../fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Nunito Sans', sans-serif;
       background: #f4f6f8;
       font-size: 20px;
       overflow-x: hidden;
@@ -72,10 +84,11 @@
       border: none;
       outline: none;
       padding: 0.5rem 0.7rem;
+      font-family: 'Nunito Sans', sans-serif;
       border-radius: 15px;
       width: 120px;
       display: none;
-      font-size: 1rem;
+      font-size: 1.2rem;
     }
 
     .nav-label {
@@ -175,6 +188,7 @@
     .get-btn.installed {
       background: #ccc;
       color: #555;
+      margin-left: 20px;
       cursor: default;
     }
 
@@ -486,7 +500,7 @@
 
         tile.innerHTML = `
           <div class="app-header">
-            <div class="app-img"><img src="${app.icon}" width="60" height="60" style="border-radius:10px"></div>
+            <div class="app-img"><img src="${app.icon}" onerror="this.src='./fallback.png'; this.onerror=null;" width="60" height="60" style="border-radius:10px"></div>
             <div class="app-info">
               <h3>${app.name}</h3>
               <p>${app.developer}</p>
@@ -494,7 +508,7 @@
             ${buttonState}
           </div>
           <div class="preview">
-            <img src="${app.preview}" alt="${app.name} preview"
+            <img src="${app.preview}" onerror="this.src='./fallback.png'; this.onerror=null;" alt="${app.name} preview"
                  style="width:100%;height:100%;object-fit:cover;border-radius:20px;">
           </div>
         `;
