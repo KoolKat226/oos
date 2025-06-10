@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wii U Style Menu</title>
+  <title>OlexOS 7</title>
   <link href="./fontfiles/font.css" rel="stylesheet">
   <style>
 
@@ -594,7 +594,7 @@ opacity: 0.5;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0);
+      background: rgba(255, 255, 255, 0.7);
       backdrop-filter: saturate(100%) blur(14px);
       align-items: center;
       z-index: 9999999999999999999999999999999999999999999;
@@ -602,12 +602,10 @@ opacity: 0.5;
     }
 
     .modal {
-      background: #f2f2f2;
       border-radius: 40px;
       padding: 40px;
       width: 500px;
       position: relative;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .modal .close {
@@ -695,7 +693,7 @@ opacity: 0.5;
 
     .gsUnique_popup {
       background: white;
-      border-radius: 12px;
+      border-radius: 25px;
       padding: 2rem;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
@@ -717,11 +715,12 @@ opacity: 0.5;
 
     .gsUnique_copyBtn {
       padding: 0.5rem 1rem;
-      background: #28a745;
+      background: #aa97c4;
+      font-family: 'Nunito Sans', sans-serif;
       border: none;
       color: white;
       font-weight: bold;
-      border-radius: 5px;
+      border-radius: 25px;
       cursor: pointer;
     }
 
@@ -733,7 +732,7 @@ opacity: 0.5;
     .toggle-group {
       display: flex;
       gap: 1rem;
-      margin-top: 1rem;
+      margin-top: 0px;
     }
 
     .toggle-container {
@@ -1096,7 +1095,15 @@ opacity: 0.5;
   <div id="gsUnique_overlay" class="gsUnique_overlay" onclick="gsUnique_handleOverlayClick(event)">
     <div class="gsUnique_popup">
       <h3>This game can now be played at:</h3>
-      <input type="text" id="gsUnique_shareLink" value="https://sites.google.com/view/jacsyn/gameshare" readonly>
+      <input style="      border: none;
+        background: #bfbfbf;
+        padding: 16px 20px;
+        width: 400px;
+        border-radius: 30px;
+        font-size: 13px;
+        text-align: center;
+        margin-bottom: 0px;
+        transition: 0.15s ease;" type="text" id="gsUnique_shareLink" value="https://sites.google.com/view/jacsyn/gameshare" readonly>
       <br><br>
       <button class="gsUnique_copyBtn" onclick="gsUnique_copyShareLink()">Copy</button>
     </div>
@@ -1189,7 +1196,7 @@ opacity: 0.5;
         .center-wrapper {
           display: flex;
           justify-content: center;
-          margin-top: 20px; /* optional vertical spacing */
+          margin-top: 5px; /* optional vertical spacing */
         }
       </style>
 
@@ -1403,6 +1410,7 @@ function logincheck() {
     <script>
       document.getElementById("sayMain2").addEventListener("input", function () {
         document.getElementById("sayMain").value = this.value;
+        document.getElementById("colE").value = this.value;
       });
     </script>
     <div id="bottomContainer">
@@ -3589,7 +3597,7 @@ function logincheck() {
       const code = textarea.value;
       localStorage.setItem(storageKey, code);
       injectScript(code);
-      alert('Code saved and executed!');
+      //alert('Code saved and executed!');
     }
 
     // Load and execute code on page load
