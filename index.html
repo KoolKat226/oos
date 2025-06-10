@@ -5,6 +5,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wii U Style Menu</title>
+  <link href="./fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
   <style>
     html,
     body {
@@ -13,7 +25,7 @@
       overflow: hidden;
       background: radial-gradient(#d3dce6, #b0bbc6);
       perspective: 4000px;
-      font-family: sans-serif;
+      font-family: 'Nunito Sans', sans-serif;
     }
 
     .scene {
@@ -332,42 +344,7 @@ opacity: 0.5;
       white-space: nowrap;
     }
 
-    /* chat bubble styling */
-    .chat-bubble {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      /* above the head */
-      left: 50%;
-      transform: translateX(-50%) scale(0);
-      transform-origin: bottom center;
-      background-color: rgba(255, 255, 255, 0.95);
-      padding: 4px 8px;
-      border-radius: 35px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-      font-size: 12px;
-      color: #333;
-      pointer-events: none;
-      opacity: 0;
-      transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
-      z-index: 3;
-    }
 
-    .chat-bubble::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      /* at bottom of bubble */
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 6px 6px 0 6px;
-      border-style: solid;
-      border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
-    }
-
-    .chat-bubble.visible {
-      transform: translateX(-50%) scale(1);
-      opacity: 1;
-    }
   </style>
   <style>
     /* Toggle button */
@@ -617,7 +594,8 @@ opacity: 0.5;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0);
+      backdrop-filter: saturate(100%) blur(14px);
       align-items: center;
       z-index: 9999999999999999999999999999999999999999999;
       justify-content: center;
@@ -654,6 +632,7 @@ opacity: 0.5;
       background-color: #ccc;
       margin-bottom: 20px;
       font-size: 16px;
+      font-family: 'Nunito Sans', sans-serif;
     }
 
     .modal button {
@@ -663,10 +642,18 @@ opacity: 0.5;
       border: none;
       background-color: #f0f0f0;
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      font-family: 'Nunito Sans', sans-serif;
       font-size: 16px;
       cursor: pointer;
       display: block;
+      transition: 0.15s ease;
       margin: 20px auto 0;
+    }
+
+    .modal button:active {
+      transform: scale(0.9);
+      transition: 0.15s ease;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
     }
   </style>
   <style>
@@ -755,6 +742,7 @@ opacity: 0.5;
       border-radius: 1.5rem;
       display: flex;
       flex-direction: column;
+      cursor: pointer;
       align-items: center;
       width: 140px;
     }
@@ -1124,8 +1112,8 @@ opacity: 0.5;
     </div>
 
     <!-- Audio icon placeholder -->
-    <button onclick="disableBgAudioControl()" class="icon-btn" id="speakBtn" title="Speak">
-      <img id="audioIcon" src="./images/soundbtn.png" alt="Speak">
+    <button onclick="disableBgAudioControl()" class="icon-btn" id="speakBtn" title="Play Menu Music">
+      <img id="audioIcon" src="./images/soundbtn.png" alt="Audio Icon">
     </button>
 
     <!-- Settings icon placeholder -->
@@ -1137,7 +1125,6 @@ opacity: 0.5;
   <!-- Settings Modal -->
   <div id="settingsModal">
     <div class="modal">
-      <div class="close" id="closeModal">&times;</div>
       <label style="display:none;" for="scriptUrl">Script URL:</label>
       <input style="display:none;"
         value="https://script.google.com/macros/s/AKfycbwm1M3hiUKFhUy8VaDKTQSeqW0KO32NeFZ5oz3BYduwsikdZ4gIHPLuqJTkclhs9fYI/exec"
@@ -1641,7 +1628,7 @@ function logincheck() {
 
     // Modal toggle
     const settingsModal = document.getElementById('settingsModal');
-    const closeModal = document.getElementById('closeModal');
+    const closeModal = document.getElementById('updateBtn');
     settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
     settingsBtnDos.addEventListener('click', () => settingsModal.style.display = 'flex');
     closeModal.addEventListener('click', () => settingsModal.style.display = 'none');
@@ -2990,14 +2977,15 @@ function logincheck() {
       const box = document.createElement('div');
       box.className = 'mii-popup';
       box.innerHTML = `
-      <button class="mii-popup-close">&times;</button>
       <h2>${name} <small>(${miiId.slice(0, 3)})</small></h2>
       <div class="mii-graphic"></div>
       <p><strong>Last said:</strong> ${message}</p>
     `;
       overlay.appendChild(box);
       document.body.appendChild(overlay);
-      box.querySelector('.mii-popup-close').onclick = () => overlay.remove();
+      overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.remove();
+      };
 
       // Render graphic
       const graphic = box.querySelector('.mii-graphic');
@@ -3057,12 +3045,13 @@ function logincheck() {
     border-color: rgba(255,255,255,0.95) transparent transparent transparent;
   }
   .chat-bubble.visible {
-    transform: translateX(-50%) scale(1);
+    transform: translateX(-50%) scale(1.8);
     opacity: 1;
   }
   .mii-popup-overlay {
     position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0);
+    backdrop-filter: saturate(100%) blur(14px);
     display: flex; align-items: center; justify-content: center;
     z-index: 2000;
   }
@@ -3212,7 +3201,16 @@ function logincheck() {
             const bubble = el.querySelector('.chat-bubble');
             if (bubble) bubble.remove();
             clearTimeout(mii._nextShowTimeout);
+            // ← 1) clear any ongoing flicker…
             clearInterval(mii._flickerInterval);
+
+            // ← 2) …and immediately reset mouth image back to its original
+            const head = mii.el.querySelector('.emoji-head');
+            const mouthImg = head && Array.from(head.querySelectorAll('img'))
+              .find(img => img.src.includes('/mouths/'));
+            if (mouthImg && mii._origMouthSrc) {
+              mouthImg.src = mii._origMouthSrc;
+            }
 
             // Stop any playing audio
             if (mii._audioSource) {
@@ -3287,7 +3285,11 @@ function logincheck() {
             const head = mii.el.querySelector('.emoji-head');
             const mouthImg = head ? Array.from(head.querySelectorAll('img'))
               .find(img => img.src.includes('/mouths/')) : null;
-            const origSrc = mouthImg?.src;
+            // ← 3) on first use, remember the "resting" mouth image
+            if (mouthImg && !mii._origMouthSrc) {
+              mii._origMouthSrc = mouthImg.src;
+            }
+            const origSrc = mii._origMouthSrc;
             const talkSrc = './emoji/mouths/talk.png';
 
             function showBubbleOnce(version) {
@@ -3327,6 +3329,7 @@ function logincheck() {
                 if (version !== mii._messageVersion) return;
 
                 bubble.classList.remove('visible');
+                // ← 4) at end of each show, stop flicker & restore
                 if (mouthImg) {
                   clearInterval(mii._flickerInterval);
                   mouthImg.src = origSrc;
