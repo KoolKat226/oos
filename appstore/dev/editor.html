@@ -3,6 +3,18 @@
 <head>
   <meta charset="utf-8">
   <title>Edit/Create App</title>
+  <link href="../../fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
   <style>
     html, body {
       height: 100vh;
@@ -10,7 +22,7 @@
     }
     body {
       background: #ffffff;
-      font-family: sans-serif;
+      font-family: 'Nunito Sans', sans-serif;
       padding: 1rem;
       display: flex;
       flex-direction: column;
@@ -32,7 +44,8 @@
       gap: 1rem;
     }
     .templateBox {
-      border: 1px solid #ccc;
+      border: 0px solid #ccc;
+      border-radius: 25px;
       padding: 0.5rem;
       width: 120px;
       text-align: center;
@@ -83,18 +96,18 @@
   <div id="templateContainer">
     <!-- App 1 template box -->
     <div class="templateBox" data-template="1">
-      <img src="" alt="App 1 Preview">
+      <img src="./webapp.png" alt="App 1 Preview">
       <span>Web Application</span>
     </div>
     <!-- App 2 template box -->
     <div class="templateBox" data-template="2">
-      <img src="" alt="App 2 Preview">
+      <img src="./brush.png" alt="App 2 Preview">
       <span>Theme Application</span>
     </div>
     <!-- Blank Template box -->
     <div class="templateBox" data-template="blank">
-      <img src="" alt="Blank Template Preview">
-      <span>Blank Template</span>
+      <img src="./codeapp.png" alt="Blank Template Preview">
+      <span>Blank Application</span>
     </div>
   </div>
 
