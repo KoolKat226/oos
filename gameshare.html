@@ -3,10 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Gameshare Lobby</title>
+  <link href="./fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f4f4f4;
+      font-family: 'Nunito Sans', sans-serif;
       margin: 0;
       padding: 2rem;
     }
@@ -18,7 +29,7 @@
     .tile {
       position: relative;
       background: white;
-      border-radius: 8px;
+      border-radius: 25px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       padding: 1rem;
       text-align: center;
@@ -26,16 +37,32 @@
     .tile img.app-icon {
       width: 100px;
       height: 100px;
+      border-radius: 25px;
+      box-shadow: 0 30px 40px rgba(99, 99, 99, 0.4);
       object-fit: contain;
     }
     .tile button {
       margin-top: 0.5rem;
+      display: block;
+      width: 100%;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 25px;
       background: #007bff;
       color: white;
+      font-family: 'Nunito Sans', sans-serif;
+      transition: 0.2s ease;
       cursor: pointer;
+    }
+
+    .tile button:hover {
+      transition: 0.3s ease;
+      cursor: pointer;
+    }
+
+    .tile button:active {
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+      transition: 0.2s ease;
     }
 
     /* ── floating emoji + drop shadow ───────────────────────── */
@@ -72,9 +99,13 @@
     }
     #closeBtn {
       position:absolute; top:10px; right:10px;
+      display:none;
       background:red; color:white; border:none;
       padding:0.5rem 1rem; font-size:1rem;
-      cursor:pointer; border-radius:4px;
+      cursor:pointer; border-radius:24px;
+      height: 10px;
+      width: 10px;
+      font-family: 'Nunito Sans', sans-serif;
       z-index:10000;
     }
   </style>
@@ -89,7 +120,7 @@
 
   <!-- full-screen runner overlay -->
   <div id="overlay">
-    <button id="closeBtn" onclick="closeOverlay()">Close</button>
+    <button id="closeBtn" onclick="closeOverlay()"></button>
     <iframe id="appFrame"></iframe>
   </div>
   <script src="./appstore/papaparse.min.js"
