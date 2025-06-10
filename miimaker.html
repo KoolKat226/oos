@@ -4,6 +4,50 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mii Maker</title>
+  <link href="./fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
+  <style>
+    /* For WebKit browsers */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      position: absolute;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 123, 255, 0.6); /* light grey */
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 123, 255, 0.9);
+    }
+
+    /* Optional: Makes scrollbar overlay the content, like on macOS */
+    html {
+      scrollbar-width: thin; /* For Firefox */
+      scrollbar-color: rgba(0, 123, 255, 0.6) transparent;
+    }
+
+    body {
+      overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
+    }
+  </style>
+
   <style>
     :root {
       /* Global sizing */
@@ -14,7 +58,7 @@
       --torso-top-offset: calc( var(--head-top-offset) + var(--emoji-size) - var(--torso-size) / 2 );
     }
     body {
-      font-family: sans-serif;
+      font-family: 'Nunito Sans', sans-serif;
       margin: 0;
       padding: 0;
       display: flex;
@@ -40,7 +84,6 @@
     #preview {
       flex: 1;
       position: relative;
-      background: #fff;
     }
     /* Head, mouth, eyes, etc. all share this fixed centered position */
     #preview img {
@@ -73,7 +116,7 @@
       height: 40px;
       cursor: pointer;
       border: 2px solid transparent;
-      border-radius: 4px;
+      border-radius: 24px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -100,6 +143,23 @@
       animation: sparkle 0.6s ease-out;
     }
   </style>
+  <style>
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -9999;
+    }
+
+    video {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  </head>
 </head>
 <body>
   <div id="main">
@@ -114,7 +174,12 @@
       <div id="sidebar"></div>
     </div>
   </div>
-
+  <div class="video-container">
+    <video autoplay loop muted>
+      <source src="./bg.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
   <script>
     const categories = ['orbs','mouths','eyes','hairs','eyewear','hats'];
     const counts = { orbs: 4, mouths: 4, eyes: 7, hairs: 9, eyewear: 6, hats: 9 };
