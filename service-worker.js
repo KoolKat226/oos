@@ -50,12 +50,15 @@ self.addEventListener('fetch', (evt) => {
   const url = new URL(req.url);
   const accept = req.headers.get('accept') || '';
 
-  // ── 1) NEVER cache any Google-Sheets CSV export requests ──
-  //    e.g. "https://docs.google.com/spreadsheets/d/.../export?format=csv..."
+  // ── 1) NEVER cache any Google-Sheets CSV requests ──
+  //    matches both ?format=csv exports and ?output=csv publishes
   if (
     url.hostname === 'docs.google.com' &&
     url.pathname.startsWith('/spreadsheets/d/') &&
-    url.searchParams.get('format') === 'csv'
+    (
+      url.searchParams.get('format') === 'csv' ||
+      url.searchParams.get('output') === 'csv'
+    )
   ) {
     evt.respondWith(
       fetch(req)
@@ -78,7 +81,6 @@ self.addEventListener('fetch', (evt) => {
   }
 
   // ── 2) NEVER cache any Google-Sheets "gviz/tq" requests ──
-  //    e.g. "https://docs.google.com/spreadsheets/d/.../gviz/tq?..."
   if (
     url.hostname === 'docs.google.com' &&
     url.pathname.startsWith('/spreadsheets/d/') &&
@@ -86,12 +88,8 @@ self.addEventListener('fetch', (evt) => {
   ) {
     evt.respondWith(
       fetch(req)
-        .then(networkResponse => {
-          // Always return fresh JsonP; do NOT cache.
-          return networkResponse;
-        })
+        .then(networkResponse => networkResponse)
         .catch(() => {
-          // If offline, fall back to any cached copy
           return caches.match(req).then(cached => {
             if (cached) return cached;
             return new Response('Offline and no cached sheet data.', {
