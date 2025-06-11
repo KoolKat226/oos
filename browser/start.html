@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bookmarks</title>
+  <style>
+html,body{
+    -webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+-o-user-select: none;
+user-select: none;
+}
+        img {
+  pointer-events: none;
+}
+</style>
+  <link href="../fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
+  <style>
+    /* CSS styles */
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      padding: 10px;
+      width: 300px;
+      font-size: 16px;
+      border-radius: 30px;
+      border: 0px solid #ccc;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+
+    .bookmark-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      max-width: 800px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .bookmark {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 200px;
+      height: 80px;
+      background-color: #f2f2f2;
+      padding: 10px;
+      border-radius: 30px;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    .bookmark:hover {
+      background-color: #f8f8f8;
+    }
+
+    .bookmark-link {
+      text-decoration: none;
+      color: #333;
+      margin-top: 2px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    .bookmark-favicon {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 10px;
+    }
+
+    .bookmark-delete {
+      margin-top: 10px;
+      background-color: #444444;
+      border: none;
+      opacity: 0;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 30px;
+      position: absolute;
+      z-index: 9;
+      cursor: pointer;
+      transition: background-color 0.3s;
+font-family: 'Nunito Sans', sans-serif;
+      transition:.2s;
+    }
+
+    .bookmark-delete:hover {
+      background-color: #ff7875;
+      transition:.2s;
+      opacity: 1;
+    }
+    
+  </style>
+  <style>
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -9999;
+    }
+
+    video {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <style>
+    .center {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="video-container">
+    <video autoplay loop muted>
+      <source src="../bg.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  <div class="search-container">
+    <input type="text" class="search-input" placeholder="Search the web...">
+    <button style="display:none" id="search-button">Search</button>
+    <div onclick="triggerActivation(); window.open('https://data.c-abogados.com.ar/&','_self');" class="center" style="font-family: 'Nunito Sans', sans-serif;
+      padding: 6px 14px;
+      border-radius: 30px;
+      color: #4E4E4E;
+      background: #d1dbe0;
+      cursor: url('../assets/cursors/Link.cur'), pointer;
+      border: none;
+      box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      text-align: center;
+      height: 30px;
+      margin-left: 8px;">
+      <a style="">VPN Mode</a>
+    </div>
+  </div>
+
+  <div class="bookmark-list"></div>
+
+  <script>
+    // Load the bookmarks from local storage
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+
+    const bookmarkList = document.querySelector('.bookmark-list');
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('#search-button');
+    const permanentBookmark = {
+      url: 'https://koolkat226.github.io/ovalgames/normal.html',
+      title: 'My Games',
+      favicon: 'https://cdn.glitch.global/6cf99900-c3ba-4c81-8866-8f88772e629b/mygames2.0.png'  // <-- Your custom favicon here
+    };
+
+
+    // Display bookmarks
+    const displayBookmarks = () => {
+      bookmarkList.innerHTML = '';
+
+      // Add permanent bookmark first (non-deletable)
+      const permanent = createBookmarkElement(permanentBookmark.url, -1, true);
+      bookmarkList.appendChild(permanent);
+
+      // Add deletable bookmarks
+      for (let i = 0; i < 6 && i < bookmarks.length; i++) {
+        const url = bookmarks[i];
+        const bookmarkContainer = createBookmarkElement(url, i, false);
+        bookmarkList.appendChild(bookmarkContainer);
+      }
+    };
+
+
+    // Create a bookmark element
+    const createBookmarkElement = (url, index, nonDeletable = false) => {
+      const bookmarkContainer = document.createElement('div');
+      bookmarkContainer.className = 'bookmark';
+      bookmarkContainer.addEventListener('click', function() {
+        window.open(url, '_self');
+      });
+
+      const bookmarkFavicon = document.createElement('img');
+      bookmarkFavicon.className = 'bookmark-favicon';
+
+      // Use custom favicon if available for permanent bookmark
+      if (nonDeletable && url === permanentBookmark.url && permanentBookmark.favicon) {
+        bookmarkFavicon.src = permanentBookmark.favicon;
+      } else {
+        bookmarkFavicon.src = 'https://www.google.com/s2/favicons?domain=' + url;
+      }
+
+      bookmarkContainer.appendChild(bookmarkFavicon);
+
+      const bookmarkLink = document.createElement('a');
+      bookmarkLink.className = 'bookmark-link';
+      bookmarkLink.href = url;
+      bookmarkLink.target = '_self';
+      bookmarkLink.textContent = getDisplayTitle(url);
+      bookmarkContainer.appendChild(bookmarkLink);
+
+      if (!nonDeletable) {
+        const bookmarkDelete = document.createElement('button');
+        bookmarkDelete.className = 'bookmark-delete';
+        bookmarkDelete.textContent = 'Remove';
+        bookmarkDelete.addEventListener('click', function(event) {
+          event.stopPropagation();
+          deleteBookmark(index);
+          bookmarkContainer.remove();
+        });
+        bookmarkContainer.appendChild(bookmarkDelete);
+      }
+
+      return bookmarkContainer;
+    };
+
+
+
+    function deleteBookmark(index) {
+      bookmarks.splice(index, 1);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    }
+
+    const getDisplayTitle = (url) => {
+      if (url === permanentBookmark.url) return permanentBookmark.title;
+      const hostname = new URL(url).hostname;
+      return hostname.startsWith('www.') ? hostname.substring(4) : hostname;
+    };
+
+
+    // Search button click event handler
+    searchButton.addEventListener('click', function() {
+      const searchQuery = searchInput.value.trim();
+      if (searchQuery !== '') {
+        const searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchQuery) + '&safe=active&sca_esv=569265910&igu=1';
+        window.open(searchUrl, '_self');
+      }
+    });
+
+    // Enter key press event handler
+    searchInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        searchButton.click();
+      }
+    });
+
+    // Initial display of bookmarks
+    displayBookmarks();
+  </script>
+  <script>
+    document.addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+});
+
+document.onkeydown = function (e) {
+  if (event.keyCode == 123) {
+    return false;
+  }
+
+  if (e.ctrlKey && e.shiftKey && e.keyCode == "I".charCodeAt(0)) {
+    return false;
+  }
+
+  if (e.ctrlKey && e.shiftKey && e.keyCode == "C".charCodeAt(0)) {
+    return false;
+  }
+
+  if (e.ctrlKey && e.keyCode == "U".charCodeAt(0)) {
+    return false;
+  }
+};
+  </script>
+  <script>
+          function triggerActivation() {
+            localStorage.setItem("activateFunction", "true");
+        }
+  </script>
+</body>
+</html>
