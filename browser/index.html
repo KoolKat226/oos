@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Browser UI</title>
+  <link href="../fontfiles/font.css" rel="stylesheet">
+  <style>
+
+    .nunito-variable {
+      font-family: 'Nunito Sans', sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 800;
+      font-style: italic;
+      font-variation-settings: "wdth" 100, "YTLC" 500;
+    }
+
+    </style>
+  <style>
+html,body{
+    -webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+-o-user-select: none;
+user-select: none;
+}
+        img {
+  pointer-events: none;
+}
+</style>
+<style>
+   {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;
+}
+</style>
+  <style>
+    /* CSS styles */
+    html, body {
+      overflow-x: hidden !important;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .browser {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header, .tabs, .url-bar {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+
+    .ui-hidden {
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+    }
+
+    
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      position: fixed; /* changed from relative */
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000; /* ensures it's on top */
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      will-change: transform;
+    }
+
+
+
+
+    .tabs {
+      display: flex;
+      overflow-x: auto;
+      padding: 4px;
+      border-radius: 30px;
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      margin-right: 4px;
+      font-weight: bold;
+font-family: 'Nunito Sans', sans-serif;
+padding: 6px 14px;
+  border-radius: 30px;
+  color: #4E4E4E;
+  background: #fff4ec;
+  border: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  pointer;
+  margin-left: 2px;
+    transition:.2s;
+    }
+
+.tab:focus {
+transform: scale(.9);
+    transition:.2s;
+}
+
+    .tab.active {
+      background-color: #e6dad1;
+    }
+
+    .tab .close-button {
+      margin-left: 8px;
+      color: #9c8684;
+    }
+
+    .url-bar {
+      display: flex;
+      align-items: center;
+      padding: 4px;
+    }
+
+    .url-input {
+      flex-grow: 1;
+      padding: 4px;
+      font-family: 'Nunito Sans', sans-serif;
+font-family: 'Nunito Sans', sans-serif;
+padding: 6px 14px;
+  border-bottom-left-radius: 15px;
+  border-top-left-radius: 15px;
+  color: #4E4E4E;
+  background: #fff4ec;
+  border: none;
+  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+    }
+
+    .go-button {
+      margin-left: 4px;
+      padding: 4px 8px;
+font-family: 'Nunito Sans', sans-serif;
+padding: 6px 14px;
+  color: #4E4E4E;
+  background: #f7e8dc;
+  border: none;
+  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 0px;
+    }
+
+    .bookmark-button {
+      margin-left: 4px;
+      padding: 4px 8px;
+font-family: 'Nunito Sans', sans-serif;
+padding: 6px 14px;
+  border-bottom-right-radius: 15px;
+  border-top-right-radius: 15px;
+  color: #4E4E4E;
+  background: #f7e8dc;
+  border: none;
+  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 0px;
+    }
+
+    .tab-contents {
+      flex-grow: 1;
+      overflow: auto;
+    }
+
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .add-button {
+font-family: 'Nunito Sans', sans-serif;
+padding: 6px 14px;
+  border-radius: 30px;
+  color: #4E4E4E;
+  background: #d1dbe0;
+  border: none;
+  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 2px;
+  font-size: 17px;
+    transition:.2s;
+    }
+
+.add-button:focus {
+transform: scale(.8);
+    transition:.2s;
+}
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .toggle-button {
+      position: fixed;
+      margin-top: 1.5%;
+      right: 16px;
+      z-index: 1000;
+background:rgba(217, 217, 217,.8); backdrop-filter: saturate(180%) blur(14px);
+      border: none;
+      border-radius: 15px;
+      padding: 8px;
+      width: 60px;
+      cursor: pointer;
+font-family: 'Nunito Sans', sans-serif;
+    }
+
+    .fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .arrow-icon {
+      margin-top: 5px;
+      height: 20px;
+      width: 20px;
+    }
+
+    body {
+      background:rgba(217, 217, 217,.8);
+    }
+  </style>
+<style>
+@font-face { font-family: Inter; src: url('./Inter-SemiBold.ttf'); } 
+h4 {text-align: center;}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="browser">
+    <div class="header">
+      <div class="tabs">
+        <button class="add-button" onclick="addTab(); this.blur();">+</button>
+      </div>
+      <div class="url-bar">
+        <input type="text" class="url-input" id="urlInput" placeholder="Enter URL" onkeydown="handleKeyDown(event)">
+        <button class="go-button" onclick="navigate()">Go</button><button class="bookmark-button" onclick="addBookmark()">Bookmark</button>
+
+      </div>
+    </div>
+    <div class="tab-contents"></div>
+    <button class="toggle-button" onclick="toggleUI()"><img class="arrow-icon" src="./browserhome.png"></button>
+  </div>
+
+  <script>
+    let activeTabIndex = 0;
+    let isUIVisible = true;
+
+    function addTab() {
+      const tabsContainer = document.querySelector('.tabs');
+      const tabContentsContainer = document.querySelector('.tab-contents');
+
+const newTab = document.createElement('div');
+newTab.className = 'tab';
+newTab.innerHTML = 'New Tab <span class="close-button" onclick="closeTab(event)">&times;</span>';
+newTab.tabIndex = 0;
+newTab.addEventListener('click', () => {
+    switchTab(Array.prototype.indexOf.call(tabsContainer.children, newTab));
+    newTab.blur(); // Remove focus after click
+});
+
+
+      tabsContainer.insertBefore(newTab, tabsContainer.lastElementChild);
+
+      const newTabContent = document.createElement('iframe');
+      newTabContent.className = 'tab-content';
+      newTabContent.src = './start.html';
+
+      tabContentsContainer.appendChild(newTabContent);
+
+      switchTab(tabContentsContainer.children.length - 1);
+    }
+
+    function switchTab(index) {
+      const tabs = document.getElementsByClassName('tab');
+      const tabContents = document.getElementsByClassName('tab-content');
+
+      for (let i = 0; i < tabs.length; i++) {
+        if (i === index) {
+          tabs[i].classList.add('active');
+          tabContents[i].classList.add('active');
+        } else {
+          tabs[i].classList.remove('active');
+          tabContents[i].classList.remove('active');
+        }
+      }
+
+      activeTabIndex = index;
+    }
+
+    function closeTab(event) {
+      event.stopPropagation();
+
+      const tab = event.target.parentNode;
+      const tabIndex = Array.prototype.indexOf.call(tab.parentElement.children, tab);
+      const tabContent = document.getElementsByClassName('tab-content')[tabIndex];
+
+      tab.remove();
+      tabContent.remove();
+
+      const tabContents = document.getElementsByClassName('tab-content');
+      const numTabs = tabContents.length;
+
+      if (numTabs === 0) {
+        addTab();
+      } else if (tabIndex === activeTabIndex) {
+        const newTabIndex = Math.max(0, tabIndex - 1);
+        switchTab(newTabIndex);
+      }
+    }
+
+    function navigate() {
+      const urlInput = document.getElementById('urlInput');
+      let url = urlInput.value.trim();
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      const tabContent = document.getElementsByClassName('tab-content active')[0];
+      tabContent.src = url;
+
+      updateTabTitle(activeTabIndex, url);
+
+    }
+
+    function updateTabTitle(tabIndex, url) {
+      const tabs = document.getElementsByClassName('tab');
+      const tabTitle = url.replace(/^(https?:\/\/)?(www\.)?/i, '').substring(0, 15);
+      tabs[tabIndex].innerHTML = `${tabTitle}<span class="close-button" onclick="closeTab(event)">&times;</span>`;
+    }
+
+    function toggleUI() {
+      const header = document.querySelector('.header');
+      const toggleButton = document.querySelector('.toggle-button');
+      const tabContents = document.getElementsByClassName('tab-content');
+
+      if (isUIVisible) {
+        toggleButton.innerHTML = '<img class="arrow-icon" src="./browserhome.png">';
+
+        // 1) clear any inline transform
+        header.style.transform = '';
+        // 2) trigger the CSS animation
+        header.classList.add('ui-hidden');
+
+        // after transition, lock fullscreen
+        setTimeout(() => {
+          document.body.style.overflow = 'hidden';
+          if (tabContents[activeTabIndex]) {
+            tabContents[activeTabIndex].classList.add('fullscreen');
+          }
+        }, 400);
+      } else {
+        toggleButton.innerHTML = '<img class="arrow-icon" src="./browserhome.png">';
+        document.body.style.overflow = 'auto';
+
+        // bring it back
+        header.classList.remove('ui-hidden');
+        if (tabContents[activeTabIndex]) {
+          tabContents[activeTabIndex].classList.remove('fullscreen');
+        }
+      }
+
+      isUIVisible = !isUIVisible;
+    }
+
+
+
+
+    function handleKeyDown(event) {
+      if (event.keyCode === 13) {
+        navigate();
+      }
+    }
+
+    window.addEventListener('load', function() {
+      addTab();
+    });
+  </script>
+<script>
+function addBookmark() {
+      const urlInput = document.getElementById('urlInput');
+      let url = urlInput.value.trim();
+
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url.startsWith('www.')) {
+          url = 'https://' + url;
+        } else {
+          url = 'https://www.' + url;
+        }
+      }
+
+      // Save the bookmark to local storage
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+      bookmarks.push(url);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+
+      // Clear the URL input
+      urlInput.value = '';
+
+      // Display the new bookmark
+      const bookmarkContainer = document.createElement('div');
+      bookmarkContainer.className = 'bookmark';
+
+      const bookmarkLink = document.createElement('a');
+      bookmarkLink.className = 'bookmark-link';
+      bookmarkLink.href = url;
+      bookmarkLink.textContent = url;
+      bookmarkContainer.appendChild(bookmarkLink);
+
+      const bookmarkDelete = document.createElement('button');
+      bookmarkDelete.className = 'bookmark-delete';
+      bookmarkDelete.textContent = 'Delete';
+      bookmarkDelete.addEventListener('click', function() {
+        deleteBookmark(bookmarks.length - 1);
+      });
+      bookmarkContainer.appendChild(bookmarkDelete);
+
+      bookmarkList.appendChild(bookmarkContainer);
+    }
+
+    function openBookmarks() {
+      window.open('bookmarks.html', '_blank');
+    }
+
+</script>
+  <script>
+    document.addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+});
+
+document.onkeydown = function (e) {
+  if (event.keyCode == 123) {
+    return false;
+  }
+
+  if (e.ctrlKey && e.shiftKey && e.keyCode == "I".charCodeAt(0)) {
+    return false;
+  }
+
+  if (e.ctrlKey && e.shiftKey && e.keyCode == "C".charCodeAt(0)) {
+    return false;
+  }
+
+  if (e.ctrlKey && e.keyCode == "U".charCodeAt(0)) {
+    return false;
+  }
+};
+  </script>
+<script>
+          function activateFunction() {
+toggleUI();
+            // Clear the flag after activation
+            localStorage.removeItem("activateFunction");
+        }
+
+        function checkForActivation() {
+            const activate = localStorage.getItem("activateFunction");
+            if (activate) {
+                activateFunction();
+            }
+        }
+
+        window.onload = function() {
+            // Check for activation every second
+            setInterval(checkForActivation, 1000);
+        };
+  </script>
+  <script>
+    document.addEventListener('mousemove', e => {
+      const header = document.querySelector('.header');
+      if (header.classList.contains('ui-hidden')) return;
+
+      const offsetX = e.clientX * 0.02;
+      const offsetY = e.clientY * 0.02;
+      header.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    });
+
+  </script>
+
+
+</body>
+</html>
+
