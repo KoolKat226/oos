@@ -16,6 +16,37 @@
     }
 
     </style>
+      <style>
+    /* For WebKit browsers */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      position: absolute;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(242, 104, 12, 0.6); /* light grey */
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(242, 104, 12, 0.9);
+    }
+
+    /* Optional: Makes scrollbar overlay the content, like on macOS */
+    html {
+      scrollbar-width: thin; /* For Firefox */
+      scrollbar-color: rgba(242, 104, 12, 0.6) transparent;
+    }
+
+    body {
+      overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
+    }
+  </style>
   <style>
     body {
       margin: 0;
