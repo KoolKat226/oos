@@ -15,36 +15,36 @@
     }
 
     </style>
-    <style>
-    /* For WebKit browsers */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-      position: absolute;
-    }
+  <style>
+  /* For WebKit browsers */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+  }
 
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-    ::-webkit-scrollbar-thumb {
-      background: rgba(0, 123, 255, 0.6); /* light grey */
-      border-radius: 10px;
-    }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 123, 255, 0.6); /* light grey */
+    border-radius: 10px;
+  }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 123, 255, 0.9);
-    }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 123, 255, 0.9);
+  }
 
-    /* Optional: Makes scrollbar overlay the content, like on macOS */
-    html {
-      scrollbar-width: thin; /* For Firefox */
-      scrollbar-color: rgba(0, 123, 255, 0.6) transparent;
-    }
+  /* Optional: Makes scrollbar overlay the content, like on macOS */
+  html {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: rgba(0, 123, 255, 0.6) transparent;
+  }
 
-    body {
-      overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
-    }
+  body {
+    overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
+  }
   </style>
   <style>
     body {
@@ -215,6 +215,7 @@
     let deleteCb = null;
 
     function loadApps() {
+      showLoadingOverlay();
       const creatorVal = document.getElementById('creator').value.trim();
       if (!creatorVal) return alert('Type your creator name');
       window.handleList = (res) => {
@@ -243,6 +244,7 @@
           location = 'editor.html?creator=' + encodeURIComponent(creatorVal);
         };
         container.appendChild(createDiv);
+        hideLoadingOverlay();
       };
       const tag = document.createElement('script');
       tag.src = `${SCRIPT_URL}?action=list&callback=handleList&creator=${encodeURIComponent(creatorVal)}`;
@@ -275,7 +277,7 @@
       document.head.appendChild(tag);
     }
 
-    function togglePub(name, creator, current, btn) {
+    function togglePub(name, creator, current, btn) { showLoadingOverlay();
       const newFlag = current==='1' ? '0' : '1';
       window.handlePub = res => {
         if (res.error) return alert(res.error);
@@ -285,6 +287,59 @@
       const tag = document.createElement('script');
       tag.src = `${SCRIPT_URL}?action=publish&callback=handlePub&appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}&published=${newFlag}`;
       document.head.appendChild(tag);
+    }
+  </script>
+  <script>
+    function showLoadingOverlay() {
+      if (document.getElementById('loadingOverlay')) return;
+
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.id = 'loadingOverlay';
+      Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+        backdropFilter: 'blur(10px)',
+        background: 'rgba(255, 255, 255, 0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: '9999'
+      });
+
+      // Wrapper to crop bottom
+      const cropWrapper = document.createElement('div');
+      Object.assign(cropWrapper.style, {
+        width: '100px',
+        height: '85px', // crop the bottom part (SVG is 100px high)
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      });
+
+      // SVG spinner
+      const spinner = document.createElement('img');
+      spinner.src = '../../images/unmomento.svg';
+      spinner.alt = 'Loading...';
+      Object.assign(spinner.style, {
+        width: '100px',
+        height: '100px',
+        opacity: '0.8',
+        objectFit: 'cover'
+      });
+
+      cropWrapper.appendChild(spinner);
+      overlay.appendChild(cropWrapper);
+      document.body.appendChild(overlay);
+    }
+
+    function hideLoadingOverlay() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) overlay.remove();
     }
   </script>
 </body>
