@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modern App Store</title>
+  <title>OOS Appstore</title>
   <link href="../fontfiles/font.css" rel="stylesheet">
   <style>
 
@@ -579,12 +579,23 @@
     document.addEventListener('mousemove', e => {
       document.querySelectorAll('.slot, .app-tile').forEach(el => {
         const rect = el.getBoundingClientRect();
-        const x = e.clientX - rect.left  - rect.width/2;
-        const y = e.clientY - rect.top   - rect.height/2;
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
         const intensity = el.classList.contains('slot') ? 10 : 90;
-        el.style.transform = `perspective(600px) rotateX(${-y/intensity}deg) rotateY(${x/intensity}deg)`;
+
+        // Calculate raw rotation
+        let rotX = -y / intensity;
+        let rotY =  x / intensity;
+
+        // Clamp the rotation values
+        const maxTilt = el.classList.contains('slot') ? 6 : 15; // degrees
+        rotX = Math.max(-maxTilt, Math.min(maxTilt, rotX));
+        rotY = Math.max(-maxTilt, Math.min(maxTilt, rotY));
+
+        el.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
       });
     });
+
 
     document.getElementById('search-input-nav').addEventListener('input', function(){
       const filter = this.value.toLowerCase();
