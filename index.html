@@ -925,19 +925,10 @@ opacity: 0.5;
     (function() {
       const STORAGE_KEY = 'savedHTMLContent';
       let isEditorInitialized = false;
-      let observer;
       let injectedContainer = null;
       let injectedScripts = [];
 
-      // ───────────────────────────────────────────────────────────────────
-      // injectHTML(content):
-      //   • Removes any previously‐injected container & scripts.
-      //   • Parses “content” (which may include <style> and <script>).
-      //   • Inserts <style> tags so CSS applies immediately.
-      //   • Creates real <script> elements so JS actually executes.
-      // ───────────────────────────────────────────────────────────────────
       function injectHTML(content) {
-        // 1) Remove previous injection if it exists:
         if (injectedContainer) {
           injectedContainer.remove();
           injectedContainer = null;
@@ -947,120 +938,87 @@ opacity: 0.5;
 
         if (!content) return;
 
-        // 2) Create a new container for non‐script elements:
         injectedContainer = document.createElement('div');
         injectedContainer.id = 'injected-container';
 
-        // 3) Use a temporary DIV to parse the HTML string:
         const temp = document.createElement('div');
         temp.innerHTML = content;
 
-        // 4) Extract and handle <script> tags:
-        const scripts = temp.querySelectorAll('script');
-        scripts.forEach(oldScript => {
+        temp.querySelectorAll('script').forEach(oldScript => {
           const newScript = document.createElement('script');
-          // Copy attributes (src, type, etc.) if any:
-          for (let i = 0; i < oldScript.attributes.length; i++) {
-            const attr = oldScript.attributes[i];
-            newScript.setAttribute(attr.name, attr.value);
-          }
-          // Copy inline JS text (if present):
+          Array.from(oldScript.attributes).forEach(attr =>
+            newScript.setAttribute(attr.name, attr.value)
+          );
           newScript.textContent = oldScript.textContent;
-          // Append the new <script> so it executes:
           document.body.appendChild(newScript);
           injectedScripts.push(newScript);
-          // Remove the old <script> from temp so it does not remain in innerHTML:
           oldScript.remove();
         });
 
-        // 5) Whatever remains in temp (including <style> tags, plain HTML, etc.)
-        //    gets moved into injectedContainer:
         while (temp.firstChild) {
           injectedContainer.appendChild(temp.firstChild);
         }
 
-        // 6) Finally, place the injectedContainer into <body>:
         document.body.appendChild(injectedContainer);
       }
 
-      // ───────────────────────────────────────────────────────────────────
-      // initEditor():
-      //   • Populates the textarea with saved content (if any).
-      //   • Hooks up the “Save & Run” button to update localStorage + re‐inject.
-      //   • Sets isEditorInitialized = true so we don't re‐hook multiple times.
-      // ───────────────────────────────────────────────────────────────────
       function initEditor() {
         if (isEditorInitialized) return;
         isEditorInitialized = true;
 
         const textarea = document.getElementById('codeInput');
-        const saveBtn = document.getElementById('saveBtn');
+        const saveBtn  = document.getElementById('saveBtn');
+        const removeBtn = document.getElementById('removeBtn');
 
-        // 1) Load existing content into the textarea:
+        // load into textarea
         const existing = localStorage.getItem(STORAGE_KEY);
+        if (existing) textarea.value = existing;
 
+        saveBtn?.addEventListener('click', () => {
+          const html = textarea.value;
+          localStorage.setItem(STORAGE_KEY, html);
+          injectHTML(html);
+        });
 
-        // 2) Wire up “Save & Run”:
-        if (saveBtn && textarea) {
-          saveBtn.addEventListener('click', () => {
-            const html = textarea.value;
-            localStorage.setItem(STORAGE_KEY, html);
-            injectHTML(html);
-            alert('Content saved and injected.');
-          });
-        }
+        // only clear the one key
+        removeBtn?.addEventListener('click', () => {
+          localStorage.removeItem(STORAGE_KEY);
+          injectHTML('');      // tear down any injected content
+          textarea.value = ''; // clear the editor
+        });
       }
 
-      // ───────────────────────────────────────────────────────────────────
-      // handleMutations(mutations):
-      //   • If <div id="editor-container"> is ADDED: call initEditor().
-      //   • If it is REMOVED: reset isEditorInitialized = false so re‐init works next time.
-      // ───────────────────────────────────────────────────────────────────
-      function handleMutations(mutationsList) {
-        for (const mutation of mutationsList) {
-          // Check for ADDED nodes:
-          for (const node of mutation.addedNodes) {
-            if (!(node instanceof HTMLElement)) continue;
-            if (node.id === 'editor-container' ||
-                node.querySelector?.('#editor-container')) {
+      function handleMutations(mutations) {
+        for (const m of mutations) {
+          for (const node of m.addedNodes) {
+            if (node instanceof HTMLElement &&
+               (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
               initEditor();
             }
           }
-          // Check for REMOVED nodes:
-          for (const node of mutation.removedNodes) {
-            if (!(node instanceof HTMLElement)) continue;
-            if (node.id === 'editor-container' ||
-                node.querySelector?.('#editor-container')) {
+          for (const node of m.removedNodes) {
+            if (node instanceof HTMLElement &&
+               (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
               isEditorInitialized = false;
             }
           }
         }
       }
 
-      // ───────────────────────────────────────────────────────────────────
-      // MAIN ENTRY POINT (on DOMContentLoaded):
-      // 1) Pull last‐saved HTML from localStorage and inject it.
-      // 2) If an editor is already in the DOM, initEditor() now.
-      // 3) Otherwise, start observing <body> for additions/removals.
-      // ───────────────────────────────────────────────────────────────────
       window.addEventListener('DOMContentLoaded', () => {
-        // 1) Inject whatever was saved (if anything):
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          injectHTML(saved);
-        }
+        if (saved) injectHTML(saved);
 
-        // 2) If the editor container is already in the page, wire it up:
         if (document.getElementById('editor-container')) {
           initEditor();
+        } else {
+          new MutationObserver(handleMutations)
+            .observe(document.body, { childList: true, subtree: true });
         }
-
-        // 3) Otherwise, watch for the editor being added or removed:
-        observer = new MutationObserver(handleMutations);
-        observer.observe(document.body, { childList: true, subtree: true });
       });
     })();
   </script>
+
 </head>
 
 <body>
@@ -1804,11 +1762,15 @@ function logincheck() {
     }
   </script>
   <script>
+    // ← one place to change the file name
+    let bgAudioFile = './bg.mp3';
+
     const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
     const bgGainNode = bgAudioContext.createGain();
     bgGainNode.gain.value = 0;
 
-    const bgAudioElement = new Audio('./bg.mp3');
+    // use the variable here
+    const bgAudioElement = new Audio(bgAudioFile);
     bgAudioElement.loop = true;
 
     const bgAudioSource = bgAudioContext.createMediaElementSource(bgAudioElement);
@@ -1877,6 +1839,7 @@ function logincheck() {
     // Set initial icon on load
     window.addEventListener('DOMContentLoaded', updateAudioIcon);
   </script>
+
 
   <script>
     const emojiStored = localStorage.getItem("emojispeekEnabled");
@@ -3888,6 +3851,93 @@ function logincheck() {
     })();
   </script>
   <!-- ──────────────────────────────────────────────────────────────────── -->
+  <script>
+    function changeSky(videoUrl) {
+      const video = document.getElementById('skyvid');
+      if (!video) {
+        console.warn('No video element with id="skyvid" found');
+        return;
+      }
+
+      // 1) Pause anything that might be playing
+      video.pause();
+
+      // 2) Swap the source and reload
+      const source = video.querySelector('source');
+      source.src = videoUrl;
+      video.load();
+
+      // 3) Mute so browsers will let it autoplay
+      video.muted = true;
+
+      // 4) Try to play
+      video.play()
+        .then(() => {
+          console.log('Video is playing!');
+        })
+        .catch(err => {
+          console.warn('Auto-play prevented:', err);
+          // Optionally you could show a "Click to play" button here
+        });
+    }
+
+    // Example:
+    
+  </script>
+  <script>
+    let _hatWatcherIntervalId = null;
+
+    /**
+     * Starts watching for any new “7.png” hats under /hats/ and swaps them out periodically,
+     * and also forces all hair layers to 1.png.
+     * @param {string} newHatUrl - The URL of the new hat image (must include '/hats/', e.g. './emoji/hats/8.png')
+     * @param {number} [intervalMs=1000] - How often (in ms) to scan for new hats/hairs
+     */
+    function changeHatTo(newHatUrl, intervalMs = 1000) {
+      const hairUrl = './emoji/hairs/1.png';
+
+      const swapLayers = () => {
+        document.querySelectorAll('.emoji-head .emoji-layer').forEach(img => {
+          const src = img.getAttribute('src') || '';
+          // swap any hats that are 7.png in /hats/
+          if (src.includes('/hats/') && src.endsWith('/7.png')) {
+            img.src = newHatUrl;
+          }
+          // force every hair layer to 1.png
+          else if (src.includes('/hairs/')) {
+            img.src = hairUrl;
+          }
+        });
+      };
+
+      // initial run
+      swapLayers();
+
+      // clear existing watcher
+      if (_hatWatcherIntervalId !== null) {
+        clearInterval(_hatWatcherIntervalId);
+      }
+      // start periodic watcher
+      _hatWatcherIntervalId = setInterval(swapLayers, intervalMs);
+    }
+
+    /**
+     * Stops the periodic hat-and-hair watcher.
+     */
+    function stopHatWatcher() {
+      if (_hatWatcherIntervalId !== null) {
+        clearInterval(_hatWatcherIntervalId);
+        _hatWatcherIntervalId = null;
+      }
+    }
+
+    // expose globally
+    window.changeHatAndHair = changeHatAndHair;
+    window.stopHatWatcher = stopHatWatcher;
+  </script>
+
+
+
 
 </body>
 
