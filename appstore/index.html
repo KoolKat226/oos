@@ -6,6 +6,42 @@
   <title>OOS Appstore</title>
   <link href="../fontfiles/font.css" rel="stylesheet">
   <style>
+    body {
+      user-select: none;       /* Disable text selection */
+      -webkit-user-drag: none; /* Disable image/text dragging */
+    }
+
+    img, a, p, span, div {
+      -webkit-user-drag: none;
+      user-select: none;
+      pointer-events: auto; /* Allow clicking while preventing drag */
+    }
+  </style>
+
+  <script>
+    // Disable Ctrl key combinations
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    });
+
+    // Disable right-click context menu
+    window.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+    });
+
+    // Disable dragging of any element
+    document.addEventListener('dragstart', function (e) {
+      e.preventDefault();
+    });
+
+    // Optional: also block selection via mouse events
+    document.addEventListener('selectstart', function (e) {
+      e.preventDefault();
+    });
+  </script>
+  <style>
 
     .nunito-variable {
       font-family: 'Nunito Sans', sans-serif;
@@ -81,7 +117,7 @@
       width: 70px;
       height: 70px;
       background: #fff;
-      border-radius: 15px;
+      border-radius: 35px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -96,12 +132,12 @@
     .nav-item:hover {
       width: 200px;
       justify-content: flex-start;
-      padding-left: 15px;
+      padding-left: 20px;
     }
 
     .nav-item img {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       transition: all 0.3s ease;
     }
 
@@ -151,15 +187,16 @@
     }
 
     .app-tile {
-      width: 360px;
-      height: 300px;
+      width: 310px;
+      height: 285px;
       background: #fff;
       border-radius: 25px;
+      transform: scale(.9);
       box-shadow: 0 30px 50px rgba(0,0,0,0.25);
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: 0.2s ease;
       position: relative;
       overflow: hidden;
       will-change: transform;
@@ -167,6 +204,7 @@
 
     .app-tile:hover {
       box-shadow: 0 40px 60px rgba(0, 0, 0, 0.35);
+      transition: 0.2s ease;
     }
 
     .app-header {
@@ -192,7 +230,7 @@
 
     .app-info h3 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1.0rem;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -202,7 +240,7 @@
     .app-info p {
       margin: 0;
       color: gray;
-      font-size: 1.1rem;
+      font-size: .8rem;
     }
 
     .get-btn {
@@ -210,10 +248,19 @@
       color: white;
       border: none;
       padding: 0.6rem 1.2rem;
+      font-family: 'Nunito Sans', sans-serif;
       border-radius: 999px;
       cursor: pointer;
       font-weight: bold;
       font-size: 1rem;
+      transition: 0.3s ease;
+    }
+
+    .get-btn:active {
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) inset;
+      background: #4fa0f7;
+      transform: scale(.9);
+      transition: 0.3s ease;
     }
 
     .get-btn.installed {
@@ -242,7 +289,8 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(211, 222, 237, 0.6);
+      backdrop-filter: saturate(100%) blur(14px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -251,7 +299,6 @@
 
     .slot-wrapper {
       text-align: center;
-      background: white;
       padding: 4rem;
       border-radius: 20px;
       transform: scale(1.2);
@@ -259,7 +306,8 @@
 
     .slot-title {
       font-size: 2rem;
-      font-weight: bold;
+      color: #424242;
+      font-weight: 700;
       margin-bottom: 3rem;
     }
 
@@ -275,7 +323,7 @@
       width: 100px;
       height: 100px;
       background: #efefef;
-      border: 1px solid #ccc;
+      border: 0px solid #ccc;
       border-radius: 20px;
       display: flex;
       align-items: center;
@@ -286,6 +334,7 @@
       overflow: hidden;
       padding: 0;
       transform-style: preserve-3d;
+      transition: 0.3s ease;
     }
 
     .slot img {
@@ -295,14 +344,23 @@
       border-radius: 20px;
     }
 
+
     .cancel-btn {
       margin-top: 3rem;
       padding: 0.75rem 2.5rem;
-      border-radius: 20px;
-      border: 1px solid #aaa;
+      font-family: 'Nunito Sans', sans-serif;
+      border-radius: 25px;
+      border: 0px solid #aaa;
       background: #eee;
       font-size: 1.1rem;
       cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .cancel-btn:active {
+      transform: scale(.9);
+      box-shadow: 0 0 130px rgba(0, 0, 0, 0.3) inset;
+      transition: 0.3s ease;
     }
 
 #toast-container {
@@ -322,7 +380,7 @@
   background-color: #333;
   color: #fff;
   padding: 0.75rem 1.5rem;
-  border-radius: 1rem;
+  border-radius: 30px;
   font-weight: 600;
   font-size: 1rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -365,7 +423,7 @@
 
   <div id="slot-overlay">
     <div class="slot-wrapper">
-      <div class="slot-title">Select a Slot:</div>
+      <div class="slot-title">Choose a slot:</div>
       <div class="slot-grid" id="slot-grid"></div>
       <button class="cancel-btn" onclick="document.getElementById('slot-overlay').style.display = 'none'">Cancel</button>
     </div>
@@ -495,7 +553,7 @@
         }
       }
       const updatesNav = document.querySelectorAll('.nav-item')[2];
-      updatesNav.style.boxShadow = hasUpdates ? '0 0 20px #007aff' : 'none';
+      updatesNav.style.boxShadow = hasUpdates ? '0 0 20px #007aff' : '0 4px 8px rgba(0,0,0,0.1)';
       return hasUpdates;
     }
 
@@ -531,7 +589,7 @@
 
         tile.innerHTML = `
           <div class="app-header">
-            <div class="app-img"><img src="${app.icon}" onerror="this.src='./fallback.png'; this.onerror=null;" width="60" height="60" style="border-radius:10px"></div>
+            <div class="app-img"><img src="${app.icon}" onerror="this.src='./fallback.png'; this.onerror=null;" width="60" height="60" style="border-radius:15px"></div>
             <div class="app-info">
               <h3>${app.name}</h3>
               <p>${app.developer}</p>
@@ -576,25 +634,72 @@
     }
 
     // mouse-tilt, search, toasts, update-button wiring… all unchanged
-    document.addEventListener('mousemove', e => {
-      document.querySelectorAll('.slot, .app-tile').forEach(el => {
-        const rect = el.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        const intensity = el.classList.contains('slot') ? 10 : 90;
+    let pressedSlot = null;
+    let lastMouseEvent = null;
+    let wiggleAngle = 0;
 
-        // Calculate raw rotation
-        let rotX = -y / intensity;
-        let rotY =  x / intensity;
-
-        // Clamp the rotation values
-        const maxTilt = el.classList.contains('slot') ? 6 : 15; // degrees
-        rotX = Math.max(-maxTilt, Math.min(maxTilt, rotX));
-        rotY = Math.max(-maxTilt, Math.min(maxTilt, rotY));
-
-        el.style.transform = `perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-      });
+    document.addEventListener('mousedown', e => {
+      const slot = e.target.closest('.slot');
+      if (slot) {
+        pressedSlot = slot;
+        updateTransform(slot, lastMouseEvent);
+      }
     });
+
+    document.addEventListener('mouseup', () => {
+      if (pressedSlot) {
+        updateTransform(pressedSlot, lastMouseEvent);
+        pressedSlot = null;
+      }
+    });
+
+    document.addEventListener('mousemove', e => {
+      lastMouseEvent = e;
+      document.querySelectorAll('.slot, .app-tile')
+        .forEach(el => updateTransform(el, e));
+    });
+
+    // Dramatic, fast wiggle: 30ms interval, big angle step, large amplitude
+    setInterval(() => {
+      wiggleAngle += 1.2;          // bigger angle step → faster oscillation
+      document.querySelectorAll('.slot:hover').forEach(el => {
+        updateTransform(el, lastMouseEvent, true);
+      });
+    }, 30);                        // shorter interval → more frequent updates
+
+    function updateTransform(el, event = null, applyWiggle = false) {
+      // 1) Tilt calculation
+      let rotX = 0, rotY = 0;
+      if (event) {
+        const rect = el.getBoundingClientRect();
+        const x = event.clientX - rect.left - rect.width / 2;
+        const y = event.clientY - rect.top  - rect.height / 2;
+        const intensity = el.classList.contains('slot') ? 10 : 90;
+        const maxTilt   = el.classList.contains('slot') ?  6 : 15;
+
+        rotX = Math.max(-maxTilt, Math.min(maxTilt, -y / intensity));
+        rotY = Math.max(-maxTilt, Math.min(maxTilt,  x / intensity));
+      }
+
+      // 2) Scale when pressed
+      const scale = (el === pressedSlot) ? 0.9 : 1;
+
+      // 3) Wiggle offset when hovered
+      let wiggleOffset = 0;
+      if (applyWiggle && el.matches(':hover')) {
+        const amplitude = 26;       // px, bigger = more dramatic
+        wiggleOffset = Math.sin(wiggleAngle) * amplitude;
+      }
+
+      // 4) Combine transforms
+      el.style.transform = 
+        `perspective(600px)
+         translateX(${wiggleOffset}px)
+         rotateX(${rotX}deg)
+         rotateY(${rotY}deg)
+         scale(${scale})`;
+    }
+
 
 
     document.getElementById('search-input-nav').addEventListener('input', function(){
