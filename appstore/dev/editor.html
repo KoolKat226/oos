@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Edit/Create App</title>
   <link href="../../fontfiles/font.css" rel="stylesheet">
+  
   <style>
 
     .nunito-variable {
@@ -15,36 +16,36 @@
     }
 
     </style>
-    <style>
-    /* For WebKit browsers */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-      position: absolute;
-    }
+  <style>
+  /* For WebKit browsers */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+  }
 
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-    ::-webkit-scrollbar-thumb {
-      background: rgba(0, 123, 255, 0.6); /* light grey */
-      border-radius: 10px;
-    }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 123, 255, 0.6); /* light grey */
+    border-radius: 10px;
+  }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 123, 255, 0.9);
-    }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 123, 255, 0.9);
+  }
 
-    /* Optional: Makes scrollbar overlay the content, like on macOS */
-    html {
-      scrollbar-width: thin; /* For Firefox */
-      scrollbar-color: rgba(0, 123, 255, 0.6) transparent;
-    }
+  /* Optional: Makes scrollbar overlay the content, like on macOS */
+  html {
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: rgba(0, 123, 255, 0.6) transparent;
+  }
 
-    body {
-      overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
-    }
+  body {
+    overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
+  }
   </style>
   <style>
     html, body {
@@ -60,11 +61,39 @@
       gap: 1rem;
       position: relative; /* for absolute positioning of templateContainer */
     }
-    input, textarea, button {
+    button {
       width: 100%;
       padding: 0.5rem;
       margin: 0.25rem 0;
     }
+
+    textarea {
+      width: 97%;
+      border-radius: 20px;
+      border: 0px;
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+    }
+
+    input {
+      border: none;
+      background: #ebebeb;
+      font-family: 'Nunito Sans', sans-serif;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 18px;
+      scale: .9;
+      outline: none;
+      transition: 0.15s ease;
+    }
+
+    input:hover {
+      border-radius: 15px;
+      background: #d6e4f5;
+      scale: 1;
+      transition: 0.15s ease;
+    }
+    
     #templateContainer {
       display: none;
       position: absolute;
@@ -80,15 +109,22 @@
       padding: 0.5rem;
       width: 120px;
       text-align: center;
+      transition: transform 0.2s ease;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #fafafa;
+      background: #d3deed;
+    }
+
+    .templateBox:hover {
+      transform: scale(1.05);
+      transition: transform 0.2s ease;
     }
     .templateBox img {
       width: 100%;
       height: auto;
+      opacity: 0.7;
       margin-bottom: 0.5rem;
     }
     #mainEditor {
@@ -109,11 +145,35 @@
     #preview-container {
       flex: 1;
       border: 1px solid #ccc;
+      border-radius: 20px;
     }
     #preview {
       width: 100%;
+      border-radius: 20px;
       height: 100%;
       border: none;
+    }
+
+    button {
+      padding: 1rem 2rem;
+      border: none;
+      background: #cfdfff;
+      border-radius: 999px;
+      font-family: 'Nunito Sans', sans-serif;
+      transform: scale(.95);
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1);
+    }
+
+    button:active {
+      transform: scale(0.9);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
     }
   </style>
 </head>
@@ -144,7 +204,7 @@
 
   <!-- Main editor, hidden until a template is chosen (or in edit mode) -->
   <div id="mainEditor">
-    <input id="appName" placeholder="App Name" />
+    <input id="appName" placeholder="App Name (You wont be able to change this later)" />
     <input id="iconUrl" placeholder="Icon URL" />
     <input id="previewUrl" placeholder="Preview Image URL" />
 
@@ -334,6 +394,7 @@
       creatorInput.value = creatorParam;
 
       if (nameParam) {
+        
         // ─── EDIT MODE ─────────────────────────────────────────────────
         pageTitle.textContent = "Edit App";
         appNameInput.value = nameParam;
@@ -406,9 +467,10 @@
       const creator = creatorInput.value;
 
       if (!name || !icon || !preview || !code) {
-        return alert("Fill in all fields");
+        //return alert("Fill in all fields");
+        return;
       }
-
+      showLoadingOverlay();
       const formData = new FormData();
       formData.append("action", "create");
       formData.append("appName", name);
@@ -431,14 +493,69 @@
         .then((payload) => {
           if (payload.error) {
             return alert("Error from server: " + payload.error);
+            hideLoadingOverlay();
           }
           window.location.href = "./index.html";
         })
         .catch((err) => {
           console.error("Fetch error:", err);
-          alert("An error occurred while saving. See console for details.");
+          hideLoadingOverlay();
         });
     });
   </script>
+  <script>
+    function showLoadingOverlay() {
+      if (document.getElementById('loadingOverlay')) return;
+
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.id = 'loadingOverlay';
+      Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100vw',
+        height: '100vh',
+        backdropFilter: 'blur(10px)',
+        background: 'rgba(255, 255, 255, 0.3)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: '9999'
+      });
+
+      // Wrapper to crop bottom
+      const cropWrapper = document.createElement('div');
+      Object.assign(cropWrapper.style, {
+        width: '100px',
+        height: '85px', // crop the bottom part (SVG is 100px high)
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      });
+
+      // SVG spinner
+      const spinner = document.createElement('img');
+      spinner.src = '../../images/unmomento.svg';
+      spinner.alt = 'Loading...';
+      Object.assign(spinner.style, {
+        width: '100px',
+        height: '100px',
+        opacity: '0.8',
+        objectFit: 'cover'
+      });
+
+      cropWrapper.appendChild(spinner);
+      overlay.appendChild(cropWrapper);
+      document.body.appendChild(overlay);
+    }
+
+    function hideLoadingOverlay() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) overlay.remove();
+    }
+  </script>
+
 </body>
 </html>
