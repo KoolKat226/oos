@@ -3888,42 +3888,49 @@ function logincheck() {
     let _hatWatcherIntervalId = null;
 
     /**
-     * Starts watching for any new “7.png” hats under /hats/ and swaps them out periodically,
-     * and also forces all hair layers to 1.png.
-     * @param {string} newHatUrl - The URL of the new hat image (must include '/hats/', e.g. './emoji/hats/8.png')
-     * @param {number} [intervalMs=1000] - How often (in ms) to scan for new hats/hairs
+     * Replaces hat 7 with a new hat image, and forces hair to 1.png
+     * for the same emoji head if a hair layer exists.
+     * @param {string} newHatUrl - New hat image URL (must include '/hats/')
+     * @param {number} [intervalMs=1000] - Interval to keep checking (ms)
      */
     function changeHatTo(newHatUrl, intervalMs = 1000) {
+
+
       const hairUrl = './emoji/hairs/1.png';
 
-      const swapLayers = () => {
-        document.querySelectorAll('.emoji-head .emoji-layer').forEach(img => {
-          const src = img.getAttribute('src') || '';
-          // swap any hats that are 7.png in /hats/
-          if (src.includes('/hats/') && src.endsWith('/7.png')) {
-            img.src = newHatUrl;
-          }
-          // force every hair layer to 1.png
-          else if (src.includes('/hairs/')) {
-            img.src = hairUrl;
+      const swap = () => {
+        document.querySelectorAll('.emoji-head').forEach(head => {
+          const layers = head.querySelectorAll('.emoji-layer');
+          let hatChanged = false;
+
+          layers.forEach(img => {
+            const src = img.getAttribute('src') || '';
+
+            if (src.includes('/hats/') && src.endsWith('/7.png')) {
+              img.src = newHatUrl;
+              hatChanged = true;
+            }
+          });
+
+          // If the hat was changed, also update hair in this head
+          if (hatChanged) {
+            layers.forEach(img => {
+              const src = img.getAttribute('src') || '';
+              if (src.includes('/hairs/')) {
+                img.src = hairUrl;
+              }
+            });
           }
         });
       };
 
-      // initial run
-      swapLayers();
+      swap(); // Run immediately
 
-      // clear existing watcher
-      if (_hatWatcherIntervalId !== null) {
-        clearInterval(_hatWatcherIntervalId);
-      }
-      // start periodic watcher
-      _hatWatcherIntervalId = setInterval(swapLayers, intervalMs);
+      // Restart periodic watcher
+      if (_hatWatcherIntervalId !== null) clearInterval(_hatWatcherIntervalId);
+      _hatWatcherIntervalId = setInterval(swap, intervalMs);
     }
 
-    /**
-     * Stops the periodic hat-and-hair watcher.
-     */
     function stopHatWatcher() {
       if (_hatWatcherIntervalId !== null) {
         clearInterval(_hatWatcherIntervalId);
@@ -3931,10 +3938,11 @@ function logincheck() {
       }
     }
 
-    // expose globally
+    // Expose globally
     window.changeHatAndHair = changeHatAndHair;
     window.stopHatWatcher = stopHatWatcher;
   </script>
+
 
 
 
