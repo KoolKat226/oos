@@ -102,6 +102,22 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
 
+  // ── NEVER cache any Google Apps Script endpoints ──
+if (url.hostname === 'script.google.com') {
+  evt.respondWith(
+    fetch(req)
+      .then(networkResponse => networkResponse)
+      .catch(() => {
+        return new Response('Offline and no cached Apps Script data.', {
+          status: 503,
+          statusText: 'Offline'
+        });
+      })
+  );
+  return;
+}
+
+
   // ── 3) NEVER cache any “?action=get” endpoints ──
   if (
     url.searchParams.has('action') &&
