@@ -201,6 +201,17 @@
 
   <div id="apps"></div>
 
+  <!-- publish‑type modal -->
+  <div id="pubModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <p>Select app type:</p>
+      <button data-type="1">Utility</button>
+      <button data-type="2">Game</button>
+      <button data-type="3">Theme</button>
+      <button id="pubCancel">Cancel</button>
+    </div>
+  </div>
+
   <!-- confirm modal -->
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
@@ -211,135 +222,180 @@
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywq_95Mud0pCiLcYSTpJu9oA3f_brqNYtguuTUJorpwz2pH464XektHwXea51lwXcc/exec';
-    let deleteCb = null;
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXhb0PX96LX7Z1ePmRQm1Bcob1vrIJHK-UxucG4f-R9KESq1ME423yDtYPgRG4ALZP/exec';
+    let deleteCb = null, pubCb = null;
 
+    // On DOM loaded: welcome, load apps & wire modals
+    document.addEventListener('DOMContentLoaded', () => {
+      // Welcome message
+      const saved = localStorage.getItem('savedName') || '';
+      document.getElementById('welcome').textContent = saved ? `Welcome ${saved}!` : 'Welcome!';
+      document.getElementById('creator').value = saved;
+
+      // Load apps immediately
+      loadApps();
+
+      // LoadBtn handler
+      document.getElementById('loadBtn').onclick = () => {
+        const name = document.getElementById('creator').value.trim();
+        localStorage.setItem('savedName', name);
+        loadApps();
+      };
+
+      // Delete modal
+      document.getElementById('confirmYes').onclick = () => { deleteCb(); closeDeleteModal(); };
+      document.getElementById('confirmNo').onclick  = closeDeleteModal;
+
+      // Publish‐type modal: delegate all clicks here
+      document.getElementById('pubModalOverlay').addEventListener('click', e => {
+        const ov = e.currentTarget;
+        // type button?
+        if (e.target.dataset.type) {
+          const dt = e.target.dataset.type;    // "1","2","3"
+          ov.style.display = 'none';
+          if (pubCb) pubCb(dt);
+          pubCb = null;
+        }
+        // cancel?
+        else if (e.target.id === 'pubCancel') {
+          ov.style.display = 'none';
+          pubCb = null;
+        }
+      });
+    });
+
+    // ── App loading ──
     function loadApps() {
       showLoadingOverlay();
-      const creatorVal = document.getElementById('creator').value.trim();
-      if (!creatorVal) return alert('Type your creator name');
-      window.handleList = (res) => {
+      const cr = document.getElementById('creator').value.trim();
+      if (!cr) { alert('Type your creator name'); hideLoadingOverlay(); return; }
+
+      window.handleList = res => {
+        hideLoadingOverlay();
         if (res.error) return alert(res.error);
-        const container = document.getElementById('apps');
-        container.innerHTML = '';
+        const c = document.getElementById('apps');
+        c.innerHTML = '';
         res.apps.forEach(app => {
           const div = document.createElement('div');
-          div.className = 'tile' + (app.published==='1' ? ' published' : '');
+          // any non‑zero published → green
+          div.className = 'tile' + (app.published !== '0' ? ' published' : '');
+
           div.innerHTML = `
-            <img onerror="this.src='../fallback.png'; this.onerror=null;" src="${app.iconUrl}" alt="">
+            <img src="${app.iconUrl}" onerror="this.src='../fallback.png';">
             <div>${app.appName}</div>
             <button onclick="edit('${app.appName}','${app.creator}')">Edit</button>
             <button onclick="confirmDelete('${app.appName}','${app.creator}', this)">Delete</button>
-            <button onclick="togglePub('${app.appName}','${app.creator}','${app.published}', this)">
-              ${app.published==='1' ? 'Unpublish' : 'Publish'}
+            <button onclick="togglePub('${app.appName}','${app.creator}','${app.published}')">
+              ${app.published !== '0' ? 'Unpublish' : 'Publish'}
             </button>
           `;
-          container.appendChild(div);
+          c.appendChild(div);
         });
-        // Create new tile
-        const createDiv = document.createElement('div');
-        createDiv.className = 'tile create-tile';
-        createDiv.innerHTML = '+<br>Create';
-        createDiv.onclick = () => {
-          location = 'editor.html?creator=' + encodeURIComponent(creatorVal);
-        };
-        container.appendChild(createDiv);
-        hideLoadingOverlay();
+
+        // create‑tile
+        const ct = document.createElement('div');
+        ct.className = 'tile create-tile';
+        ct.innerHTML = '+<br>Create';
+        ct.onclick = () => location = `editor.html?creator=${encodeURIComponent(cr)}`;
+        c.appendChild(ct);
       };
-      const tag = document.createElement('script');
-      tag.src = `${SCRIPT_URL}?action=list&callback=handleList&creator=${encodeURIComponent(creatorVal)}`;
-      document.head.appendChild(tag);
+
+      const s = document.createElement('script');
+      s.src = `${SCRIPT_URL}?action=list&callback=handleList&creator=${encodeURIComponent(cr)}`;
+      document.head.appendChild(s);
     }
 
     function edit(name, creator) {
       location = `editor.html?appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}`;
     }
 
+    // ── Delete flow ──
     function confirmDelete(name, creator, btn) {
       deleteCb = () => deleteApp(name, creator, btn);
       document.getElementById('modalText').textContent = `Delete "${name}"?`;
       document.getElementById('modalOverlay').style.display = 'flex';
     }
-    document.getElementById('confirmYes').onclick = () => { deleteCb(); closeModal(); };
-    document.getElementById('confirmNo').onclick  = () => closeModal();
-    function closeModal() {
+    function closeDeleteModal() {
       document.getElementById('modalOverlay').style.display = 'none';
       deleteCb = null;
     }
-
     function deleteApp(name, creator, btn) {
       window.handleDel = res => {
         if (res.error) return alert(res.error);
         btn.closest('.tile').remove();
       };
-      const tag = document.createElement('script');
-      tag.src = `${SCRIPT_URL}?action=delete&callback=handleDel&appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}`;
-      document.head.appendChild(tag);
+      const t = document.createElement('script');
+      t.src = `${SCRIPT_URL}?action=delete&callback=handleDel`
+            + `&appName=${encodeURIComponent(name)}`
+            + `&creator=${encodeURIComponent(creator)}`;
+      document.head.appendChild(t);
     }
 
-    function togglePub(name, creator, current, btn) { showLoadingOverlay();
-      const newFlag = current==='1' ? '0' : '1';
-      window.handlePub = res => {
-        if (res.error) return alert(res.error);
-        // refresh the grid to show updated color/button
-        loadApps();
+    // ── Publish flow ──
+    function togglePub(name, creator, current) {
+      // If it's already published (1, 2, or 3), unpublish immediately:
+      if (current !== '0') {
+        showLoadingOverlay();
+        window.handlePub = res => {
+          if (res.error) return alert(res.error);
+          loadApps();
+        };
+        const script = document.createElement('script');
+        script.src = `${SCRIPT_URL}`
+                    + `?action=publish`
+                    + `&callback=handlePub`
+                    + `&appName=${encodeURIComponent(name)}`
+                    + `&creator=${encodeURIComponent(creator)}`
+                    + `&published=0`;
+        document.head.appendChild(script);
+        return;
+      }
+
+      // Otherwise (current === '0') → show type picker
+      pubCb = chosenType => {
+        showLoadingOverlay();
+        window.handlePub = res => {
+          if (res.error) return alert(res.error);
+          loadApps();
+        };
+        const tag = document.createElement('script');
+        tag.src = `${SCRIPT_URL}`
+                 + `?action=publish`
+                 + `&callback=handlePub`
+                 + `&appName=${encodeURIComponent(name)}`
+                 + `&creator=${encodeURIComponent(creator)}`
+                 + `&published=${chosenType}`;
+        document.head.appendChild(tag);
+        pubCb = null;
       };
-      const tag = document.createElement('script');
-      tag.src = `${SCRIPT_URL}?action=publish&callback=handlePub&appName=${encodeURIComponent(name)}&creator=${encodeURIComponent(creator)}&published=${newFlag}`;
-      document.head.appendChild(tag);
+
+      document.getElementById('pubModalOverlay').style.display = 'flex';
     }
-  </script>
-  <script>
+
+
+    // ── Loading overlay ──
     function showLoadingOverlay() {
       if (document.getElementById('loadingOverlay')) return;
-
-      // Create overlay
-      const overlay = document.createElement('div');
-      overlay.id = 'loadingOverlay';
-      Object.assign(overlay.style, {
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        width: '100vw',
-        height: '100vh',
-        backdropFilter: 'blur(10px)',
-        background: 'rgba(255, 255, 255, 0.3)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: '9999'
+      const ov = document.createElement('div');
+      ov.id = 'loadingOverlay';
+      Object.assign(ov.style, {
+        position:'fixed',top:'0',left:'0',width:'100vw',height:'100vh',
+        backdropFilter:'blur(10px)',background:'rgba(255,255,255,0.3)',
+        display:'flex',alignItems:'center',justifyContent:'center',zIndex:'9999'
       });
-
-      // Wrapper to crop bottom
-      const cropWrapper = document.createElement('div');
-      Object.assign(cropWrapper.style, {
-        width: '100px',
-        height: '85px', // crop the bottom part (SVG is 100px high)
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      });
-
-      // SVG spinner
-      const spinner = document.createElement('img');
-      spinner.src = '../../images/unmomento.svg';
-      spinner.alt = 'Loading...';
-      Object.assign(spinner.style, {
-        width: '100px',
-        height: '100px',
-        opacity: '0.8',
-        objectFit: 'cover'
-      });
-
-      cropWrapper.appendChild(spinner);
-      overlay.appendChild(cropWrapper);
-      document.body.appendChild(overlay);
+      const cw = document.createElement('div');
+      Object.assign(cw.style, {width:'100px',height:'85px',overflow:'hidden',display:'flex',alignItems:'center',justifyContent:'center'});
+      const sp = document.createElement('img');
+      sp.src = '../../images/unmomento.svg';
+      sp.alt = 'Loading...';
+      Object.assign(sp.style, {width:'100px',height:'100px',opacity:'.8',objectFit:'cover'});
+      cw.appendChild(sp);
+      ov.appendChild(cw);
+      document.body.appendChild(ov);
     }
-
     function hideLoadingOverlay() {
-      const overlay = document.getElementById('loadingOverlay');
-      if (overlay) overlay.remove();
+      const ov = document.getElementById('loadingOverlay');
+      if (ov) ov.remove();
     }
   </script>
 </body>
