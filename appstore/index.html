@@ -395,6 +395,30 @@
   transform: translateY(0);
 }
 
+    .filter-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      font-family: 'Nunito Sans', sans-serif;
+      border: 2px solid #ccc;
+      background: #fff;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .filter-btn.active {
+      background: #007aff;
+      border-color: #007aff;
+      color: #fff;
+    }
+    .filter-btn:hover {
+      border-color: #007aff;
+    }
+
   </style>
 </head>
 <body>
@@ -418,6 +442,11 @@
   </div>
 
   <div class="container">
+    <div class="filter-buttons">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn"       data-filter="games">Games</button>
+      <button class="filter-btn"       data-filter="themes">Themes</button>
+    </div>
     <div class="app-grid" id="app-list"></div>
   </div>
 
@@ -472,14 +501,10 @@
           // 2d) (Optional) If you want to see how many rows we have:
           console.log(`‣ [DEBUG] Total rows parsed (including unpublished): ${allRows.length}`);
 
-          // 2e) Filter only published==='1' **after trimming**:
-          window.appstore = allRows.filter(app => {
-            // Log each app’s published value to ensure it really is '1'
-            if (app.published !== '1') {
-              console.warn(`‣ [DEBUG] Row "${app.name}" skipped (published="${app.published}")`);
-            }
-            return app.published === '1';
-          });
+          // 2e) Keep any row whose published/category is "1", "2" or "3"
+          window.appstore = allRows.filter(app => ['1','2','3'].includes(app.published));
+          console.log(`‣ [DEBUG] After filtering categories 1–3, window.appstore.length = ${window.appstore.length}`);
+
 
           // 2f) Log the final filtered array:
           console.log(`‣ [DEBUG] After filtering published==='1', window.appstore.length = ${window.appstore.length}`);
@@ -536,6 +561,25 @@
       return a.icon !== b.icon || a.preview !== b.preview || a.code !== b.code;
     }
 
+    let currentFilter = 'all';
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      // update button styling
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderApps();
+    }
+
+    // hook up clicks
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+      });
+    });
+
+
     function checkForUpdates() {
       let hasUpdates = false;
       for (let i = 0; i < NUM_SLOTS; i++) {
@@ -559,6 +603,14 @@
 
     function renderApps() {
       const appList = document.getElementById('app-list');
+      // only show apps matching the current filter:
+      const appsToShow = appstore.filter(app => {
+        if (currentFilter === 'all')   return true;
+        if (currentFilter === 'games')  return app.published === '2';
+        if (currentFilter === 'themes') return app.published === '3';
+        return true;
+      });
+
       appList.innerHTML = '';
       const updatesNeeded = {};
       for (let i = 0; i < NUM_SLOTS; i++) {
@@ -572,7 +624,7 @@
           }
         } catch {}
       }
-      appstore.forEach(app => {
+        appsToShow.forEach(app => {
         const isInstalled = Object.keys(localStorage).some(key => {
           const val = localStorage.getItem(key);
           try { return val && JSON.parse(val).name === app.name; }
@@ -752,6 +804,73 @@
       });
     };
   </script>
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+  <!--  Separate Popularity Module (place after your PapaParse/app code)      -->
+  <!-- ─────────────────────────────────────────────────────────────────────── -->
+  <script>
+  (function PopularityJSONP(){
+    const URL = 'https://script.google.com/macros/s/AKfycbz3FeZlP2DmYVuOL9UzTriCz9SobQTvD7D4ZBTdSqU2l71V4H9DhvIBzpYPJY-Fyu5g8w/exec';
+    const CB  = 'onPopCB';
+
+    // 1) JSONP callback
+    window[CB] = resp => {
+      // only handle listPopularity responses that include an apps[] array
+      if (!resp || !Array.isArray(resp.apps)) return;
+
+      const lookup = {};
+      resp.apps.forEach(a => {
+        lookup[a.appName + '|' + a.creator] = a.popularity;
+      });
+
+      window.appstore = window.appstore
+        .map(app => ({
+          ...app,
+          popularity: lookup[app.name + '|' + app.developer] || 0
+        }))
+        .sort((a, b) => b.popularity - a.popularity);
+
+      renderApps();
+      checkForUpdates();
+    };
+
+    // 2) load listPopularity
+    function loadPopularity() {
+      const s = document.createElement('script');
+      s.src = `${URL}?action=listPopularity&callback=${CB}`;
+      document.head.appendChild(s);
+      setTimeout(()=> s.remove(), 60_000);
+    }
+
+    // 3) bumpPopularity (re‑uses same callback, but callback now ignores non‑apps responses)
+    function bump(name, creator) {
+      const s = document.createElement('script');
+      s.src = `${URL}`
+            + `?action=bumpPopularity`
+            + `&appName=${encodeURIComponent(name)}`
+            + `&creator=${encodeURIComponent(creator)}`
+            + `&callback=${CB}`;
+      document.head.appendChild(s);
+      setTimeout(()=> s.remove(), 60_000);
+    }
+
+    // 4) hook Get/Update clicks
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.get-btn:not(.installed)');
+      if (!btn) return;
+      const tile      = btn.closest('.app-tile');
+      const name      = tile?.dataset.name;
+      const creator   = tile?.querySelector('.app-info p')?.textContent;
+      if (!name || !creator) return;
+      setTimeout(()=> bump(name, creator), 100);
+    });
+
+    // 5) initial load
+    window.addEventListener('load', () => setTimeout(loadPopularity, 200));
+  })();
+  </script>
+
+
+
 
 
 </body>
