@@ -103,20 +103,19 @@ self.addEventListener('fetch', (evt) => {
   }
 
   // ── NEVER cache any Google Apps Script endpoints ──
-if (url.hostname === 'script.google.com') {
-  evt.respondWith(
-    fetch(req)
-      .then(networkResponse => networkResponse)
-      .catch(() => {
-        return new Response('Offline and no cached Apps Script data.', {
-          status: 503,
-          statusText: 'Offline'
-        });
-      })
-  );
-  return;
-}
-
+  if (url.hostname === 'script.google.com') {
+    evt.respondWith(
+      fetch(req)
+        .then(networkResponse => networkResponse)
+        .catch(() => {
+          return new Response('Offline and no cached Apps Script data.', {
+            status: 503,
+            statusText: 'Offline'
+          });
+        })
+    );
+    return;
+  }
 
   // ── 3) NEVER cache any “?action=get” endpoints ──
   if (
@@ -139,20 +138,25 @@ if (url.hostname === 'script.google.com') {
     return;
   }
 
-  // ── 4) HTML navigations: fetch & strip form defaults ──
+  // ── 4) HTML navigations: CACHE FIRST + strip form defaults ──
   if (req.mode === 'navigate' || accept.includes('text/html')) {
     evt.respondWith(
-      fetch(req)
-        .then(networkResponse => stripFormDefaultsIfHTML(networkResponse))
-        .catch(() => {
-          return caches.match(req).then(cached => {
-            if (cached) return cached;
+      caches.match(req).then(cached => {
+        if (cached) {
+          // Serve the cached HTML immediately…
+          return stripFormDefaultsIfHTML(cached);
+        }
+        // Otherwise fetch from network and strip defaults
+        return fetch(req)
+          .then(networkResponse => stripFormDefaultsIfHTML(networkResponse))
+          .catch(() => {
+            // If offline and not in cache, show offline fallback
             return new Response('Offline and no cached page.', {
               status: 503,
               statusText: 'Offline'
             });
           });
-        })
+      })
     );
     return;
   }
