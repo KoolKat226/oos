@@ -1055,7 +1055,7 @@ opacity: 0.5;
     targetX = y * 5;  // rotateX
   });
 
-  function animate() {
+  function animatesky() {
     // Lerp (linear interpolation)
     currentX += (targetX - currentX) * 0.1;
     currentY += (targetY - currentY) * 0.1;
@@ -1067,10 +1067,10 @@ opacity: 0.5;
       scale(1.05)
     `;
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(animatesky);
   }
 
-  animate();
+  animatesky();
 </script>
   <!-- ============================================
        FULL-SCREEN SPLASH OVERLAY
