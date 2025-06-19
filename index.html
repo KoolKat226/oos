@@ -1041,22 +1041,26 @@ opacity: 0.5;
   </div>
 <script>
   const video = document.getElementById('skyvid');
-
   let targetX = 0;
   let targetY = 0;
   let currentX = 0;
   let currentY = 0;
+  let skyAnimOn = false;
+  let skyAnimFrame = null;
 
   document.addEventListener('mousemove', (e) => {
+    if (!skyAnimOn) return;
+
     const x = (e.clientX / window.innerWidth - 0.5) * 2;
     const y = (e.clientY / window.innerHeight - 0.5) * 2;
 
-    targetY = x * -5; // rotateY
-    targetX = y * 5;  // rotateX
+    targetY = x * -5;
+    targetX = y * 5;
   });
 
   function animatesky() {
-    // Lerp (linear interpolation)
+    if (!skyAnimOn) return;
+
     currentX += (targetX - currentX) * 0.1;
     currentY += (targetY - currentY) * 0.1;
 
@@ -1067,10 +1071,22 @@ opacity: 0.5;
       scale(1.05)
     `;
 
-    requestAnimationFrame(animatesky);
+    skyAnimFrame = requestAnimationFrame(animatesky);
   }
 
-  animatesky();
+  function toggleSkyAnimation() {
+    if (skyAnimOn) {
+      skyAnimOn = false;
+      cancelAnimationFrame(skyAnimFrame);
+      video.style.transform = `translate(-10%, -10%) scale(1.05)`; // reset rotation
+    } else {
+      skyAnimOn = true;
+      animatesky();
+    }
+  }
+
+  // Optional: enable on load
+  toggleSkyAnimation();
 </script>
   <!-- ============================================
        FULL-SCREEN SPLASH OVERLAY
