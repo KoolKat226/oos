@@ -6,7 +6,7 @@
   const stored = parseFloat(localStorage.getItem('oos_version') || '0');
 
   // Bump this number whenever you release a new offline build!
-  const NEW_VERSION = 1.0;
+  const NEW_VERSION = 1.1;
 
   // If we already have this version (or newer), nothing to do
   if (stored >= NEW_VERSION) return;
@@ -49,7 +49,7 @@
     popup.querySelector('#upd-timer').textContent = seconds;
     if (seconds <= 0) {
       clearInterval(interval);
-      window.location.href = '/save.html';
+      window.location.href = './save.html';
     }
   }, 1000);
 })();
