@@ -6,343 +6,281 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0"
   />
-  <title>Save OlexOS for Offline use</title>
+  <title>OlexOS 7 Offline Installer</title>
   <style>
-    /* ===== Reset + Basic Layout ===== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* ─── Full‐page console ─────────────────────────────────────────── */
+    * { box-sizing: border-box; margin:0; padding:0 }
+    html, body { height: 100%; }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
+      background: #000;
+      color: #ffffff;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
       display: flex;
       flex-direction: column;
+    }
+
+    /* ─── Console window ───────────────────────────────────────────── */
+    .console {
+      flex: 1;
+      padding: 5px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    /* ─── Logo with divider lines ──────────────────────────────────── */
+    .logo-divider {
+      display: flex;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 20px;
+      margin-bottom: 10px;
+    }
+    .logo-divider hr {
+      flex: 1;
+      border: none;
+      height: 1px;
+      background: #0f0;
+      opacity: 0.5;
+    }
+    .logo-divider img {
+      height: 40px;
+      margin: 0 8px;
     }
 
-    /* ===== Container ===== */
-    .save-container {
-      width: 100%;
-      max-width: 600px;
-      margin-top: 50px;
-      background: #fff;
-      border-radius: 28px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      padding: 30px;
-      text-align: center;
-    }
-    .logo {
-      margin-bottom: 30px;
-    }
-    .logo img {
-      height: 80px;
-      width: auto;
-    }
-
-    /* ===== Progress Bar ===== */
-    .progress-wrapper {
-      width: 100%;
-      background-color: #eee;
-      border-radius: 25px;
-      overflow: hidden;
+    /* ─── Progress bar at bottom ──────────────────────────────────── */
+    .progress-bar-container {
+      height: 8px;
+      background: #111;
+      display:none; 
+      border-top: 1px solid #0f0;
     }
     .progress-bar {
-      width: 0%;
-      height: 20px;
-      background-color: #4CAF50;
-      transition: width 0.2s ease-in-out;
+      height: 100%;
+      display:none; 
+      width: 0;
+      background: #0f0;
+      transition: width 0.2s ease;
     }
-    .progress-text {
-      margin-top: 10px;
-      font-size: 14px;
+
+    .lined-image {
+      position: relative;
+      margin-top: 40px;
+      height: 50px;
+      display: inline-block;
     }
-    .status {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #666;
-      min-height: 1.2em;
+
+    .lined-image img {
+      display: block;
+      height: 50px;
     }
+
+    .line-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .line {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: black;
+      opacity: 0.4;
+    }
+
+
   </style>
 </head>
 <body>
-  <audio style="display:none" src="https://koolkat226.github.io/oos/sounds/loading.mp3" autoplay loop></audio>
-  <div class="save-container">
-    <!-- Your logo (adjust path if needed) -->
-    <div class="logo">
-      <img src="./images/logoblue.png" alt="My Logo" />
-    </div>
-
-    <!-- Progress bar -->
-    <div class="progress-wrapper">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
-    <div class="progress-text" id="progress-text">0 / 0</div>
-    <div class="status" id="status-text">
-      ‣ Starting Installation...
-    </div>
+    <div class="lined-image"> <img src="./images/logoblue.png" alt="Logo">  <div class="line-container">
+      <!-- 12 lines -->
+      <div class="line" style="top: 8.33%"></div>
+      <div class="line" style="top: 16.66%"></div>
+      <div class="line" style="top: 25%"></div>
+      <div class="line" style="top: 33.33%"></div>
+      <div class="line" style="top: 41.66%"></div>
+      <div class="line" style="top: 50%"></div>
+      <div class="line" style="top: 58.33%"></div>
+      <div class="line" style="top: 66.66%"></div>
+      <div class="line" style="top: 75%"></div>
+      <div class="line" style="top: 83.33%"></div>
+      <div class="line" style="top: 91.66%"></div>
+      <div class="line" style="top: 100%"></div>
+    </div></div>
+  <div id="console" class="console">
+    ‣ Starting installer...
   </div>
-<iframe src="./appstore/preinstaller.html" style="display:none"></iframe>
+  <div class="progress-bar-container">
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+
+  <iframe src="./appstore/preinstaller.html" style="display:none"></iframe>
+
   <script>
-    // -------------------------------------
-    // 1) Configuration
-    // -------------------------------------
-    const CACHE_NAME = 'oos';
-    const START_URL = '/oos/';                // Root of your site
-    const ORIGIN = window.location.origin; // e.g. "https://yourdomain.com"
-    const MAX_PAGES = 1000;                // Safety cap on number of pages
-
-    // Pages that aren’t linked anywhere can be forced here:
-    const EXTRA_URLS = [
-      '/oos/index.html',
-      '/oos/logon.html',
-      '/oos/returnfresh.html',
-      // …etc
-    ];
-
-    // -------------------------------------
-    // 2) DOM References
-    // -------------------------------------
-    const progressBarEl   = document.getElementById('progress-bar');
-    const progressTextEl  = document.getElementById('progress-text');
-    const statusTextEl    = document.getElementById('status-text');
-
-    // -------------------------------------
-    // 3) Register Service Worker at root
-    // -------------------------------------
-    async function registerServiceWorker() {
-      if (!('serviceWorker' in navigator)) {
-        statusTextEl.textContent = 'OlexOS 7 is not supported in this browser.';
-        throw new Error('SW unsupported');
-      }
-      try {
-        const reg = await navigator.serviceWorker.register('./service-worker.js');
-        statusTextEl.textContent = 'Service worker registered. Waiting for activation…';
-        await navigator.serviceWorker.ready;
-        statusTextEl.textContent = 'Service worker is active.';
-      } catch (err) {
-        console.error('SW registration failed:', err);
-        statusTextEl.textContent = '❌ Failed to Install OlexOS 7';
-        throw err;
-      }
+    // ─── Logging helper ─────────────────────────────────────────────
+    function log(line) {
+      const c = document.getElementById('console');
+      c.textContent += '\n' + line;
+      c.scrollTop = c.scrollHeight;
     }
 
-    // -------------------------------------
-    // 4) Crawl the site to collect ALL page URLs
-    //    (fetch + parse <a href> links)
-    // -------------------------------------
-    async function crawlSiteAndCollectPageURLs() {
-      const visitedPages = new Set();
-      const queue = [new URL(START_URL, ORIGIN).href];
-      const collectedPages = new Set();
+    // ─── Config ─────────────────────────────────────────────────────
+    const CACHE_NAME = 'oos';
+    const START_URL  = '/oos/';
+    const ORIGIN     = window.location.origin;
+    const MAX_PAGES  = 1000;
+    const EXTRA_URLS = ['/oos/index.html','/oos/logon.html','/oos/returnfresh.html'];
 
-      // Seed “extra” orphan URLs
-      EXTRA_URLS.forEach((rel) => {
+    const progressBar = document.getElementById('progress-bar');
+    const wasBefore   = !!localStorage.getItem('oos_urls');
+    const action      = wasBefore ? 'Updating' : 'Installing';
+    localStorage.removeItem('oos_urls');
+
+    // ─── Service Worker ────────────────────────────────────────────
+    async function registerSW() {
+      log(`‣ Requesting OOS install server…`);
+      if (!('serviceWorker' in navigator)) {
+        log('❌ SW unsupported');
+        throw new Error('SW unsupported');
+      }
+      await navigator.serviceWorker.register('./service-worker.js');
+      log('Connection Established');
+      await navigator.serviceWorker.ready;
+      log('OOS Server Ready');
+    }
+
+    // ─── Crawl pages ────────────────────────────────────────────────
+    async function crawl() {
+      log(`‣ Verfiying Files (max ${MAX_PAGES} blocks)…`);
+      const visited = new Set();
+      const queue   = [ new URL(START_URL, ORIGIN).href ];
+      const found   = new Set();
+
+      EXTRA_URLS.forEach(rel => {
         try {
           const abs = new URL(rel, ORIGIN).href;
           if (abs.startsWith(ORIGIN)) queue.push(abs);
-        } catch (_) {}
+        } catch {}
       });
 
-      while (queue.length > 0 && visitedPages.size < MAX_PAGES) {
-        const pageURL = queue.shift();
-        if (visitedPages.has(pageURL)) continue;
-        visitedPages.add(pageURL);
+      while (queue.length && visited.size < MAX_PAGES) {
+        const url = queue.shift();
+        if (visited.has(url)) continue;
+        visited.add(url);
 
-        statusTextEl.textContent = `🔍 Did you know OOS 7 works offline? (${visitedPages.size}): `;
-        let htmlText;
+        log(`Block ${visited.size} fetched`);
+        let html;
         try {
-          const resp = await fetch(pageURL, { credentials: 'same-origin' });
-          if (!resp.ok) continue;
-          htmlText = await resp.text();
-        } catch (err) {
-          console.warn('Error fetching page for crawl:', pageURL, err);
+          const res = await fetch(url, { credentials: 'same-origin' });
+          if (!res.ok) continue;
+          html = await res.text();
+        } catch {
+          log(`⚠️  Fetch error, skipping`);
           continue;
         }
 
-        collectedPages.add(pageURL);
-
-        // Parse for same-origin <a href> links
-        const doc = new DOMParser().parseFromString(htmlText, 'text/html');
-        doc.querySelectorAll('a[href]').forEach((anchor) => {
-          const raw = anchor.getAttribute('href');
-          if (
-            raw &&
-            !raw.startsWith('mailto:') &&
-            !raw.startsWith('tel:') &&
-            !raw.startsWith('javascript:') &&
-            !raw.startsWith('#')
-          ) {
+        found.add(url);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        doc.querySelectorAll('a[href]').forEach(a => {
+          const raw = a.getAttribute('href');
+          if (raw && !/^(mailto:|tel:|javascript:|#)/.test(raw)) {
             try {
-              const abs = new URL(raw, pageURL).href;
-              if (abs.startsWith(ORIGIN) && !visitedPages.has(abs)) {
+              const abs = new URL(raw, url).href;
+              if (abs.startsWith(ORIGIN) && !visited.has(abs)) {
                 queue.push(abs);
               }
-            } catch (_) {}
+            } catch{}
           }
         });
       }
 
-      return Array.from(collectedPages);
+      log(`Verified ${visited.size} blocks`);
+      return Array.from(found);
     }
 
-    // -------------------------------------
-    // 5) For each page URL:
-    //    • Load in a hidden <iframe> (no sandbox)
-    //    • Wait for it to load + a brief delay
-    //    • Call iframe.contentWindow.__getAllAssets()
-    //      (the helper we inserted into each page)
-    //    • Collect that array of URLs + the page URL itself
-    // -------------------------------------
-    async function discoverAssetsFromPages(pageURLs) {
-      const discoveredAssets = new Set();
+    // ─── Discover assets ────────────────────────────────────────────
+    async function discoverAssets(pages) {
+      log(`‣ ${action} OOS 7…`);
+      const all = new Set();
 
-      for (let i = 0; i < pageURLs.length; i++) {
-        const pageURL = pageURLs[i];
-        statusTextEl.textContent = `🔄 Installing OOS 7 (${i + 1}/${pageURLs.length}): `;
-
-        // 1) Create a hidden iframe
+      for (let i = 0; i < pages.length; i++) {
+        log(`Processing block ${i+1}/${pages.length}`);
         const iframe = document.createElement('iframe');
-        iframe.style.position = 'fixed';
-        iframe.style.left = '-9999px';
-        iframe.style.top = '-9999px';
-        iframe.style.width = '1px';
-        iframe.style.height = '1px';
-        iframe.src = pageURL;
+        Object.assign(iframe.style, {
+          position: 'fixed', left: '-9999px',
+          top: '-9999px', width: '1px', height: '1px'
+        });
+        iframe.src = pages[i];
         document.body.appendChild(iframe);
 
-        // 2) Wait for it to finish loading (or timeout)
-        await new Promise((resolve) => {
-          let resolved = false;
-          iframe.addEventListener('load', () => {
-            if (!resolved) {
-              resolved = true;
-              resolve();
-            }
-          });
-          setTimeout(() => {
-            if (!resolved) {
-              resolved = true;
-              console.warn('Iframe load timeout:', pageURL);
-              resolve();
-            }
-          }, 15000); // 15s max
+        await new Promise(r => {
+          let done = false;
+          iframe.onload = () => { if (!done) { done=true; r(); } };
+          setTimeout(() => { if (!done) { done=true; r(); } }, 15000);
         });
+        await new Promise(r => setTimeout(r, 500));
 
-        // 3) Wait an extra 1 second so any JS-injected assets can appear 
-        await new Promise(r => setTimeout(r, 1000));
-
-        // 4) Call the helper __getAllAssets() that was added to each page
         try {
           const win = iframe.contentWindow;
           if (win && typeof win.__getAllAssets === 'function') {
-            // Add the page URL itself
-            discoveredAssets.add(pageURL);
-
-            // Get an array of all assets that page might need
-            const assets = await win.__getAllAssets();
-            assets.forEach(u => discoveredAssets.add(u));
-          } else {
-            console.warn('Helper __getAllAssets() not found on page:', pageURL);
+            all.add(pages[i]);
+            (await win.__getAllAssets()).forEach(u => all.add(u));
           }
-        } catch (err) {
-          console.warn('Could not invoke __getAllAssets() on iframe:', pageURL, err);
+        } catch {
+          log(`⚠️  No asset helper on page ${i+1}`);
         }
 
-        // 5) Remove the iframe before moving on
         document.body.removeChild(iframe);
       }
 
-      return Array.from(discoveredAssets);
+      log(`Discovered ${all.size} unique blocks`);
+      return Array.from(all);
     }
 
-    // -------------------------------------
-    // 6) Cache every page + discovered asset URL
-    // -------------------------------------
-    async function cacheAllResources(urls) {
-      let cache;
-      try {
-        cache = await caches.open(CACHE_NAME);
-      } catch (err) {
-        console.error('Could not open cache:', err);
-        throw err;
-      }
+    // ─── Cache everything ────────────────────────────────────────────
+    async function cacheAll(urls) {
+      log(`‣ Adding ${urls.length} resources…`);
+      await caches.delete(CACHE_NAME);
+      const cache = await caches.open(CACHE_NAME);
 
-      const total = urls.length;
-      let count = 0;
-
-      for (let resourceURL of urls) {
+      for (let i = 0; i < urls.length; i++) {
         try {
-          // Use cache.add() (which does fetch + store)
-          await cache.add(resourceURL);
-        } catch (err) {
-          console.warn('Failed to cache:', resourceURL, err);
-        } finally {
-          count++;
-          const pct = Math.round((count / total) * 100);
-          progressBarEl.style.width = pct + '%';
-          progressTextEl.textContent = `${count} / ${total}`;
+          await cache.add(urls[i]);
+          log(`➕ Resource ${i+1}/${urls.length}`);
+        } catch {
+          log(`❌ Failed ${i+1}/${urls.length}`);
         }
+        const pct = Math.round((i+1) / urls.length * 100);
+        progressBar.style.width = pct + '%';
       }
 
-      statusTextEl.textContent = '✅ OlexOS 7 is installed!';
-      window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
+      log(`${action} successful`);
+      localStorage.setItem('oos_urls', JSON.stringify(urls));
+      log(`‣ OOS 7 Installed…`);
+      window.location.href = 'https://koolkat226.github.io/oos/index.html';
+      
     }
 
-    // -------------------------------------
-    // 7) Main orchestration
-    // -------------------------------------
-    async function runSaveProcess() {
+    // ─── Orchestrator ───────────────────────────────────────────────
+    (async function run() {
       try {
-        await registerServiceWorker();
-      } catch {
-        return; // abort if SW registration fails
-      }
-
-      // A) Crawl to get all page URLs
-      statusTextEl.textContent = '🔍 Checking your info…';
-      let pageURLs = [];
-      try {
-        pageURLs = await crawlSiteAndCollectPageURLs();
+        await registerSW();
+        const pages = await crawl();
+        if (!pages.length) {
+          log('⚠️ No pages found; aborting.');
+          return;
+        }
+        const assets = await discoverAssets(pages);
+        await cacheAll(assets);
       } catch (err) {
-        console.error('Crawling error:', err);
-        statusTextEl.textContent = '❌ Unable to connect to OOS servers';
-        return;
+        log(`❌ Error: ${err.message}`);
       }
-
-      if (pageURLs.length === 0) {
-        statusTextEl.textContent = '⚠️ Failed to find installation files';
-        return;
-      }
-
-      // B) For each page, load in iframe and call __getAllAssets()
-      statusTextEl.textContent = `🔄 Downloading assets ${pageURLs.length}`;
-      let allURLs;
-      try {
-        const assetURLs = await discoverAssetsFromPages(pageURLs);
-        // Merge the page URLs + the asset URLs, de-duped
-        const merged = new Set([...pageURLs, ...assetURLs]);
-        allURLs = Array.from(merged);
-      } catch (err) {
-        console.error('Asset discovery error:', err);
-        statusTextEl.textContent = '❌ Error during asset download';
-        return;
-      }
-
-      // C) Cache everything
-      statusTextEl.textContent = `📥 Downloading ${allURLs.length} total resources…`;
-      await cacheAllResources(allURLs);
-    }
-
-    // Kick off once the page loads
-    window.addEventListener('load', () => {
-      runSaveProcess();
-    });
+    })();
   </script>
 </body>
 </html>
