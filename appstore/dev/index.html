@@ -275,22 +275,32 @@
         if (res.error) return alert(res.error);
         const c = document.getElementById('apps');
         c.innerHTML = '';
-        res.apps.forEach(app => {
-          const div = document.createElement('div');
-          // any non‑zero published → green
-          div.className = 'tile' + (app.published !== '0' ? ' published' : '');
+res.apps.forEach(app => {
+  // treat empty or undefined published as "0" (unpublished)
+  const pub = app.published || '0';
 
-          div.innerHTML = `
-            <img src="${app.iconUrl}" onerror="this.src='../fallback.png';">
-            <div>${app.appName}</div>
-            <button onclick="edit('${app.appName}','${app.creator}')">Edit</button>
-            <button onclick="confirmDelete('${app.appName}','${app.creator}', this)">Delete</button>
-            <button onclick="togglePub('${app.appName}','${app.creator}','${app.published}')">
-              ${app.published !== '0' ? 'Unpublish' : 'Publish'}
-            </button>
-          `;
-          c.appendChild(div);
-        });
+  // create the tile
+  const div = document.createElement('div');
+  div.className = 'tile' + (pub !== '0' ? ' published' : '');
+
+  div.innerHTML = `
+    <img src="${app.iconUrl}" onerror="this.src='../fallback.png';">
+    <div>${app.appName}</div>
+    <button onclick="edit('${app.appName}','${app.creator}')">Edit</button>
+    <button onclick="confirmDelete('${app.appName}','${app.creator}', this)">
+      Delete
+    </button>
+    <button onclick="togglePub(
+                      '${app.appName}',
+                      '${app.creator}',
+                      '${pub}'
+                    )">
+      ${pub !== '0' ? 'Unpublish' : 'Publish'}
+    </button>
+  `;
+  document.getElementById('apps').appendChild(div);
+});
+
 
         // create‑tile
         const ct = document.createElement('div');
