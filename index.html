@@ -2668,7 +2668,7 @@ function logincheck() {
 
         const orb = getRandomAsset('orbs', 4);
         const mouth = getRandomAsset('mouths', 4);
-        const eyes = getRandomAsset('eyes', 10);
+        const eyes = getRandomAsset('eyes', 12);
         const hair = getRandomAsset('hairs', 12);
         const eyewear = getRandomAsset('eyewear', 6, 0.2);
         const hat = getRandomAsset('hats', 15, 0.3);
@@ -4012,6 +4012,41 @@ function logincheck() {
     window.changeHatAndHair = changeHatAndHair;
     window.stopHatWatcher = stopHatWatcher;
   </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Prevent commas in the specified inputs
+  ['sayMain', 'sayMain2'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener('keydown', e => {
+        if (e.key === ',' || e.keyCode === 188) {
+          e.preventDefault();
+        }
+      });
+    }
+  });
+
+  // 2. Disable right-click context menu globally
+  document.addEventListener('contextmenu', e => {
+    e.preventDefault();
+  });
+
+  // 3. Block Ctrl+I, Ctrl+U, Ctrl+S
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey) {
+      const forbidden = ['i', 'u', 's'];
+      if (forbidden.includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  // 4. Prevent dragging of any element (images, links, etc.)
+  document.addEventListener('dragstart', e => {
+    e.preventDefault();
+  });
+});
+</script>
 
 
 
