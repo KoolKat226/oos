@@ -4045,8 +4045,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('dragstart', e => {
     e.preventDefault();
   });
+
+  // 5. Disable text selection except inside inputs/textareas
+  document.addEventListener('selectstart', e => {
+    const tag = e.target.tagName.toLowerCase();
+    if (tag !== 'input' && tag !== 'textarea') {
+      e.preventDefault();
+    }
+  });
 });
 </script>
+
 
 
 
