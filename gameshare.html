@@ -108,6 +108,14 @@
       font-family: 'Nunito Sans', sans-serif;
       z-index:10000;
     }
+    .tile button.running {
+      background: #cccccc;
+      color: #666;
+      cursor: not-allowed;
+      pointer-events: none;
+      font-weight: bold;
+    }
+
   </style>
 </head>
 <body>
@@ -127,17 +135,54 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <script>
+    const POPUP_NAME     = 'gamesharePopup';
+    let openGameWindow   = null;
+    let lastRunningBtn   = null;
+
+    // Poll for popup close to reset button state
+    setInterval(() => {
+      if (openGameWindow && openGameWindow.closed) {
+        if (lastRunningBtn) {
+          lastRunningBtn.textContent = 'Play';
+          lastRunningBtn.classList.remove('running');
+          lastRunningBtn = null;
+        }
+        openGameWindow = null;
+      }
+    }, 500);
+
+    // 3) Before we unload the lobby page, close the popup if it’s still open
+    window.addEventListener('beforeunload', () => {
+      if (openGameWindow && !openGameWindow.closed) {
+        openGameWindow.close();
+      }
+    });
+
     // ─── CONFIG ─────────────────────────────────────────────────────────────────
     const APPS_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSbEFnVd9-meryPcq40T7btzywuJZdrzkfIOFfbFDmym131n1YXDvMmGCcHapIT1h868dBFKsNB1ZtK/pub?output=csv';
     const USERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSaBDFzjOsd8sjrvo0bzHf7CfEsSmJVzp-2htZG6d0U9_a6biy1lsvx1odlb_-Mae5u_8T4YogMw59p/pub?output=csv';
+    const POLL_INTERVAL = 20 * 1000; // 30 seconds
+
+    let appsIndex     = {};
+    let currentGames  = new Set();   // keys of games currently shown (e.g. "title___author")
 
     // ─── CSV LOADING (with PapaParse) ─────────────────────────────────
     async function fetchCsv(url) {
       const txt = await fetch(url).then(r => r.text());
-      // skipEmptyLines: true  → ignores blank lines
-      // quoteChar: '"'        → default
-      const parsed = Papa.parse(txt.trim(), { skipEmptyLines: true });
-      return parsed.data;  // array-of-arrays
+      return Papa.parse(txt.trim(), { skipEmptyLines: true }).data;
+    }
+
+    function buildLookup(rows, colA, colD) {
+      const idx = {};
+      rows.forEach(r => {
+        idx[r[colA] + '___' + r[colD]] = r;
+      });
+      return idx;
+    }
+
+    function clearLobby() {
+      document.getElementById('lobbyGrid').innerHTML = '';
+      currentGames.clear();
     }
 
     // reuse your decoder map
@@ -196,7 +241,13 @@
     }
 
     // ─── RENDERING ────────────────────────────────────────────────────────────────
+    
     function renderTile(userRow, appRow) {
+      const key = userRow[1] + '___' + userRow[4];
+      // skip duplicates
+      if (currentGames.has(key)) return;
+      currentGames.add(key);
+      
       const grid = document.getElementById('lobbyGrid');
       const tile = document.createElement('div');
       tile.className = 'tile';
@@ -274,11 +325,60 @@
       const btn = document.createElement('button');
       btn.textContent = 'Play';
       btn.onclick = () => {
-        const encoded = appRow[2];              // col C = encoded code
-        const decoded = reverseConvert(encoded);
-        const blob = new Blob([decoded], { type:'text/html' });
-        document.getElementById('appFrame').src = URL.createObjectURL(blob);
-        document.getElementById('overlay').style.display = 'block';
+        // reset previous button state
+        if (lastRunningBtn && lastRunningBtn !== btn) {
+          lastRunningBtn.textContent = 'Play';
+          lastRunningBtn.classList.remove('running');
+        }
+
+        const decoded   = reverseConvert(appRow[2]);    // raw HTML
+        const gameTitle = appRow[0] || 'Gameshare App';
+        const iconURL   = appRow[1] || appRow[4];
+
+        // open (or re-use) the named popup
+        openGameWindow = window.open('', POPUP_NAME);
+        if (!openGameWindow) {
+          return alert("Popup blocked! Please allow popups for this site.");
+        }
+
+        const doc = openGameWindow.document;
+        let frame = doc.getElementById('gameFrame');
+
+        if (!frame) {
+          // first time: write a minimal shell
+          doc.open();
+          doc.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${gameTitle}</title>
+                <link id="favicon" rel="icon" href="${iconURL}" type="image/png">
+                <style>
+                  body { margin:0; overflow:hidden; }
+                  iframe { width:100vw; height:100vh; border:none; }
+                </style>
+              </head>
+              <body>
+                <iframe id="gameFrame"></iframe>
+              </body>
+            </html>
+          `);
+          doc.close();
+          frame = doc.getElementById('gameFrame');
+        } else {
+          // update title & favicon on reuse
+          doc.title = gameTitle;
+          doc.getElementById('favicon').href = iconURL;
+        }
+
+        // **HERE**: inject your game HTML directly
+        frame.srcdoc = decoded;
+        openGameWindow.focus();
+
+        // mark this button “Running”
+        btn.textContent = 'Running';
+        btn.classList.add('running');
+        lastRunningBtn = btn;
       };
       tile.appendChild(btn);
 
@@ -291,6 +391,47 @@
       document.getElementById('appFrame').src = '';
       ov.style.display = 'none';
     }
+
+    // ─── POLL & UPDATE ────────────────────────────────────────────────────────────
+    async function updateLobby() {
+      try {
+        // 1) Fetch apps CSV (only once, or you can refresh this too)
+        if (Object.keys(appsIndex).length === 0) {
+          const appsRows = await fetchCsv(APPS_CSV_URL);
+          appsIndex = buildLookup(appsRows, 0, 3);
+        }
+
+        // 2) Fetch users CSV and rerender
+        const usersRows = await fetchCsv(USERS_CSV_URL);
+        // Reset lobby if something changed (optional smarter diffing)
+        clearLobby();
+
+        let anyGame = false;
+        const today = new Date();
+        const todayStr = (today.getMonth()+1) + '/' + today.getDate();
+
+        usersRows.forEach(user => {
+          const userDate = (user[5] || '').trim();
+          if (userDate !== todayStr) return;
+          const m = /I am currently sharing\s+"([^"]+)"\s+by\s+"([^"]+)"/.exec(user[4] || '');
+          if (!m) return;
+          const key = m[1] + '___' + m[2];
+          const appRow = appsIndex[key];
+          if (appRow) {
+            renderTile(user, appRow);
+            anyGame = true;
+          }
+        });
+
+        document.getElementById('emptyMessage').style.display = anyGame ? 'none' : 'block';
+      } catch (err) {
+        console.error("Failed to update lobby:", err);
+      }
+    }
+
+    // ─── BOOTSTRAP + AUTO-POLL ─────────────────────────────────────────────────────
+    updateLobby();
+    setInterval(updateLobby, POLL_INTERVAL);
   </script>
   <script>
 document.addEventListener('DOMContentLoaded', () => {
