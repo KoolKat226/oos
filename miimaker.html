@@ -45,7 +45,6 @@
 
     body {
       overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
-      background: #fff;
     }
   </style>
 
@@ -142,7 +141,7 @@
       width: var(--emoji-size);\
 
       height: var(--emoji-size);
-      background: url('sparkle.png') center/contain no-repeat;
+      background: url('https://icons.iconarchive.com/icons/google/noto-emoji-activities/512/52705-sparkles-icon.png') center/contain no-repeat;
       pointer-events: none;
       transform: translate(-50%, -50%);
       animation: sparkle 0.6s ease-out;
@@ -268,7 +267,7 @@
     function updatePreview(layers) {
       layers.forEach((url, idx) => {
         const cat = categories[idx];
-        previewImgs[cat].src = url;
+        previewImgs[cat].src = decodeURIComponent(url);
       });
       const savedColor = getSavedHairColor();
       previewImgs['hairs'].style.filter = hairFilters[savedColor];
@@ -346,14 +345,25 @@
       }
     });
 
-    // blink logic
     function blinkCycle() {
+      // Check if any decoded preview image source contains "data:image"
+      const hasDataImage = Object.values(previewImgs).some(img => {
+        try {
+          return decodeURIComponent(img.src).startsWith('data:image');
+        } catch {
+          return false;
+        }
+      });
+
+      if (hasDataImage) return; // Stop the blink cycle entirely
+
       const eyeImg = previewImgs['eyes'];
       const original = eyeImg.src;
       eyeImg.src = './emoji/eyes/blink.png';
       setTimeout(() => { eyeImg.src = original; }, 200);
       setTimeout(blinkCycle, 2000 + Math.random() * 3000);
     }
+
 
     layersText.addEventListener('change', () => {
       const layers = getSavedLayers();
@@ -393,37 +403,5 @@
     }
 
   </script>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Disable right-click context menu globally
-  document.addEventListener('contextmenu', e => {
-    e.preventDefault();
-  });
-
-  // 2. Block Ctrl+I, Ctrl+U, Ctrl+S
-  document.addEventListener('keydown', e => {
-    if (e.ctrlKey) {
-      const forbidden = ['i', 'u', 's'];
-      if (forbidden.includes(e.key.toLowerCase())) {
-        e.preventDefault();
-      }
-    }
-  });
-
-  // 3. Prevent dragging of any element (images, links, etc.)
-  document.addEventListener('dragstart', e => {
-    e.preventDefault();
-  });
-
-  // 4. Disable text selection except inside inputs/textareas
-  document.addEventListener('selectstart', e => {
-    const tag = e.target.tagName.toLowerCase();
-    if (tag !== 'input' && tag !== 'textarea') {
-      e.preventDefault();
-    }
-  });
-});
-</script>
-
 </body>
 </html>
