@@ -302,7 +302,7 @@
       emojiUrls.forEach((url, i) => {
         if (!url) return;
         const img = document.createElement('img');
-        img.src = url;
+        img.src = decodeURIComponent(src);
 
         // Apply hair filter to second-to-last layer (usually the hair layer)
         if (i === emojiUrls.length - 3) {
