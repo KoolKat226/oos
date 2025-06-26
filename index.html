@@ -2920,8 +2920,9 @@ function logincheck() {
 
         const head = document.createElement('div');
         head.className = 'emoji-head';
-        layers.forEach(src => {
-          if (!src) return;
+        layers.forEach(encodedSrc => {
+          if (!encodedSrc) return;
+          const src = decodeURIComponent(encodedSrc);
           const img = document.createElement('img');
           img.src = src;
           img.className = 'emoji-layer';
@@ -3036,7 +3037,7 @@ function logincheck() {
       head.className = 'emoji-head';
       layers.forEach(src => {
         const img = document.createElement('img');
-        img.src = src;
+        img.src = decodeURIComponent(src);
         img.className = 'emoji-layer';
         if (src.includes('/hairs/')) {
           const map = {
