@@ -46,6 +46,129 @@
     body {
       overflow: overlay; /* Use `overlay` instead of `scroll` for WebKit to overlay scrollbar */
     }
+    /* --- Add “Add My Face” button --- */
+    #add-face-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-weight: 800;
+      background: #dbdbdb;
+      color: #292929;
+      filter: drop-shadow(0px 7px 15px #545454);
+      border: none;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      transition: 0.2s;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 500;
+    }
+
+    #add-face-btn:hover {
+      transition: 0.2s;
+      scale: 1.05;
+    }
+
+    #add-face-btn:active {
+      filter: drop-shadow(0px 0px 0px #545454);
+      transition: 0.2s;
+      scale: 0.85;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8) inset;
+    }
+
+    .face-capture-buttons button {
+      padding: 6px 12px;
+      font-size: 14px;
+      font-family: 'Nunito Sans', sans-serif;
+      font-weight: 800;
+      background: #c3d3de;
+      color: #292929;
+      filter: drop-shadow(0px 7px 7px #878787);
+      border: none;
+      border-radius: 24px;
+      transition: 0.2s;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .face-capture-buttons button:hover {
+      transition: 0.2s;
+      scale: 1.05;
+    }
+
+    .face-capture-buttons button:active {
+      filter: drop-shadow(0px 0px 0px #545454);
+      transition: 0.2s;
+      scale: 0.85;
+      box-shadow: 0 0 20px rgba(64, 64, 64, 0.8) inset;
+    }
+
+    /* when in “Remove face” mode, make the button red */
+    #add-face-btn.remove-ready {
+      background: #d9928b;  /* cherry-red */
+      border-color: #c0392b;
+      color: #382624;
+    }
+
+
+    /* Don’t let the #preview img rule grab the button icon */
+    #add-face-btn img {
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+      margin-right: 0px;
+      margin-left: 16px;
+      vertical-align: middle;
+    }
+
+
+    /* --- Face‐capture overlay + controls --- */
+    .face-capture-overlay {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px; height: 300px;
+      padding: 84px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      overflow: hidden;
+      display: none;
+      z-index: 1;
+    }
+
+    #preview_hairs {
+      z-index: 2;
+    }
+
+    #preview_eyewear {
+      z-index: 2;
+    }
+
+    #preview_hats {
+      z-index: 2;
+    }
+    .face-capture-overlay video,
+    .face-capture-overlay img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .face-capture-buttons {
+      position: absolute;
+      top: calc(50% + 180px);
+      left: 50%; transform: translateX(-50%);
+      display: flex; gap: 10px;
+      z-index: 500;
+    }
+    .face-capture-buttons button {
+      padding: 8px 14px;
+      font-size: 14px;
+    }
+
   </style>
 
   <style>
@@ -162,6 +285,15 @@
       width: 100%;
       height: 100%;
     }
+    /* mirror horizontally */
+    #face-video {
+      transform: scaleX(-1);
+    }
+
+    /* if you also want the preview image flipped too: */
+    #face-preview-img {
+      transform: scaleX(-1);
+    }
   </style>
   <style>
     .toast {
@@ -199,6 +331,25 @@
     <div id="content">
       <div id="preview">
         <div id="torso-dot"></div>
+        <!-- Add‐My‐Face trigger -->
+        <button id="add-face-btn">
+          Add my face
+          <img src="./icons/camera.svg" alt="📷" width="16" height="16">
+        </button>
+        <canvas id="canvas" width="512" height="512" style="display:none;"></canvas>
+
+        <!-- Overlay for live video & capture -->
+        <div id="face-overlay" class="face-capture-overlay">
+          <video id="face-video" autoplay playsinline></video>
+          <img id="face-preview-img" style="display:none;">
+        </div>
+
+        <!-- Capture/Cancel or Apply/Redo/Cancel buttons -->
+        <div id="face-controls" class="face-capture-buttons" style="display:none;">
+          <button id="face-capture-btn">Capture</button>
+          <button id="face-cancel-btn">Cancel</button>
+        </div>
+
       </div>
       <div id="sidebar"></div>
     </div>
@@ -379,6 +530,208 @@
       saveAndUpdateHairColor(getSavedHairColor());
       setTimeout(blinkCycle, 3000 + Math.random() * 2000);
     });
+
+    // --- Element refs ---
+    const canvas        = document.getElementById('canvas');
+    const addFaceBtn    = document.getElementById('add-face-btn');
+    const faceOverlay   = document.getElementById('face-overlay');
+    const faceVideo     = document.getElementById('face-video');
+    const facePreviewImg= document.getElementById('face-preview-img');
+    const faceControls  = document.getElementById('face-controls');
+    let captureBtn      = document.getElementById('face-capture-btn');
+    let cancelBtn       = document.getElementById('face-cancel-btn');
+
+    let originalEyeUrl, savedLayers;
+
+    // Start capture: show video + Capture/Cancel
+    async function startFaceCapture() {
+      const eyeImg = previewImgs['eyes'];
+      originalEyeUrl = eyeImg.src;
+      savedLayers = getSavedLayers();
+
+      addFaceBtn.style.display    = 'none';
+      eyeImg.style.display        = 'none';
+      faceOverlay.style.display   = 'block';
+      faceVideo.style.display     = 'block';
+      facePreviewImg.style.display= 'none';
+      faceControls.style.display  = 'flex';
+
+      // reset controls to capture/cancel
+      faceControls.innerHTML = `
+        <button id="face-capture-btn">Capture</button>
+        <button id="face-cancel-btn">Cancel</button>
+      `;
+      bindInitialControls();
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        faceVideo.srcObject = stream;
+      } catch {
+        alert('Camera access denied');
+      }
+    }
+
+    // Bind Capture & Cancel
+    function bindInitialControls() {
+      captureBtn = document.getElementById('face-capture-btn');
+      cancelBtn  = document.getElementById('face-cancel-btn');
+      captureBtn.addEventListener('click', captureHandler);
+      cancelBtn.addEventListener('click', resetFaceUI);
+    }
+
+    // Capture handler: switch to preview + Apply/Redo/Cancel
+    function captureHandler() {
+    const ctx = canvas.getContext('2d');
+    const finalSize = 512, padding = 88;
+    canvas.width = canvas.height = finalSize;
+    ctx.clearRect(0, 0, finalSize, finalSize);
+
+    // 1) set up circular clip
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(finalSize/2, finalSize/2, (finalSize - padding*2)/2, 0, 2*Math.PI);
+    ctx.clip();
+
+    // 2) flip horizontally
+    ctx.translate(finalSize, 0);
+    ctx.scale(-1, 1);
+
+    // 3) draw the video
+    const size = Math.min(faceVideo.videoWidth, faceVideo.videoHeight);
+    const sx = (faceVideo.videoWidth - size)/2;
+    const sy = (faceVideo.videoHeight - size)/2;
+    // note: destination coords still use padding
+    ctx.drawImage(
+      faceVideo,
+      sx, sy, size, size,
+      padding, padding,
+      finalSize - padding*2,
+      finalSize - padding*2
+    );
+
+    // 4) restore your transform+clip
+    ctx.restore();
+
+      // stop camera
+      faceVideo.srcObject.getTracks().forEach(t => t.stop());
+
+      // build data URL
+      let raw;
+      try { raw = canvas.toDataURL('image/webp', .75); }
+      catch { raw = canvas.toDataURL('image/png'); }
+      const encoded = encodeURIComponent(raw);
+
+      // show captured image
+      facePreviewImg.src             = decodeURIComponent(encoded);
+      faceVideo.style.display        = 'none';
+      facePreviewImg.style.display   = 'block';
+
+      // switch controls
+      faceControls.innerHTML = `
+        <button id="face-apply-btn">Apply</button>
+        <button id="face-redo-btn">Redo</button>
+        <button id="face-cancel2-btn">Cancel</button>
+      `;
+      bindPostCaptureControls(encoded);
+    }
+
+    // Bind Apply, Redo, Cancel after capture
+    function bindPostCaptureControls(encoded) {
+      const layers = getSavedLayers();
+      document.getElementById('face-apply-btn').addEventListener('click', () => {
+        const layers = savedLayers.slice();
+        layers[2] = encoded;               // eyes index
+        saveAndUpdateLayers(layers);
+        showToastOnce();
+        // Delay the manual replacement slightly
+        const decodedDataUrl = decodeURIComponent(encoded);
+        setTimeout(() => {
+          const eyeImgEl = document.getElementById('preview_eyes');
+          eyeImgEl.src = decodedDataUrl; 
+          updateFaceButtonText();
+        }, 100);  // 100ms delay
+
+        resetFaceUI();
+      });
+
+
+
+      document.getElementById('face-redo-btn').addEventListener('click', () => {
+        // restart capture
+        startFaceCapture();
+      });
+      document.getElementById('face-cancel2-btn').addEventListener('click', resetFaceUI);
+    }
+
+    // Reset entire face-capture UI
+    function resetFaceUI() {
+      // stop camera if still running
+      if (faceVideo.srcObject)
+        faceVideo.srcObject.getTracks().forEach(t => t.stop());
+
+      // restore eyes
+      previewImgs['eyes'].src         = originalEyeUrl;
+      previewImgs['eyes'].style.display = '';
+
+      // hide overlay & controls, show add button
+      faceOverlay.style.display      = 'none';
+      faceControls.style.display     = 'none';
+      addFaceBtn.style.display       = '';
+    }
+
+    // kick off binding
+    addFaceBtn.addEventListener('click', startFaceCapture);
+    // 1) Helper to set the button text + icon
+    function updateFaceButtonText() {
+      const layers = getSavedLayers();
+      const isDefaultEye = layers[2].endsWith('/eyes/1.png');
+
+      if (isDefaultEye) {
+        addFaceBtn.innerHTML = 
+          '<img src="./emoji/lily.jpg" ' +
+              'alt="custom face" ' +
+              'style="width:26px; height:26px; border-radius:50%;">' +
+          'Add custom face';
+      } else {
+        addFaceBtn.innerHTML = 
+          '<img src="./emoji/lily.jpg" ' +
+              'alt="custom face" ' +
+              'style="opacity: 0.5; width:26px; height:26px; border-radius:50%;">' +
+          'Remove custom face';
+      }
+
+      addFaceBtn.classList.toggle('remove-ready', !isDefaultEye);
+    }
+
+
+    // 2) Override the single click handler to toggle add vs remove
+    addFaceBtn.removeEventListener('click', startFaceCapture);
+    addFaceBtn.addEventListener('click', () => {
+      const layers = getSavedLayers();
+      const isDefaultEye = layers[2].endsWith('/eyes/1.png');
+
+      if (isDefaultEye) {
+        // launch the capture UI
+        startFaceCapture();
+      } else {
+        // remove custom face → reset to 1.png
+        const newLayers = layers.slice();
+        newLayers[2] = './emoji/eyes/1.png';
+        saveAndUpdateLayers(newLayers);
+
+        // immediate preview swap
+        const eyeEl = document.getElementById('preview_eyes');
+        eyeEl.src = newLayers[2];
+
+        // reset button
+        updateFaceButtonText();
+      }
+    });
+
+    // 3) Whenever you Apply a new face, call updateFaceButtonText()
+    //    (and also once on initial page load)
+    document.addEventListener('DOMContentLoaded', updateFaceButtonText);
+
   </script>
   <script>
     let toastShown = false;
