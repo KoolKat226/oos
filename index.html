@@ -1150,6 +1150,11 @@ opacity: 0.5;
       <img id="audioIcon" src="./images/soundbtn.png" alt="Audio Icon">
     </button>
 
+    <button onclick="toggleFullscreen()" class="icon-btn" title="Fullscreen">
+      <img id="fullscreenIcon" src="./images/fullscreenbtn.png" alt="Fullscreen Icon">
+    </button>
+
+
     <!-- Settings icon placeholder -->
     <button class="icon-btn" id="settingsBtn" title="Settings">
       <img id="settingsIcon" src="./images/settingsbtn.png" alt="Settings">
@@ -1427,6 +1432,10 @@ function logincheck() {
 
         <button style="display:none" onclick="disableBgAudioControl()" class="icon-btn" id="speakBtn2" title="Speak">
           <img id="audioIcon" src="./images/soundbtn.png" alt="Speak">
+        </button>
+
+        <button onclick="toggleFullscreen()" class="icon-btn" title="Fullscreen">
+          <img id="fullscreenIcon2" src="./images/fullscreenbtn.png" alt="Fullscreen Icon">
         </button>
 
         <button class="icon-btn" id="settingsBtn2" title="Settings">
@@ -2024,9 +2033,9 @@ function logincheck() {
         background: rgba(0,0,0,0.8);
         color: white;
         padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
+        border-radius: 30px;
         max-width: 300px;
-        font-family: sans-serif;
+        font-family: 'Nunito Sans', sans-serif;
         box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         opacity: 0;
         transform: translateY(10px);
@@ -2038,7 +2047,7 @@ function logincheck() {
       }
       #controls {
         margin-bottom: 1rem;
-        font-family: sans-serif;
+        font-family: 'Nunito Sans', sans-serif;
       }
       #controls label {
         margin-left: 0.5rem;
@@ -2058,6 +2067,28 @@ function logincheck() {
     <p style="display:none;" id="status">Idle</p>
     <div id="toast-container"></div>
 
+  <script>
+    function toggleFullscreen() {
+      window.parent.postMessage({ type: "toggle-fullscreen" }, "*");
+    }
+
+    // Listen for fullscreen state updates from parent
+    window.addEventListener("message", (event) => {
+      const data = event.data;
+      if (data?.type === "fullscreen-state") {
+        updateIcon("fullscreenIcon", data.active);
+        updateIcon("fullscreenIcon2", data.active);
+      }
+    });
+
+    function updateIcon(id, isActive) {
+      const icon = document.getElementById(id);
+      if (!icon) return;
+      icon.src = isActive
+        ? "./images/fullscreenbtn_active.png"
+        : "./images/fullscreenbtn.png";
+    }
+  </script>
     <script>
     (function(){
       const BASE_URL      = "https://docs.google.com/spreadsheets/d/1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0/gviz/tq?sheet=Sheet1&tqx=out:json";
