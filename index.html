@@ -1841,106 +1841,97 @@ function logincheck() {
     }
   </script>
 <script>
-  let bgAudioFile = './bg.mp3';
+  // ← one place to change the file name
+  const bgAudioFile = './bg.mp3';
 
   const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-  const bgGainNode = bgAudioContext.createGain();
+  const bgGainNode    = bgAudioContext.createGain();
   bgGainNode.gain.value = 0;
 
   const bgAudioElement = new Audio(bgAudioFile);
   bgAudioElement.loop = true;
 
-  const bgAudioSource = bgAudioContext.createMediaElementSource(bgAudioElement);
-  bgAudioSource.connect(bgGainNode).connect(bgAudioContext.destination);
+  const source = bgAudioContext.createMediaElementSource(bgAudioElement);
+  source.connect(bgGainNode).connect(bgAudioContext.destination);
 
   const BG_FADE_DURATION = 1.5; // seconds
 
-  // core fade-in / fade-out
-  const _play = () => {
+  function isDisabled() {
+    return localStorage.getItem('bgAudioDisabled') === 'true';
+  }
+
+  // core fade‑in
+  function playBgAudio() {
+    if (isDisabled() || document.visibilityState !== 'visible') return;
     bgAudioContext.resume();
-    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
-    bgGainNode.gain.setValueAtTime(0, bgAudioContext.currentTime);
-    bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
+    const t = bgAudioContext.currentTime;
+    bgGainNode.gain.cancelScheduledValues(t);
+    bgGainNode.gain.setValueAtTime(0, t);
+    bgGainNode.gain.linearRampToValueAtTime(1, t + BG_FADE_DURATION);
     bgAudioElement.play();
-  };
-  const _pause = () => {
-    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
-    bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
-    bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
+  }
+
+  // core fade‑out
+  function pauseBgAudio() {
+    const t = bgAudioContext.currentTime;
+    bgGainNode.gain.cancelScheduledValues(t);
+    bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, t);
+    bgGainNode.gain.linearRampToValueAtTime(0, t + BG_FADE_DURATION);
     setTimeout(() => bgAudioElement.pause(), BG_FADE_DURATION * 1000);
-  };
-
-  // — unlock-once logic —
-  let hasUnlocked = false;
-  function tryPlayBgAudio() {
-    if (hasUnlocked || document.visibilityState !== 'visible') return;
-    hasUnlocked = true;
-    _play();
   }
 
-  // — resume-on-return logic —
-  function resumeBgAudio() {
-    if (!hasUnlocked || document.visibilityState !== 'visible') return;
-    _play();
-  }
+  // expose for your buttons
+  window.playBgAudio  = playBgAudio;
+  window.pauseBgAudio = pauseBgAudio;
 
-  function realPauseBgAudio() {
-    _pause();
-  }
+  // — first‑gesture unlock (once) —
+  const unlock = () => { playBgAudio(); };
+  document.addEventListener('click',      unlock, { once: true });
+  document.addEventListener('keydown',    unlock, { once: true });
+  document.addEventListener('touchstart', unlock, { once: true });
 
-  // expose for external controls (and disable toggle)
-  window.playBgAudio  = tryPlayBgAudio;
-  window.pauseBgAudio = realPauseBgAudio;
-
-  // — gesture unlock (once) —
-  document.addEventListener('click',      tryPlayBgAudio,   { once: true });
-  document.addEventListener('keydown',    tryPlayBgAudio,   { once: true });
-  document.addEventListener('touchstart', tryPlayBgAudio,   { once: true });
-
-  // — auto-pause & auto-resume on tab visibility —
+  // — auto‑pause/resume on tab switch —
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      resumeBgAudio();
+      playBgAudio();
     } else {
-      realPauseBgAudio();
+      pauseBgAudio();
     }
   });
 
-  // — disable toggle + icon logic (unchanged) —
+  // — toggle & icon logic —
   function updateAudioIcon() {
     const icon = document.getElementById('audioIcon');
     if (!icon) return;
-    const disabled = localStorage.getItem('bgAudioDisabled') === 'true';
-    icon.src = disabled
+    icon.src = isDisabled()
       ? './images/soundbtn_pressed.png'
       : './images/soundbtn.png';
   }
 
   function disableBgAudioControl() {
-    const disabled = localStorage.getItem('bgAudioDisabled') === 'true';
-
-    if (!disabled) {
-      realPauseBgAudio();
-      window.playBgAudio = () => {};
-      window.pauseBgAudio = () => {};
-      localStorage.setItem('bgAudioDisabled', 'true');
+    const turningOff = !isDisabled();
+    localStorage.setItem('bgAudioDisabled', turningOff);
+    if (turningOff) {
+      pauseBgAudio();
       console.log('Background audio disabled');
     } else {
-      window.playBgAudio = tryPlayBgAudio;
-      window.pauseBgAudio = realPauseBgAudio;
-      localStorage.removeItem('bgAudioDisabled');
-      tryPlayBgAudio();
-      console.log('Background audio enabled and playing');
+      console.log('Background audio enabled');
+      playBgAudio();
     }
     updateAudioIcon();
   }
 
-  if (localStorage.getItem('bgAudioDisabled') === 'true') {
-    window.playBgAudio = () => {};
-    window.pauseBgAudio = () => {};
+  window.disableBgAudioControl = disableBgAudioControl;
+
+  // honor stored setting on load
+  if (isDisabled()) {
+    // make sure it stays off
+    pauseBgAudio();
+  } else {
+    // if you want it to start immediately when page loads in active tab:
+    // playBgAudio();
   }
 
-  window.disableBgAudioControl = disableBgAudioControl;
   window.addEventListener('DOMContentLoaded', updateAudioIcon);
 </script>
 
