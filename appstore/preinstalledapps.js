@@ -8,18 +8,18 @@ var preinstalledapps = [
     code: "*oosango*iframe name*ooseq**oosap*minecraft*oosap* frameborder*ooseq**oosap*0*oosap* style*ooseq**oosap*position*ooscol* absolute*oosscol* top*ooscol* 0*oosscol* left*ooscol* 0*oosscol* border*ooscol* none*oosscol* height*ooscol* 100%*oosscol* width*ooscol* 100%*oosscol**oosap* src*ooseq**oosap*./miimaker.html*oosap**oosangc**oosango**oosfsl*iframe*oosangc*"
   },
   {
-    name: "Minecraft",
-    developer: "Mojang",
-    icon: "https://koolkat226.github.io/oosg/minecraft/icon.png",
-    preview: "https://media.gamestop.com/i/gamestop/10108713_10113355_10114672_10115479_10115481_10117341_10130409_10151161_10155679_10162373_SCR09?$screen$",
-    code: "*oosango*iframe frameborder*ooseq**oosap*0*oosap* style*ooseq**oosap*position*ooscol* absolute*oosscol* top*ooscol* 0*oosscol* left*ooscol* 0*oosscol* border*ooscol* none*oosscol* height*ooscol* 100%*oosscol* width*ooscol* 100%*oosscol**oosap* src*ooseq**oosap*https*ooscol**oosfsl**oosfsl*koolkat226.github.io*oosfsl*oosg*oosfsl*minecraft.html?game*ooseq*minecraft*oosap**oosangc**oosango**oosfsl*iframe*oosangc*"
-  },
-  {
     name: "Browser",
     developer: "Jackson Coolman",
     icon: "./images/browsericon.png",
     preview: "",
     code: "*oosango*iframe frameborder*ooseq**oosap*0*oosap* style*ooseq**oosap*position*ooscol* absolute*oosscol* top*ooscol* 0*oosscol* left*ooscol* 0*oosscol* border*ooscol* none*oosscol* height*ooscol* 100%*oosscol* width*ooscol* 100%*oosscol**oosap* src*ooseq**oosap*.*oosfsl*browser*oosfsl*index.html*oosap**oosangc**oosango**oosfsl*iframe*oosangc*"
+  },
+  {
+    name: "Minecraft",
+    developer: "Mojang",
+    icon: "https://koolkat226.github.io/oosg/minecraft/icon.png",
+    preview: "https://media.gamestop.com/i/gamestop/10108713_10113355_10114672_10115479_10115481_10117341_10130409_10151161_10155679_10162373_SCR09?$screen$",
+    code: "*oosango*iframe frameborder*ooseq**oosap*0*oosap* style*ooseq**oosap*position*ooscol* absolute*oosscol* top*ooscol* 0*oosscol* left*ooscol* 0*oosscol* border*ooscol* none*oosscol* height*ooscol* 100%*oosscol* width*ooscol* 100%*oosscol**oosap* src*ooseq**oosap*https*ooscol**oosfsl**oosfsl*koolkat226.github.io*oosfsl*oosg*oosfsl*minecraft.html?game*ooseq*minecraft*oosap**oosangc**oosango**oosfsl*iframe*oosangc*"
   },
   {
     name: "Stickman Hook",
