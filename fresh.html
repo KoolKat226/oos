@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Create New Data Row</title>
+  <title>OOS Account Creator</title>
   <link href="./fontfiles/font.css" rel="stylesheet">
   <style>
 
@@ -55,12 +55,13 @@
     .hint {
       margin-top: -10px;
       margin-bottom: 20px;
-      font-size: 14px;
+      font-size: 10px;
       color: #666;
     }
     input[type="text"] {
       border: none;
       background: #f9f9f9;
+      font-family: 'Nunito Sans', sans-serif;
       padding: 16px 20px;
       width: 400px;
       border-radius: 30px;
@@ -115,7 +116,9 @@
       transform: none;
     }
     .popup-btn {
-      background: #e7e7e7ff;
+      background: #d0d9d3;
+      color: #333333;
+      padding: 8px 30px;
       font-weight: 600;
     }
 
@@ -192,11 +195,11 @@
   </div>
 
   <!-- Visible form -->
-  <div class="label">Enter your Name:</div>
-  <input type="text" autocomplete="off" id="colB" maxlength="16">
+  <div style="display:none" class="label">Enter your Name:</div>
+  <input type="text" placeholder="Enter your first name..." autocomplete="off" id="colB" maxlength="16">
 
-  <div class="label">Plaza destination:</div>
-  <input type="text" autocomplete="off" id="colH">
+  <div style="display:none" class="label">Enter your Location</div>
+  <input type="text" placeholder="Enter your location..." autocomplete="off" id="colH">
   <div class="hint">Example: "OHS" (All caps) will add you to Orange High School</div>
   <script>
     // Function to block comma input
@@ -222,7 +225,7 @@
     });
   </script>
 
-  <button class="popup-btn" onclick="openPopup()">Edit my Plaza Character</button>
+  <button class="popup-btn" onclick="openPopup()">Create a Plaza Character</button>
   <style>
     .submit-container {
       display: flex;
@@ -236,11 +239,15 @@
     <button onclick="window.location.href = './logon.html';" class="return-btn">
       Cancel
     </button>
-    <button class="submit-btn" id="createBtn" onclick="createRow()" disabled>
+    <button class="submit-btn" id="createBtn" onclick="createRow(); toggleFullscreen();" disabled>
       Create my OOS
     </button>
   </div>
-
+  <script>
+    function toggleFullscreen() {
+      window.parent.postMessage({ type: "toggle-fullscreen" }, "*");
+    }
+  </script>
 
   <!-- Background blur overlay -->
   <div id="overlay"></div>
