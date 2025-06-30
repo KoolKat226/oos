@@ -1841,7 +1841,6 @@ function logincheck() {
     }
   </script>
 <script>
-  // ← one place to change the file name
   let bgAudioFile = './bg.mp3';
 
   const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1856,7 +1855,7 @@ function logincheck() {
 
   const BG_FADE_DURATION = 1.5; // seconds
 
-  // internal play/pause
+  // core fade-in / fade-out
   const _play = () => {
     bgAudioContext.resume();
     bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
@@ -1864,7 +1863,6 @@ function logincheck() {
     bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
     bgAudioElement.play();
   };
-
   const _pause = () => {
     bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
     bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
@@ -1872,12 +1870,17 @@ function logincheck() {
     setTimeout(() => bgAudioElement.pause(), BG_FADE_DURATION * 1000);
   };
 
-  // avoid multiple unlocks
+  // — unlock-once logic —
   let hasUnlocked = false;
-
   function tryPlayBgAudio() {
     if (hasUnlocked || document.visibilityState !== 'visible') return;
     hasUnlocked = true;
+    _play();
+  }
+
+  // — resume-on-return logic —
+  function resumeBgAudio() {
+    if (!hasUnlocked || document.visibilityState !== 'visible') return;
     _play();
   }
 
@@ -1885,21 +1888,21 @@ function logincheck() {
     _pause();
   }
 
-  // expose (may be overridden by disable toggle)
-  window.playBgAudio = tryPlayBgAudio;
+  // expose for external controls (and disable toggle)
+  window.playBgAudio  = tryPlayBgAudio;
   window.pauseBgAudio = realPauseBgAudio;
 
-  // — unlock on first user gesture, once-only each
-  document.addEventListener('click',    tryPlayBgAudio, { once: true });
-  document.addEventListener('keydown',  tryPlayBgAudio, { once: true });
-  document.addEventListener('touchstart', tryPlayBgAudio, { once: true });
+  // — gesture unlock (once) —
+  document.addEventListener('click',      tryPlayBgAudio,   { once: true });
+  document.addEventListener('keydown',    tryPlayBgAudio,   { once: true });
+  document.addEventListener('touchstart', tryPlayBgAudio,   { once: true });
 
-  // — auto-pause/resume on tab change
+  // — auto-pause & auto-resume on tab visibility —
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      window.playBgAudio();
+      resumeBgAudio();
     } else {
-      window.pauseBgAudio();
+      realPauseBgAudio();
     }
   });
 
@@ -1907,16 +1910,16 @@ function logincheck() {
   function updateAudioIcon() {
     const icon = document.getElementById('audioIcon');
     if (!icon) return;
-    const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
-    icon.src = isDisabled
+    const disabled = localStorage.getItem('bgAudioDisabled') === 'true';
+    icon.src = disabled
       ? './images/soundbtn_pressed.png'
       : './images/soundbtn.png';
   }
 
   function disableBgAudioControl() {
-    const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
+    const disabled = localStorage.getItem('bgAudioDisabled') === 'true';
 
-    if (!isDisabled) {
+    if (!disabled) {
       realPauseBgAudio();
       window.playBgAudio = () => {};
       window.pauseBgAudio = () => {};
@@ -1929,7 +1932,6 @@ function logincheck() {
       tryPlayBgAudio();
       console.log('Background audio enabled and playing');
     }
-
     updateAudioIcon();
   }
 
@@ -1941,6 +1943,7 @@ function logincheck() {
   window.disableBgAudioControl = disableBgAudioControl;
   window.addEventListener('DOMContentLoaded', updateAudioIcon);
 </script>
+
 
 
 
