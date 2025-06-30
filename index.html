@@ -1848,7 +1848,6 @@ function logincheck() {
   const bgGainNode = bgAudioContext.createGain();
   bgGainNode.gain.value = 0;
 
-  // use the variable here
   const bgAudioElement = new Audio(bgAudioFile);
   bgAudioElement.loop = true;
 
@@ -1857,7 +1856,7 @@ function logincheck() {
 
   const BG_FADE_DURATION = 1.5; // seconds
 
-  // the “real” play/pause
+  // internal play/pause
   const _play = () => {
     bgAudioContext.resume();
     bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
@@ -1873,40 +1872,29 @@ function logincheck() {
     setTimeout(() => bgAudioElement.pause(), BG_FADE_DURATION * 1000);
   };
 
-  // wrappers that also check visibility
-  let realPlayBgAudio = function () {
-    if (document.visibilityState !== 'visible') return;
+  // avoid multiple unlocks
+  let hasUnlocked = false;
+
+  function tryPlayBgAudio() {
+    if (hasUnlocked || document.visibilityState !== 'visible') return;
+    hasUnlocked = true;
     _play();
-    removeGestureListeners();
-  };
+  }
 
-  let realPauseBgAudio = function () {
+  function realPauseBgAudio() {
     _pause();
-  };
+  }
 
-  // expose (maybe overridden by disable control)
-  window.playBgAudio = realPlayBgAudio;
+  // expose (may be overridden by disable toggle)
+  window.playBgAudio = tryPlayBgAudio;
   window.pauseBgAudio = realPauseBgAudio;
 
-  // —————————————————————————————
-  // initial “play on first gesture” setup:
-  function onFirstGesture() {
-    window.playBgAudio();
-  }
-  function addGestureListeners() {
-    document.addEventListener("click", onFirstGesture);
-    document.addEventListener("keydown", onFirstGesture);
-    document.addEventListener("touchstart", onFirstGesture);
-  }
-  function removeGestureListeners() {
-    document.removeEventListener("click", onFirstGesture);
-    document.removeEventListener("keydown", onFirstGesture);
-    document.removeEventListener("touchstart", onFirstGesture);
-  }
-  addGestureListeners();
+  // — unlock on first user gesture, once-only each
+  document.addEventListener('click',    tryPlayBgAudio, { once: true });
+  document.addEventListener('keydown',  tryPlayBgAudio, { once: true });
+  document.addEventListener('touchstart', tryPlayBgAudio, { once: true });
 
-  // —————————————————————————————
-  // visibility auto-pause/resume
+  // — auto-pause/resume on tab change
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       window.playBgAudio();
@@ -1915,8 +1903,7 @@ function logincheck() {
     }
   });
 
-  // —————————————————————————————
-  // your disable toggle and icon logic
+  // — disable toggle + icon logic (unchanged) —
   function updateAudioIcon() {
     const icon = document.getElementById('audioIcon');
     if (!icon) return;
@@ -1931,32 +1918,30 @@ function logincheck() {
 
     if (!isDisabled) {
       realPauseBgAudio();
-      window.playBgAudio = function () {};
-      window.pauseBgAudio = function () {};
+      window.playBgAudio = () => {};
+      window.pauseBgAudio = () => {};
       localStorage.setItem('bgAudioDisabled', 'true');
       console.log('Background audio disabled');
     } else {
-      window.playBgAudio = realPlayBgAudio;
+      window.playBgAudio = tryPlayBgAudio;
       window.pauseBgAudio = realPauseBgAudio;
       localStorage.removeItem('bgAudioDisabled');
-      realPlayBgAudio();
+      tryPlayBgAudio();
       console.log('Background audio enabled and playing');
     }
 
     updateAudioIcon();
   }
 
-  // Apply state on load
   if (localStorage.getItem('bgAudioDisabled') === 'true') {
-    window.playBgAudio = function () {};
-    window.pauseBgAudio = function () {};
+    window.playBgAudio = () => {};
+    window.pauseBgAudio = () => {};
   }
 
   window.disableBgAudioControl = disableBgAudioControl;
-
-  // Set initial icon on load
   window.addEventListener('DOMContentLoaded', updateAudioIcon);
 </script>
+
 
 
 
