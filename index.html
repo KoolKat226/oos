@@ -1844,21 +1844,23 @@ function logincheck() {
   const bgAudioFile = './bg.mp3';
   const BG_FADE_DURATION = 1.5; // seconds
 
-  // set up WebAudio
-  const ctx     = new (window.AudioContext || window.webkitAudioContext)();
-  const gain    = ctx.createGain();
+  // Web Audio setup
+  const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+  const gain = ctx.createGain();
   gain.gain.value = 0;
+
   const audioEl = new Audio(bgAudioFile);
-  audioEl.loop  = true;
+  audioEl.loop = true;
+
   ctx.createMediaElementSource(audioEl)
      .connect(gain).connect(ctx.destination);
 
-  // disabled flag helper
+  // check your disable‑flag
   function isDisabled() {
     return localStorage.getItem('bgAudioDisabled') === 'true';
   }
 
-  // core fade‑in
+  // fade‑in/out
   function doFadeIn() {
     ctx.resume();
     const t = ctx.currentTime;
@@ -1867,8 +1869,6 @@ function logincheck() {
     gain.gain.linearRampToValueAtTime(1, t + BG_FADE_DURATION);
     audioEl.play();
   }
-
-  // core fade‑out
   function doFadeOut() {
     const t = ctx.currentTime;
     gain.gain.cancelScheduledValues(t);
@@ -1877,33 +1877,31 @@ function logincheck() {
     setTimeout(() => audioEl.pause(), BG_FADE_DURATION * 1000);
   }
 
-  // ————————— unlock-once logic —————————
+  // ——— only unlock on your play‑button click ———
   let hasUnlocked = false;
-  function unlockAudio() {
+  const button = document.getElementById('audioIcon');
+  button && button.addEventListener('click', () => {
     if (hasUnlocked || isDisabled() || document.visibilityState !== 'visible') return;
     hasUnlocked = true;
     doFadeIn();
-  }
-  document.addEventListener('click',      unlockAudio, { once: true });
-  document.addEventListener('keydown',    unlockAudio, { once: true });
-  document.addEventListener('touchstart', unlockAudio, { once: true });
+    updateAudioIcon();
+  }, { once: true });
 
-  // ————————— resume/pause on tab switch —————————
+  // ——— auto‑pause / resume on tab switch ———
   document.addEventListener('visibilitychange', () => {
-    if (isDisabled()) return;       // never auto start if disabled
+    if (isDisabled()) return;
     if (document.visibilityState === 'visible') {
-      // only fade in on return if we already unlocked once
       if (hasUnlocked) doFadeIn();
     } else {
       doFadeOut();
     }
   });
 
-  // ————————— exposed controls —————————
+  // ——— expose manual controls ———
   window.playBgAudio  = () => { if (!isDisabled() && hasUnlocked) doFadeIn(); };
   window.pauseBgAudio = () => { doFadeOut(); };
 
-  // ————————— toggle & icon logic —————————
+  // ——— toggle + icon logic ———
   function updateAudioIcon() {
     const icon = document.getElementById('audioIcon');
     if (!icon) return;
@@ -1913,14 +1911,11 @@ function logincheck() {
   }
 
   window.disableBgAudioControl = function() {
-    const turnOff = !isDisabled();
-    localStorage.setItem('bgAudioDisabled', turnOff);
-    if (turnOff) {
+    const turningOff = !isDisabled();
+    localStorage.setItem('bgAudioDisabled', turningOff);
+    if (turningOff) {
       doFadeOut();
-      console.log('Background audio disabled');
     } else {
-      console.log('Background audio enabled');
-      // if page is visible and already unlocked, restart
       if (hasUnlocked && document.visibilityState === 'visible') {
         doFadeIn();
       }
@@ -1928,7 +1923,7 @@ function logincheck() {
     updateAudioIcon();
   };
 
-  // honor stored flag on load
+  // honor stored setting
   if (isDisabled()) {
     doFadeOut();
   }
