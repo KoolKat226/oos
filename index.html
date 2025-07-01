@@ -1841,95 +1841,116 @@ function logincheck() {
     }
   </script>
 <script>
-  const bgAudioFile     = './bg.mp3';
-  const BG_FADE_SECONDS = 1.5;
+  // ← one place to change the file name
+  let bgAudioFile = './bg.mp3';
 
-  // — Web Audio setup —
-  const ctx  = new (window.AudioContext || window.webkitAudioContext)();
-  const gain = ctx.createGain();
-  gain.gain.value = 0;
-  const audioEl = new Audio(bgAudioFile);
-  audioEl.loop = true;
-  ctx.createMediaElementSource(audioEl)
-     .connect(gain).connect(ctx.destination);
+  const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const bgGainNode    = bgAudioContext.createGain();
+  bgGainNode.gain.value = 0;
 
-  // — Helpers —
-  function doFadeIn() {
-    ctx.resume();
-    const t = ctx.currentTime;
-    gain.gain.cancelScheduledValues(t);
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(1, t + BG_FADE_SECONDS);
-    audioEl.play();
-  }
-  function doFadeOut() {
-    const t = ctx.currentTime;
-    gain.gain.cancelScheduledValues(t);
-    gain.gain.setValueAtTime(gain.gain.value, t);
-    gain.gain.linearRampToValueAtTime(0, t + BG_FADE_SECONDS);
-    setTimeout(() => audioEl.pause(), BG_FADE_SECONDS * 1000);
-  }
-  function isDisabled() {
-    return localStorage.getItem('bgAudioDisabled') === 'true';
-  }
+  // use the variable here
+  const bgAudioElement = new Audio(bgAudioFile);
+  bgAudioElement.loop = true;
+
+  const bgAudioSource = bgAudioContext.createMediaElementSource(bgAudioElement);
+  bgAudioSource.connect(bgGainNode).connect(bgAudioContext.destination);
+
+  const BG_FADE_DURATION = 1.5; // seconds
+
+  let realPlayBgAudio = function () {
+    if (localStorage.getItem('bgAudioDisabled') === 'true') return;
+    bgAudioContext.resume();
+    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+    bgGainNode.gain.setValueAtTime(0, bgAudioContext.currentTime);
+    bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
+    bgAudioElement.play();
+    document.removeEventListener("click", playBgAudio);
+    document.removeEventListener("keydown", playBgAudio);
+    document.removeEventListener("touchstart", playBgAudio);
+  };
+
+  let realPauseBgAudio = function () {
+    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+    bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
+    bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
+    setTimeout(() => {
+      bgAudioElement.pause();
+    }, BG_FADE_DURATION * 1000);
+  };
+
+  window.playBgAudio  = realPlayBgAudio;
+  window.pauseBgAudio = realPauseBgAudio;
+
   function updateAudioIcon() {
-    const ico = document.getElementById('audioIcon');
-    if (!ico) return;
-    ico.src = isDisabled()
+    const icon = document.getElementById('audioIcon');
+    if (!icon) return;
+    const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
+    icon.src = isDisabled
       ? './images/soundbtn_pressed.png'
       : './images/soundbtn.png';
   }
 
-  // — State flag to stop re‑unlocks/fades —
-  let hasStarted = false;
+  function disableBgAudioControl() {
+    const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
 
-  // — 1) Initial unlock: only #audioIcon, once —
-  const btn = document.getElementById('audioIcon');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      // guard: only once, only when visible, only when not disabled
-      if (hasStarted || isDisabled() || document.visibilityState !== 'visible') return;
-      hasStarted = true;
-      doFadeIn();
-      updateAudioIcon();
-    }, { once: true });
+    if (!isDisabled) {
+      realPauseBgAudio();
+      window.playBgAudio  = function () {};
+      window.pauseBgAudio = function () {};
+      localStorage.setItem('bgAudioDisabled', 'true');
+      console.log('Background audio disabled');
+    } else {
+      window.playBgAudio  = realPlayBgAudio;
+      window.pauseBgAudio = realPauseBgAudio;
+      localStorage.removeItem('bgAudioDisabled');
+      realPlayBgAudio();
+      console.log('Background audio enabled and playing');
+    }
+
+    updateAudioIcon();
   }
 
-  // — 2) Tab‑switch fades (only after first unlock) —
+  // Apply state on load
+  if (localStorage.getItem('bgAudioDisabled') === 'true') {
+    window.playBgAudio  = function () {};
+    window.pauseBgAudio = function () {};
+  }
+
+  window.disableBgAudioControl = disableBgAudioControl;
+
+  // Set initial icon on load
+  window.addEventListener('DOMContentLoaded', updateAudioIcon);
+
+  // ——————————————————————————————————————————————
+  // PAUSE/RESUME WHEN TAB OR WINDOW BLURS/VISIBILITY CHANGES
+  // ——————————————————————————————————————————————
+
+  // Using the Page Visibility API
   document.addEventListener('visibilitychange', () => {
-    if (isDisabled() || !hasStarted) return;
-    if (document.visibilityState === 'visible') {
-      doFadeIn();
+    if (document.hidden) {
+      realPauseBgAudio();
     } else {
-      doFadeOut();
+      realPlayBgAudio();
     }
   });
 
-  // — 3) Expose manual controls (won’t auto‑repeat fade) —
-  window.playBgAudio  = () => { if (hasStarted && !isDisabled()) doFadeIn(); };
-  window.pauseBgAudio = () => { doFadeOut(); };
+  // Fallback for browsers without full Visibility API support
+  window.addEventListener('blur', () => {
+    realPauseBgAudio();
+  });
+  window.addEventListener('focus', () => {
+    realPlayBgAudio();
+  });
 
-  // — 4) On/off toggle —
-  window.disableBgAudioControl = () => {
-    const turnOff = !isDisabled();
-    localStorage.setItem('bgAudioDisabled', turnOff);
-    if (turnOff) {
-      doFadeOut();
-      console.log('Background audio disabled');
-    } else {
-      console.log('Background audio enabled');
-      if (hasStarted && document.visibilityState === 'visible') {
-        doFadeIn();
-      }
-    }
-    updateAudioIcon();
-  };
-
-  // — 5) Honor saved setting on load —
-  if (isDisabled()) {
-    doFadeOut();
+  // ——————————————————————————————————————————————
+  // ONE-TIME USER INTERACTION TO UNLOCK AUDIO (if needed)
+  // ——————————————————————————————————————————————
+  function playBgAudio(evt) {
+    realPlayBgAudio();
   }
-  window.addEventListener('DOMContentLoaded', updateAudioIcon);
+  document.addEventListener("click",    playBgAudio);
+  document.addEventListener("keydown",  playBgAudio);
+  document.addEventListener("touchstart", playBgAudio);
 </script>
 
 
