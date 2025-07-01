@@ -788,6 +788,67 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<script>
+(function() {
+  const bgAudioFile = './bg.mp3';
+  const FADE_DURATION = 1.5; // seconds
+
+  // Audio setup
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0;
+  const audioEl = new Audio(bgAudioFile);
+  audioEl.loop = true;
+  const source = audioCtx.createMediaElementSource(audioEl);
+  source.connect(gainNode).connect(audioCtx.destination);
+
+  // Fade-in
+  function playAudio() {
+    // don't play if user disabled
+    if (localStorage.getItem('bgAudioDisabled') === 'true') return;
+    audioCtx.resume();
+    gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + FADE_DURATION);
+    audioEl.play();
+  }
+
+  // Fade-out
+  function pauseAudio() {
+    gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + FADE_DURATION);
+    setTimeout(() => audioEl.pause(), FADE_DURATION * 1000);
+  }
+
+  // Watch localStorage flag every second
+  let lastState = localStorage.getItem('bgAudioDisabled');
+  setInterval(() => {
+    const curr = localStorage.getItem('bgAudioDisabled');
+    if (curr !== lastState) {
+      lastState = curr;
+      if (curr === 'true') pauseAudio();
+      else playAudio();
+    }
+  }, 1000);
+
+  // Pause/resume on tab visibility
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pauseAudio();
+    else playAudio();
+  });
+
+  // Fallback blur/focus
+  window.addEventListener('blur',  pauseAudio);
+  window.addEventListener('focus', playAudio);
+
+  // Initial play/pause on load
+  window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('bgAudioDisabled') === 'true') pauseAudio();
+    else playAudio();
+  });
+})();
+</script>
 
 </body>
 </html>
