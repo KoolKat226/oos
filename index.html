@@ -1857,29 +1857,41 @@ function logincheck() {
 
   const BG_FADE_DURATION = 1.5; // seconds
 
-  let realPlayBgAudio = function () {
+  // --- TRACK IF USER/CONTROLLED PAUSE HAPPENED ---
+  let manualPaused = false;
+
+  // --- CORE PLAY/PAUSE ROUTINES ---
+  function _playBgAudio() {
+    // never play if disabled
     if (localStorage.getItem('bgAudioDisabled') === 'true') return;
     bgAudioContext.resume();
     bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
     bgGainNode.gain.setValueAtTime(0, bgAudioContext.currentTime);
     bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
     bgAudioElement.play();
+  }
+
+  function _pauseBgAudio() {
+    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+    bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
+    bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
+    setTimeout(() => bgAudioElement.pause(), BG_FADE_DURATION * 1000);
+  }
+
+  // --- PUBLIC INTERFACES, WHICH SET manualPaused ---
+  window.playBgAudio = function() {
+    manualPaused = false;
+    _playBgAudio();
+    // remove first‐touch listeners if you still want that
     document.removeEventListener("click", playBgAudio);
     document.removeEventListener("keydown", playBgAudio);
     document.removeEventListener("touchstart", playBgAudio);
   };
 
-  let realPauseBgAudio = function () {
-    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
-    bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
-    bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
-    setTimeout(() => {
-      bgAudioElement.pause();
-    }, BG_FADE_DURATION * 1000);
+  window.pauseBgAudio = function() {
+    manualPaused = true;
+    _pauseBgAudio();
   };
-
-  window.playBgAudio  = realPlayBgAudio;
-  window.pauseBgAudio = realPauseBgAudio;
 
   function updateAudioIcon() {
     const icon = document.getElementById('audioIcon');
@@ -1894,64 +1906,71 @@ function logincheck() {
     const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
 
     if (!isDisabled) {
-      realPauseBgAudio();
-      window.playBgAudio  = function () {};
-      window.pauseBgAudio = function () {};
+      window.pauseBgAudio();
+      // lock out future play calls
+      window.playBgAudio  = function () { manualPaused = true; /* noop */ };
+      window.pauseBgAudio = function () { /* already paused */ };
       localStorage.setItem('bgAudioDisabled', 'true');
       console.log('Background audio disabled');
     } else {
-      window.playBgAudio  = realPlayBgAudio;
-      window.pauseBgAudio = realPauseBgAudio;
       localStorage.removeItem('bgAudioDisabled');
-      realPlayBgAudio();
+      // restore normal controls
+      window.playBgAudio  = function() {
+        manualPaused = false;
+        _playBgAudio();
+      };
+      window.pauseBgAudio = function() {
+        manualPaused = true;
+        _pauseBgAudio();
+      };
+      window.playBgAudio();
       console.log('Background audio enabled and playing');
     }
 
     updateAudioIcon();
   }
 
-  // Apply state on load
+  // Apply stored‐disabled state immediately
   if (localStorage.getItem('bgAudioDisabled') === 'true') {
-    window.playBgAudio  = function () {};
-    window.pauseBgAudio = function () {};
+    window.playBgAudio  = function () { manualPaused = true; };
+    window.pauseBgAudio = function () { /* noop */ };
   }
 
   window.disableBgAudioControl = disableBgAudioControl;
-
-  // Set initial icon on load
   window.addEventListener('DOMContentLoaded', updateAudioIcon);
 
-  // ——————————————————————————————————————————————
+  // ————————————————————————————————————————————————————————————
   // PAUSE/RESUME WHEN TAB OR WINDOW BLURS/VISIBILITY CHANGES
-  // ——————————————————————————————————————————————
-
-  // Using the Page Visibility API
+  // ————————————————————————————————————————————————————————————
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      realPauseBgAudio();
+      // page hide always pauses
+      _pauseBgAudio();
     } else {
-      realPlayBgAudio();
+      // only auto‐resume if user hasn't manually paused
+      if (!manualPaused) _playBgAudio();
     }
   });
 
-  // Fallback for browsers without full Visibility API support
+  // fallback blur/focus
   window.addEventListener('blur', () => {
-    realPauseBgAudio();
+    _pauseBgAudio();
   });
   window.addEventListener('focus', () => {
-    realPlayBgAudio();
+    if (!manualPaused) _playBgAudio();
   });
 
-  // ——————————————————————————————————————————————
-  // ONE-TIME USER INTERACTION TO UNLOCK AUDIO (if needed)
-  // ——————————————————————————————————————————————
+  // ————————————————————————————————————————————————————————————
+  // ONE‑TIME USER INTERACTION TO UNLOCK AUDIO (if needed)
+  // ————————————————————————————————————————————————————————————
   function playBgAudio(evt) {
-    realPlayBgAudio();
+    window.playBgAudio();
   }
-  document.addEventListener("click",    playBgAudio);
-  document.addEventListener("keydown",  playBgAudio);
+  document.addEventListener("click", playBgAudio);
+  document.addEventListener("keydown", playBgAudio);
   document.addEventListener("touchstart", playBgAudio);
 </script>
+
 
 
 
