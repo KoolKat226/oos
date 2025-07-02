@@ -304,6 +304,7 @@ newTab.addEventListener('click', () => {
 
       const newTabContent = document.createElement('iframe');
       newTabContent.className = 'tab-content';
+      newTabContent.name = 'inline-frame';
       newTabContent.src = './start.html';
 
       tabContentsContainer.appendChild(newTabContent);
