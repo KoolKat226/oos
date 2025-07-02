@@ -2706,6 +2706,36 @@ function logincheck() {
     document.addEventListener('mousemove', e => {mouseX = e.clientX / window.innerWidth; mouseY = e.clientY / window.innerHeight;});
     document.addEventListener('wheel', e => targetRotation += e.deltaY * 0.001);
 
+    let touchStartX = null;
+
+// on touch start, grab initial X
+document.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+  }
+});
+
+// on touch move, use horizontal movement
+document.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && touchStartX !== null) {
+    const currentX = e.touches[0].clientX;
+    const deltaX = currentX - touchStartX;
+    // larger multiplier for more pronounced spin
+    targetRotation += deltaX * 0.005;
+    touchStartX = currentX;   // reset baseline
+    e.preventDefault();       // prevent page scroll
+  }
+}, { passive: false });
+
+// clear on touch end/cancel
+document.addEventListener('touchend', () => {
+  touchStartX = null;
+});
+document.addEventListener('touchcancel', () => {
+  touchStartX = null;
+});
+
+
     // Mii functions
     function getRandomAsset(folder, max, chance = 1) {
       if (Math.random() > chance) return null;
