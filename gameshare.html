@@ -324,65 +324,72 @@
       // 3) Run button
       const btn = document.createElement('button');
       btn.textContent = 'Play';
-      btn.onclick = () => {
-        // reset previous button state
-        if (lastRunningBtn && lastRunningBtn !== btn) {
-          lastRunningBtn.textContent = 'Play';
-          lastRunningBtn.classList.remove('running');
-        }
+    btn.onclick = () => {
+      // reset previous button state
+      if (lastRunningBtn && lastRunningBtn !== btn) {
+        lastRunningBtn.textContent = 'Play';
+        lastRunningBtn.classList.remove('running');
+      }
 
-        const decoded   = reverseConvert(appRow[2]);    // raw HTML
-        const gameTitle = appRow[0] || 'Gameshare App';
-        const iconURL   = appRow[1] || appRow[4];
+      const decoded   = reverseConvert(appRow[2]); // raw HTML
+      const gameTitle = appRow[0] || 'Gameshare App';
+      const iconURL   = appRow[1] || appRow[4];
 
-        // open (or re-use) the named popup
-        openGameWindow = window.open('', POPUP_NAME);
-        if (!openGameWindow) {
-          return alert("Popup blocked! Please allow popups for this site.");
-        }
+      // ✅ If inside inline iframe, run game in-place
+      if (window.name === 'inline-frame') {
+        document.open();
+        document.write(decoded);
+        document.close();
+        return;
+      }
 
-        const doc = openGameWindow.document;
-        let frame = doc.getElementById('gameFrame');
+      // fallback: open (or reuse) the named popup
+      openGameWindow = window.open('', POPUP_NAME);
+      if (!openGameWindow) {
+        return alert("Popup blocked! Please allow popups for this site.");
+      }
 
-        if (!frame) {
-          // first time: write a minimal shell
-          doc.open();
-          doc.write(`
-            <!DOCTYPE html>
-            <html>
-              <head>
-                <title>${gameTitle}</title>
-                <link id="favicon" rel="icon" href="${iconURL}" type="image/png">
-                <style>
-                  body { margin:0; overflow:hidden; }
-                  iframe { width:100vw; height:100vh; border:none; }
-                </style>
-              </head>
-              <body>
-                <iframe id="gameFrame"></iframe>
-              </body>
-            </html>
-          `);
-          doc.close();
-          frame = doc.getElementById('gameFrame');
-        } else {
-          // update title & favicon on reuse
-          doc.title = gameTitle;
-          doc.getElementById('favicon').href = iconURL;
-        }
+      const doc = openGameWindow.document;
+      let frame = doc.getElementById('gameFrame');
 
-        // **HERE**: inject your game HTML directly
-        frame.srcdoc = decoded;
-        openGameWindow.focus();
+      if (!frame) {
+        // first time: write a minimal shell
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>${gameTitle}</title>
+              <link id="favicon" rel="icon" href="${iconURL}" type="image/png">
+              <style>
+                body { margin:0; overflow:hidden; }
+                iframe { width:100vw; height:100vh; border:none; }
+              </style>
+            </head>
+            <body>
+              <iframe id="gameFrame"></iframe>
+            </body>
+          </html>
+        `);
+        doc.close();
+        frame = doc.getElementById('gameFrame');
+      } else {
+        // update title & favicon on reuse
+        doc.title = gameTitle;
+        doc.getElementById('favicon').href = iconURL;
+      }
 
-        // mark this button “Running”
-        btn.textContent = 'Running';
-        btn.classList.add('running');
-        lastRunningBtn = btn;
-      };
-      tile.appendChild(btn);
+      // Inject game HTML into the iframe
+      frame.srcdoc = decoded;
+      openGameWindow.focus();
 
-      grid.appendChild(tile);
+      // mark this button “Running”
+      btn.textContent = 'Running';
+      btn.classList.add('running');
+      lastRunningBtn = btn;
+    };
+    tile.appendChild(btn);
+    grid.appendChild(tile);
     }
 
     // ─── OVERLAY ─────────────────────────────────────────────────────────────────
