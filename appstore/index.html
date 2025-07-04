@@ -244,7 +244,7 @@
     }
 
     .get-btn {
-      background: #007aff;
+      background: #ffa12e;
       color: white;
       border: none;
       padding: 0.6rem 1.2rem;
@@ -258,7 +258,7 @@
 
     .get-btn:active {
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) inset;
-      background: #4fa0f7;
+      background: #ffd18c;
       transform: scale(.9);
       transition: 0.3s ease;
     }
@@ -396,6 +396,8 @@
 }
 
     .filter-buttons {
+      width: 300px;
+      margin: 0 auto;
       display: flex;
       gap: 1rem;
       margin-bottom: 2rem;
@@ -403,7 +405,7 @@
     .filter-btn {
       padding: 0.5rem 1rem;
       font-family: 'Nunito Sans', sans-serif;
-      border: 2px solid #ccc;
+      border: 0px solid #ccc;
       background: #fff;
       border-radius: 999px;
       cursor: pointer;
@@ -411,12 +413,11 @@
       transition: background 0.2s, border-color 0.2s;
     }
     .filter-btn.active {
-      background: #007aff;
-      border-color: #007aff;
+      background: #ffb366;
       color: #fff;
     }
     .filter-btn:hover {
-      border-color: #007aff;
+      background: #ffce91;
     }
 
   </style>
@@ -447,7 +448,7 @@
       <button class="filter-btn"       data-filter="games">Games</button>
       <button class="filter-btn"       data-filter="themes">Themes</button>
     </div>
-    <div class="app-grid" id="app-list"></div>
+    <div style="display:none" class="app-grid" id="app-list"></div>
   </div>
 
   <div id="slot-overlay">
@@ -830,6 +831,7 @@
         .sort((a, b) => b.popularity - a.popularity);
 
       renderApps();
+      document.getElementById('app-list').style.display = '';
       checkForUpdates();
     };
 
@@ -868,67 +870,63 @@
     window.addEventListener('load', () => setTimeout(loadPopularity, 200));
   })();
   </script>
-<script>
-(function() {
-  const bgAudioFile = './bg.mp3';
-  const FADE_DURATION = 1.5; // seconds
+  <script>
+  (function() {
+    const bgAudioFile = './bg.mp3';
 
-  // Audio setup
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const gainNode = audioCtx.createGain();
-  gainNode.gain.value = 0;
-  const audioEl = new Audio(bgAudioFile);
-  audioEl.loop = true;
-  const source = audioCtx.createMediaElementSource(audioEl);
-  source.connect(gainNode).connect(audioCtx.destination);
+    // Audio setup
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 1;  // always at full volume
+    const audioEl = new Audio(bgAudioFile);
+    audioEl.loop = true;
+    const source = audioCtx.createMediaElementSource(audioEl);
+    source.connect(gainNode).connect(audioCtx.destination);
 
-  // Fade-in
-  function playAudio() {
-    // don't play if user disabled
-    if (localStorage.getItem('bgAudioDisabled') === 'true') return;
-    audioCtx.resume();
-    gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + FADE_DURATION);
-    audioEl.play();
-  }
-
-  // Fade-out
-  function pauseAudio() {
-    gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + FADE_DURATION);
-    setTimeout(() => audioEl.pause(), FADE_DURATION * 1000);
-  }
-
-  // Watch localStorage flag every second
-  let lastState = localStorage.getItem('bgAudioDisabled');
-  setInterval(() => {
-    const curr = localStorage.getItem('bgAudioDisabled');
-    if (curr !== lastState) {
-      lastState = curr;
-      if (curr === 'true') pauseAudio();
-      else playAudio();
+    // Play immediately
+    function playAudio() {
+      // don't play if user disabled
+      if (localStorage.getItem('bgAudioDisabled') === 'true') return;
+      audioCtx.resume();
+      gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+      audioEl.play();
     }
-  }, 1000);
 
-  // Pause/resume on tab visibility
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) pauseAudio();
-    else playAudio();
-  });
+    // Pause immediately
+    function pauseAudio() {
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      audioEl.pause();
+    }
 
-  // Fallback blur/focus
-  window.addEventListener('blur',  pauseAudio);
-  window.addEventListener('focus', playAudio);
+    // Watch localStorage flag every second
+    let lastState = localStorage.getItem('bgAudioDisabled');
+    setInterval(() => {
+      const curr = localStorage.getItem('bgAudioDisabled');
+      if (curr !== lastState) {
+        lastState = curr;
+        if (curr === 'true') pauseAudio();
+        else playAudio();
+      }
+    }, 1000);
 
-  // Initial play/pause on load
-  window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('bgAudioDisabled') === 'true') pauseAudio();
-    else playAudio();
-  });
-})();
-</script>
+    // Pause/resume on tab visibility
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) pauseAudio();
+      else playAudio();
+    });
+
+    // Fallback blur/focus
+    window.addEventListener('blur',  pauseAudio);
+    window.addEventListener('focus', playAudio);
+
+    // Initial play/pause on load
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('bgAudioDisabled') === 'true') pauseAudio();
+      else playAudio();
+    });
+  })();
+  </script>
+
 
 
 
