@@ -1242,6 +1242,31 @@ opacity: 0.5;
       </div>
     </div>
   </div>
+  <script>
+    function updateColFDate() {
+      const input = document.getElementById('colF');
+      if (!input) return;
+      const now = new Date();
+      const formatted = `${now.getMonth() + 1}/${now.getDate()}`;
+      if (input.value !== formatted) {
+        input.value = formatted;
+      }
+    }
+
+    // Run initially
+    updateColFDate();
+
+    // Keep updating every minute to catch date changes even after long tab inactivity
+    setInterval(updateColFDate, 60000);
+
+    // Also update when the tab becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        updateColFDate();
+      }
+    });
+  </script>
+
 <script>
   function updateColBReadonlyStatus() {
     const colI = document.getElementById("colI");
@@ -1765,8 +1790,7 @@ function logincheck() {
         const gPrev = document.getElementById('colG').value || '';
         const h = document.getElementById('colH').value || '';
         const i = document.getElementById('colI').value || '';
-        const today = new Date();
-        const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+        const dateStr = document.getElementById('colF').value || '';
         // build values: B,C,D,E=message,F=date,G=original,Gprev,H
         const full = [b, c, d, message, dateStr, gPrev, h, i];
         submitUpdate(full);
@@ -1787,8 +1811,7 @@ function logincheck() {
         const gPrev = document.getElementById('colG').value || '';
         const h = document.getElementById('colH').value || '';
         const i = document.getElementById('colI').value || '';
-        const today = new Date();
-        const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+        const dateStr = document.getElementById('colF').value || '';
         // build values: B,C,D,E=message,F=date,G=original,Gprev,H
         const full = [b, c, d, message, dateStr, gPrev, h, i];
         submitUpdate(full);
@@ -1810,8 +1833,7 @@ function logincheck() {
       const h = document.getElementById('colH').value || '';
       const i = document.getElementById('colI').value || '';
 
-      const today = new Date();
-      const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+      const dateStr = document.getElementById('colF').value || '';
 
       // Build values: B, C, D, E=message, F=date, G=original, Gprev, H
       const full = [b, c, d, message, dateStr, gPrev, h, i];
