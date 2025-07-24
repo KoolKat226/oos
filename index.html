@@ -3143,10 +3143,27 @@ document.addEventListener('touchcancel', () => {
       const box = document.createElement('div');
       box.className = 'mii-popup';
       box.innerHTML = `
-      <h2>${name} <small>(${miiId.slice(0, 3)})</small></h2>
-      <div class="mii-graphic"></div>
-      <p><strong>Last said:</strong> ${message}</p>
-    `;
+        <h2>${name} <small>(${miiId.slice(0, 3)})</small></h2>
+        <div class="mii-graphic"></div>
+        <p><strong>Last said:</strong> ${message}</p>
+        <div style="
+          margin-top: 12px;
+          padding: 10px;
+          background: #f0f0f0;
+          border-radius: 15px;
+          text-align: center;
+        ">
+          <p style="margin: 0 0 8px;"><strong>Currently Playing:</strong></p>
+          <img src="${iconUrl}" alt="App Icon" style="
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+          ">
+        </div>
+      `;
+
       overlay.appendChild(box);
       document.body.appendChild(overlay);
       overlay.onclick = (e) => {
@@ -3176,9 +3193,9 @@ document.addEventListener('touchcancel', () => {
       const dot = document.createElement('div');
       dot.className = 'mii';
       dot.style.backgroundColor = iconColor;
-      dot.style.marginTop = '-20px';
-      dot.style.width = '45px';  // Adjust size as needed
-      dot.style.height = '45px';
+      dot.style.marginTop = '-26px';
+      dot.style.width = '47px';  // Adjust size as needed
+      dot.style.height = '47px';
       graphic.appendChild(head);
       graphic.appendChild(dot);
     }
@@ -3222,10 +3239,10 @@ document.addEventListener('touchcancel', () => {
     z-index: 2000;
   }
   .mii-popup {
-    background: white;
+    background-color: rgba(255, 255, 255, 0.7);
     padding: 20px;
     border-radius: 28px;
-    max-width: 320px;
+    width: 320px;
     text-align: center;
     position: relative;
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
