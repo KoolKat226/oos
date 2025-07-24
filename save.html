@@ -267,20 +267,31 @@
     }
 
     // ─── Orchestrator ───────────────────────────────────────────────
-    (async function run() {
-      try {
-        await registerSW();
-        const pages = await crawl();
-        if (!pages.length) {
-          log('⚠️ No pages found; aborting.');
-          return;
-        }
-        const assets = await discoverAssets(pages);
-        await cacheAll(assets);
-      } catch (err) {
-        log(`❌ Error: ${err.message}`);
-      }
-    })();
+    async function unregisterSW() {
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (const reg of registrations) {
+      await reg.unregister();
+      console.log('✅ Unregistered SW');
+    }
+  }
+}
+
+(async function run() {
+  try {
+    await unregisterSW();          // <<<<<<<<<<<< Add this
+    await registerSW();            // ← Then register a fresh one
+    const pages = await crawl();
+    if (!pages.length) {
+      log('⚠️ No pages found; aborting.');
+      return;
+    }
+    const assets = await discoverAssets(pages);
+    await cacheAll(assets);
+  } catch (err) {
+    log(`❌ Error: ${err.message}`);
+  }
+})();
   </script>
   <script>
 document.addEventListener('DOMContentLoaded', () => {
