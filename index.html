@@ -1970,7 +1970,9 @@ function logincheck() {
     if (document.hidden) {
       // page hide always pauses
       _pauseBgAudio();
+      prohibitEmojiAudio();
     } else {
+      cheeseburger();
       // only auto‐resume if user hasn't manually paused
       if (!manualPaused) _playBgAudio();
     }
@@ -4174,20 +4176,70 @@ document.addEventListener('touchcancel', () => {
     window.changeHatAndHair = changeHatAndHair;
     window.stopHatWatcher = stopHatWatcher;
   </script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Prevent commas in the specified inputs
-  ['sayMain', 'sayMain2'].forEach(id => {
-    const input = document.getElementById(id);
-    if (input) {
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bannedWordMap = {
+      "fuck": "fudge",
+      "fuk": "fudge",
+      "f*ck": "fudge",
+      "shit": "fudge",
+      "crap": "fudge",
+      "cunt": "fudge",
+      "bitch": "fudge",
+      "fag": "fudge",
+      "whore": "fudge",
+      "ass": "fudge",
+      "damn": "fudge",
+      "retard": "fudge",
+      "retarded": "fudge",
+      "nigger": "fudge",
+      "nigga": "fudge"
+    };
+
+    function normalize(text) {
+      return text
+        .replace(/[^a-zA-Z]/g, '')   // remove non-letters
+        .replace(/(.)\1+/g, '$1')    // collapse repeat chars
+        .toLowerCase();
+    }
+
+    function sanitizeInput(original) {
+      const words = original.split(/\b/); // split by word boundaries
+      return words.map(word => {
+        const norm = normalize(word);
+        for (const [badWord, replacement] of Object.entries(bannedWordMap)) {
+          if (norm === normalize(badWord)) {
+            return replacement;
+          }
+        }
+        return word;
+      }).join('');
+    }
+
+    ['sayMain', 'sayMain2'].forEach(id => {
+      const input = document.getElementById(id);
+      if (!input) return;
+
+      // Block commas
       input.addEventListener('keydown', e => {
         if (e.key === ',' || e.keyCode === 188) {
           e.preventDefault();
         }
       });
-    }
-  });
 
+      // Replace bad words with "fudge"
+      input.addEventListener('input', () => {
+        const clean = sanitizeInput(input.value);
+        if (clean !== input.value) {
+          input.value = clean;
+        }
+      });
+    });
+  });
+  </script>
+
+
+<script>
   // 2. Disable right-click context menu globally
   document.addEventListener('contextmenu', e => {
     e.preventDefault();
