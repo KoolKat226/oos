@@ -1,0 +1,1 @@
+Update the cache name in save.html and service-worker.js, and then change the update name in update.js 👍
