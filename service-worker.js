@@ -2,7 +2,7 @@
 // File: /service-worker.js
 // ────────────────────────────────────────────────────────────────────
 
-const CACHE_NAME = 'oos';
+const CACHE_NAME = 'oosv1';
 
 // On install, skip waiting so it activates immediately
 self.addEventListener('install', (evt) => {
