@@ -280,11 +280,13 @@ function endTutorial() {
     });
 
 // On page load, read the name from localStorage and display the welcome message
-window.addEventListener('DOMContentLoaded', () => {
-  const name = localStorage.getItem('savedName') || '';
-  const welcomeEl = document.getElementById('welcome');
-  if (welcomeEl) {
-    welcomeEl.textContent = name ? `Hello ${name}!` : 'Hello!';
+// Listen for messages from the parent
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'setName') {
+    const welcomeEl = document.getElementById('welcome');
+    if (welcomeEl) {
+      welcomeEl.textContent = `Welcome ${event.data.name}!`;
+    }
   }
 });
 
