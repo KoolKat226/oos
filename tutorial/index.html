@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: #f9f9f9;
+    }
+
+    canvas.bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -2;
+      filter: blur(10px);
+    }
+
+    .page {
+      position: absolute;
+      top: 0;
+      left: -20px;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .button-row {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    button {
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .gray-btn {
+      background: #eee;
+    }
+
+    .blue-btn {
+      background: #4285f4;
+      color: white;
+    }
+
+    .card {
+      background: #eee;
+      border-radius: 25px;
+      padding: 2rem;
+      margin: 1rem;
+      min-width: 250px;
+      max-width: 300px;
+    }
+
+    .cardimg {
+      background: #eee;
+      border-radius: 25px;
+      margin: 1rem;
+      min-width: 250px;
+      max-width: 300px;
+    }
+
+    .layout-row {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      width: 150px;
+      padding: 10px;
+      border-radius: 20px;
+      border: none;
+      background-color: #f0f0f0;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      transition: 0.15s ease;
+      margin: 20px auto 0;
+    }
+
+    button:active {
+      transform: scale(0.9);
+      transition: 0.15s ease;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <canvas class="bg"></canvas>
+
+  <div style="" class="page active" id="page0">
+    <h1 id="welcome">Hello!</h1>
+    <div class="button-row">
+      <button class="gray-btn" onclick="endTutorial()">Skip Tutorial</button>
+      <button class="blue-btn" onclick="nextPage()">Continue</button>
+    </div>
+  </div>
+
+  <div class="page" id="page1">
+    <h1>Closing Applications</h1>
+    <div class="layout-row">
+      <img class="cardimg" src="./closeapp.gif">
+      <div class="card">
+        <ol style="text-align:left;">
+          <li>Move your mouse cursor to the bottom left hand corner of the screen</li>
+          <li>Select the Home button to close</li>
+          <li>Select the People button to minimize</li>
+          <li>Select the share button to quickly share the app with a friend</li>
+        </ol>
+      </div>
+    </div>
+    <div class="button-row">
+      <button class="gray-btn" onclick="prevPage()">Back</button>
+      <button class="blue-btn" onclick="nextPage()">Next</button>
+    </div>
+  </div>
+
+  <div class="page" id="page2">
+    <h1>Installing Applications</h1>
+    <div class="layout-row">
+      <img class="cardimg" src="./getapp.gif">
+      <div class="card">
+        <ol style="text-align:left;">
+          <li>Open the appstore from the Plaza</li>
+          <li>Select "Get" for the application</li>
+          <li>And Choose a slot to install the app to</li>
+        </ol>
+      </div>
+    </div>
+    <div class="button-row">
+      <button class="gray-btn" onclick="prevPage()">Back</button>
+      <button class="blue-btn" onclick="nextPage()">Next</button>
+    </div>
+  </div>
+
+  <div class="page" id="page3">
+    <h1>Learn about people</h1>
+    <div class="layout-row">
+      <img class="cardimg" src="./people.gif">
+      <div class="card">
+        <ol style="text-align:left;">
+          <li>Find the person you would like to learn about</li>
+          <li>Click on them</li>
+          <li>And OOS will tell you what game they are playing</li>
+        </ol>
+      </div>
+    </div>
+    <div class="button-row">
+      <button class="gray-btn" onclick="prevPage()">Back</button>
+      <button class="blue-btn" onclick="nextPage()">Next</button>
+    </div>
+  </div>
+
+  <div class="page" id="page4">
+    <h1>Changing your Plaza</h1>
+    <div class="layout-row">
+      <img class="cardimg" src="./settings.gif">
+      <div class="card">
+        <ol style="text-align:left;">
+          <li>Select Settings</li>
+          <li>Find where it says Group and change it</li>
+          <li>(Only people with that same Group will appear)</li>
+        </ol>
+      </div>
+    </div>
+    <div class="button-row">
+      <button class="gray-btn" onclick="prevPage()">Back</button>
+      <button class="blue-btn" onclick="nextPage()">Next</button>
+    </div>
+  </div>
+
+  <div class="page" id="page5">
+    <h1>Tutorial Complete</h1>
+    <p>You're ready to use OOS!</p>
+    <div class="button-row">
+      <button class="blue-btn" onclick="endTutorial()">Finish</button>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 0;
+
+    function showPage(index) {
+      document.querySelectorAll('.page').forEach((p, i) => {
+        p.classList.remove('active');
+      });
+      requestAnimationFrame(() => {
+        document.getElementById(`page${index}`).classList.add('active');
+      });
+    }
+
+    function nextPage() {
+      if (currentPage < 5) currentPage++;
+      showPage(currentPage);
+    }
+
+    function prevPage() {
+      if (currentPage > 0) currentPage--;
+      showPage(currentPage);
+    }
+
+function endTutorial() {
+  localStorage.setItem('tutorialSeen', 'true');
+  if (window.parent !== window) {
+    window.parent.postMessage('tutorialComplete', '*');
+  } else {
+    alert('Tutorial closed. Start your app logic here.');
+  }
+}
+
+
+    const canvas = document.querySelector("canvas.bg");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const shapes = Array.from({ length: 5 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      dx: (Math.random() - 0.5) * 2,
+      dy: (Math.random() - 0.5) * 2,
+      radius: 100 + Math.random() * 50,
+      color: `hsl(${Math.random() * 360}, 70%, 80%)`
+    }));
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      shapes.forEach(s => {
+        s.x += s.dx;
+        s.y += s.dy;
+
+        if (s.x + s.radius > canvas.width || s.x - s.radius < 0) s.dx *= -1;
+        if (s.y + s.radius > canvas.height || s.y - s.radius < 0) s.dy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+// On page load, read the name from localStorage and display the welcome message
+window.addEventListener('DOMContentLoaded', () => {
+  const name = localStorage.getItem('savedName') || '';
+  const welcomeEl = document.getElementById('welcome');
+  if (welcomeEl) {
+    welcomeEl.textContent = name ? `Hello ${name}!` : 'Hello!';
+  }
+});
+
+  </script>
+</body>
+</html>
