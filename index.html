@@ -4427,6 +4427,43 @@ filter: drop-shadow(0px 7px 25px #000);
       }
     });
   </script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const iframe = document.getElementById('tutorialFrame');
+    const nameInput = document.getElementById('colB');
+
+    function sendNameToTutorial() {
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          type: 'setName',
+          name: nameInput.value
+        }, '*');
+      }
+    }
+
+    // Send name on user input
+    nameInput.addEventListener('input', sendNameToTutorial);
+
+    // Send name on DOM text/value change via JS
+    const observer = new MutationObserver(sendNameToTutorial);
+    observer.observe(nameInput, { attributes: true, childList: true, subtree: true });
+
+    // Send name on value change via JS (e.g., programmatic set)
+    const originalSet = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    Object.defineProperty(nameInput, 'value', {
+      set: function(v) {
+        originalSet.call(this, v);
+        sendNameToTutorial();
+      },
+      get: function() {
+        return this.getAttribute('value') || '';
+      }
+    });
+
+    // Initial send on page load
+    sendNameToTutorial();
+  });
+</script>
 
 
 
