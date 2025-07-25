@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OlexOS 7</title>
   <link href="./fontfiles/font.css" rel="stylesheet">
+    <style>
+    iframe {
+      width: 100vw;
+      height: 100vh;
+      border: none;
+    }
+  </style>
   <style>
 
     .nunito-variable {
@@ -2446,6 +2453,12 @@ function logincheck() {
       requestAnimationFrame(animate);
     }
 
+    async function appstoreclose() {
+      await refreshData();
+      refreshPlaza();
+    }
+
+      
     function renderIcons() {
       icons.forEach((data, i) => {
         const ic = document.createElement('div');
@@ -2469,6 +2482,7 @@ function logincheck() {
       // Show clicked icon’s src in the text box (if it exists)
       const iconUrlBox = document.getElementById('colG');
       if (iconUrlBox) iconUrlBox.value = data.src || '';
+      cancelPlazaRefresh();
       updatemyoos();
 
       // If we’re un‐minimizing the same icon:
@@ -2682,7 +2696,7 @@ function logincheck() {
 
         // If we just closed the App Store (icon index 0), refresh data
         if (lastClickedIcon === iconEls[0]) {
-          refreshData();
+          appstoreclose();
         }
       }, 1000);
     }
@@ -4237,37 +4251,65 @@ document.addEventListener('touchcancel', () => {
     });
   });
   </script>
+  <script>
+    let originalValue = '';
+    let restoreTimeout = null;
 
+    function refreshPlaza() {
+      const input = document.getElementById('colH');
+      originalValue = input.value;
 
-<script>
-  // 2. Disable right-click context menu globally
-  document.addEventListener('contextmenu', e => {
-    e.preventDefault();
-  });
+      input.value = '🐟🐟';
 
-  // 3. Block Ctrl+I, Ctrl+U, Ctrl+S
-  document.addEventListener('keydown', e => {
-    if (e.ctrlKey) {
-      const forbidden = ['i', 'u', 's'];
-      if (forbidden.includes(e.key.toLowerCase())) {
-        e.preventDefault();
+      // Clear any existing timeout before setting a new one
+      clearTimeout(restoreTimeout);
+
+      restoreTimeout = setTimeout(() => {
+        input.value = originalValue;
+        restoreTimeout = null;
+      }, 5000);
+    }
+
+    function cancelPlazaRefresh() {
+      if (restoreTimeout !== null) {
+        clearTimeout(restoreTimeout);
+        restoreTimeout = null;
+
+        const input = document.getElementById('colH');
+        input.value = originalValue;
       }
     }
-  });
+  </script>
 
-  // 4. Prevent dragging of any element (images, links, etc.)
-  document.addEventListener('dragstart', e => {
-    e.preventDefault();
-  });
-
-  // 5. Disable text selection except inside inputs/textareas
-  document.addEventListener('selectstart', e => {
-    const tag = e.target.tagName.toLowerCase();
-    if (tag !== 'input' && tag !== 'textarea') {
+  <script>
+    // 2. Disable right-click context menu globally
+    document.addEventListener('contextmenu', e => {
       e.preventDefault();
-    }
-  });
-</script>
+    });
+
+    // 3. Block Ctrl+I, Ctrl+U, Ctrl+S
+    document.addEventListener('keydown', e => {
+      if (e.ctrlKey) {
+        const forbidden = ['i', 'u', 's'];
+        if (forbidden.includes(e.key.toLowerCase())) {
+          e.preventDefault();
+        }
+      }
+    });
+
+    // 4. Prevent dragging of any element (images, links, etc.)
+    document.addEventListener('dragstart', e => {
+      e.preventDefault();
+    });
+
+    // 5. Disable text selection except inside inputs/textareas
+    document.addEventListener('selectstart', e => {
+      const tag = e.target.tagName.toLowerCase();
+      if (tag !== 'input' && tag !== 'textarea') {
+        e.preventDefault();
+      }
+    });
+  </script>
 
 
 <style>
@@ -4368,7 +4410,23 @@ filter: drop-shadow(0px 7px 25px #000);
     };
   })();
 </script>
+  <iframe id="tutorialFrame" src="./tutorial/index.html"></iframe>
+  <script>
+    // Check localStorage to see if tutorial should be skipped
+    if (localStorage.getItem('tutorialSeen') === 'true') {
+      document.getElementById('tutorialFrame').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'flex';
+    }
 
+    // Listen for tutorial complete or skip
+    window.addEventListener('message', (event) => {
+      if (event.data === 'tutorialComplete') {
+        localStorage.setItem('tutorialSeen', 'true');
+        document.getElementById('tutorialFrame').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+      }
+    });
+  </script>
 
 
 
