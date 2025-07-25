@@ -122,7 +122,7 @@
   <canvas class="bg"></canvas>
 
   <div style="" class="page active" id="page0">
-    <h1 id="welcome">Hello!</h1>
+    <h1 id="welcome">Would you like learn about OOS?</h1>
     <div class="button-row">
       <button class="gray-btn" onclick="endTutorial()">Skip Tutorial</button>
       <button class="blue-btn" onclick="nextPage()">Continue</button>
@@ -280,15 +280,6 @@ function endTutorial() {
     });
 
 // On page load, read the name from localStorage and display the welcome message
-// Listen for messages from the parent
-window.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'setName') {
-    const welcomeEl = document.getElementById('welcome');
-    if (welcomeEl) {
-      welcomeEl.textContent = `Welcome ${event.data.name}!`;
-    }
-  }
-});
 
   </script>
 </body>
