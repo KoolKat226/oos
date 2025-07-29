@@ -2,13 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OlexOS 7 Offline Installer</title>
   <style>
-    /* ─── Full‐page console ─────────────────────────────────────────── */
     * { box-sizing: border-box; margin:0; padding:0 }
     html, body { height: 100%; }
     body {
@@ -19,8 +15,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* ─── Console window ───────────────────────────────────────────── */
     .console {
       flex: 1;
       padding: 5px;
@@ -29,8 +23,6 @@
       line-height: 1.4;
       position: relative;
     }
-
-    /* ─── Logo with divider lines ──────────────────────────────────── */
     .logo-divider {
       display: flex;
       align-items: center;
@@ -47,34 +39,29 @@
       height: 40px;
       margin: 0 8px;
     }
-
-    /* ─── Progress bar at bottom ──────────────────────────────────── */
     .progress-bar-container {
       height: 8px;
       background: #111;
-      display:none; 
+      display: none; 
       border-top: 1px solid #0f0;
     }
     .progress-bar {
       height: 100%;
-      display:none; 
+      display: none; 
       width: 0;
       background: #0f0;
       transition: width 0.2s ease;
     }
-
     .lined-image {
       position: relative;
       margin-top: 40px;
       height: 50px;
       display: inline-block;
     }
-
     .lined-image img {
       display: block;
       height: 50px;
     }
-
     .line-container {
       position: absolute;
       top: 0;
@@ -83,7 +70,6 @@
       height: 100%;
       pointer-events: none;
     }
-
     .line {
       position: absolute;
       left: 0;
@@ -92,13 +78,12 @@
       background-color: black;
       opacity: 0.4;
     }
-
-
   </style>
 </head>
 <body>
-    <div class="lined-image"> <img src="./images/logoblue.png" alt="Logo">  <div class="line-container">
-      <!-- 12 lines -->
+  <div class="lined-image">
+    <img src="./images/logoblue.png" alt="Logo">
+    <div class="line-container">
       <div class="line" style="top: 8.33%"></div>
       <div class="line" style="top: 16.66%"></div>
       <div class="line" style="top: 25%"></div>
@@ -111,10 +96,13 @@
       <div class="line" style="top: 83.33%"></div>
       <div class="line" style="top: 91.66%"></div>
       <div class="line" style="top: 100%"></div>
-    </div></div>
+    </div>
+  </div>
+
   <div id="console" class="console">
     ‣ Starting installer...
   </div>
+
   <div class="progress-bar-container">
     <div id="progress-bar" class="progress-bar"></div>
   </div>
@@ -122,28 +110,25 @@
   <iframe src="./appstore/preinstaller.html" style="display:none"></iframe>
 
   <script>
-    // ─── Logging helper ─────────────────────────────────────────────
     function log(line) {
       const c = document.getElementById('console');
       c.textContent += '\n' + line;
       c.scrollTop = c.scrollHeight;
     }
 
-    // ─── Config ─────────────────────────────────────────────────────
     const CACHE_NAME = 'oosv2';
-    const START_URL  = '/oos/';
-    const ORIGIN     = window.location.origin;
-    const MAX_PAGES  = 1000;
-    const EXTRA_URLS = ['/oos/index.html','/oos/logon.html','/oos/returnfresh.html'];
+    const START_URL = '/oos/';
+    const ORIGIN = window.location.origin;
+    const MAX_PAGES = 1000;
+    const EXTRA_URLS = ['/oos/index.html', '/oos/logon.html', '/oos/returnfresh.html'];
 
     const progressBar = document.getElementById('progress-bar');
-    const wasBefore   = !!localStorage.getItem('oos_urls');
-    const action      = wasBefore ? 'Updating' : 'Installing';
+    const wasBefore = !!localStorage.getItem('oos_urls');
+    const action = wasBefore ? 'Updating' : 'Installing';
     localStorage.removeItem('oos_urls');
 
-    // ─── Service Worker ────────────────────────────────────────────
     async function registerSW() {
-      log(‣ Requesting OOS install server…);
+      log('‣ Requesting OOS install server…');
       if (!('serviceWorker' in navigator)) {
         log('❌ SW unsupported');
         throw new Error('SW unsupported');
@@ -154,12 +139,11 @@
       log('OOS Server Ready');
     }
 
-    // ─── Crawl pages ────────────────────────────────────────────────
     async function crawl() {
-      log(‣ Verfiying Files (max ${MAX_PAGES} blocks)…);
+      log(`‣ Verfiying Files (max ${MAX_PAGES} blocks)…`);
       const visited = new Set();
-      const queue   = [ new URL(START_URL, ORIGIN).href ];
-      const found   = new Set();
+      const queue = [new URL(START_URL, ORIGIN).href];
+      const found = new Set();
 
       EXTRA_URLS.forEach(rel => {
         try {
@@ -173,14 +157,14 @@
         if (visited.has(url)) continue;
         visited.add(url);
 
-        log(Block ${visited.size} fetched);
+        log(`Block ${visited.size} fetched`);
         let html;
         try {
           const res = await fetch(url, { credentials: 'same-origin' });
           if (!res.ok) continue;
           html = await res.text();
         } catch {
-          log(⚠️  Fetch error, skipping);
+          log('⚠️  Fetch error, skipping');
           continue;
         }
 
@@ -194,22 +178,21 @@
               if (abs.startsWith(ORIGIN) && !visited.has(abs)) {
                 queue.push(abs);
               }
-            } catch{}
+            } catch {}
           }
         });
       }
 
-      log(Verified ${visited.size} blocks);
+      log(`Verified ${visited.size} blocks`);
       return Array.from(found);
     }
 
-    // ─── Discover assets ────────────────────────────────────────────
     async function discoverAssets(pages) {
-      log(‣ ${action} OOS 7…);
+      log(`‣ ${action} OOS 7…`);
       const all = new Set();
 
       for (let i = 0; i < pages.length; i++) {
-        log(Processing block ${i+1}/${pages.length});
+        log(`Processing block ${i + 1}/${pages.length}`);
         const iframe = document.createElement('iframe');
         Object.assign(iframe.style, {
           position: 'fixed', left: '-9999px',
@@ -220,8 +203,8 @@
 
         await new Promise(r => {
           let done = false;
-          iframe.onload = () => { if (!done) { done=true; r(); } };
-          setTimeout(() => { if (!done) { done=true; r(); } }, 15000);
+          iframe.onload = () => { if (!done) { done = true; r(); } };
+          setTimeout(() => { if (!done) { done = true; r(); } }, 15000);
         });
         await new Promise(r => setTimeout(r, 500));
 
@@ -232,107 +215,96 @@
             (await win.__getAllAssets()).forEach(u => all.add(u));
           }
         } catch {
-          log(⚠️  No asset helper on page ${i+1});
+          log(`⚠️  No asset helper on page ${i + 1}`);
         }
 
         document.body.removeChild(iframe);
       }
 
-      log(Discovered ${all.size} unique blocks);
+      log(`Discovered ${all.size} unique blocks`);
       return Array.from(all);
     }
 
-    // ─── Cache everything ────────────────────────────────────────────
-async function cacheAll(urls) {
-  log(‣ Deleting previous caches…);
+    async function cacheAll(urls) {
+      log('‣ Deleting previous caches…');
 
-  const keys = await caches.keys();
-  for (const key of keys) {
-    if (key.startsWith('oos')) {
-      await caches.delete(key);
-      log(🗑️ Deleted cache: ${key});
+      const keys = await caches.keys();
+      for (const key of keys) {
+        if (key.startsWith('oos')) {
+          await caches.delete(key);
+          log(`🗑️ Deleted cache: ${key}`);
+        }
+      }
+
+      log(`‣ Adding ${urls.length} resources…`);
+      const cache = await caches.open(CACHE_NAME);
+
+      for (let i = 0; i < urls.length; i++) {
+        try {
+          await cache.add(new Request(urls[i], { cache: 'no-store' }));
+          log(`➕ Resource ${i + 1}/${urls.length}`);
+        } catch {
+          log(`❌ Failed ${i + 1}/${urls.length}`);
+        }
+        const pct = Math.round((i + 1) / urls.length * 100);
+        progressBar.style.width = pct + '%';
+      }
+
+      log(`${action} successful`);
+      localStorage.setItem('oos_urls', JSON.stringify(urls));
+      log('‣ OOS 7 Installed…');
+      window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
     }
-  }
 
-  log(‣ Adding ${urls.length} resources…);
-  const cache = await caches.open(CACHE_NAME);
-
-  for (let i = 0; i < urls.length; i++) {
-    try {
-      await cache.add(new Request(urls[i], { cache: 'no-store' }));
-      log(➕ Resource ${i+1}/${urls.length});
-    } catch {
-      log(❌ Failed ${i+1}/${urls.length});
-    }
-    const pct = Math.round((i+1) / urls.length * 100);
-    progressBar.style.width = pct + '%';
-  }
-
-  log(${action} successful);
-  localStorage.setItem('oos_urls', JSON.stringify(urls));
-  log(‣ OOS 7 Installed…);
-  window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
-}
-
-
-    // ─── Orchestrator ───────────────────────────────────────────────
     async function unregisterSW() {
-  if ('serviceWorker' in navigator) {
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    for (const reg of registrations) {
-      await reg.unregister();
-      console.log('✅ Unregistered SW');
-    }
-  }
-}
-
-(async function run() {
-  try {
-    await unregisterSW();          // <<<<<<<<<<<< Add this
-    await registerSW();            // ← Then register a fresh one
-    const pages = await crawl();
-    if (!pages.length) {
-      log('⚠️ No pages found; aborting.');
-      return;
-    }
-    const assets = await discoverAssets(pages);
-    await cacheAll(assets);
-  } catch (err) {
-    log(❌ Error: ${err.message});
-  }
-})();
-  </script>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Disable right-click context menu globally
-  document.addEventListener('contextmenu', e => {
-    e.preventDefault();
-  });
-
-  // 2. Block Ctrl+I, Ctrl+U, Ctrl+S
-  document.addEventListener('keydown', e => {
-    if (e.ctrlKey) {
-      const forbidden = ['i', 'u', 's'];
-      if (forbidden.includes(e.key.toLowerCase())) {
-        e.preventDefault();
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+          console.log('✅ Unregistered SW');
+        }
       }
     }
-  });
 
-  // 3. Prevent dragging of any element (images, links, etc.)
-  document.addEventListener('dragstart', e => {
-    e.preventDefault();
-  });
+    (async function run() {
+      try {
+        await unregisterSW();
+        await registerSW();
+        const pages = await crawl();
+        if (!pages.length) {
+          log('⚠️ No pages found; aborting.');
+          return;
+        }
+        const assets = await discoverAssets(pages);
+        await cacheAll(assets);
+      } catch (err) {
+        log(`❌ Error: ${err.message}`);
+      }
+    })();
+  </script>
 
-  // 4. Disable text selection except inside inputs/textareas
-  document.addEventListener('selectstart', e => {
-    const tag = e.target.tagName.toLowerCase();
-    if (tag !== 'input' && tag !== 'textarea') {
-      e.preventDefault();
-    }
-  });
-});
-</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('contextmenu', e => e.preventDefault());
 
+      document.addEventListener('keydown', e => {
+        if (e.ctrlKey) {
+          const forbidden = ['i', 'u', 's'];
+          if (forbidden.includes(e.key.toLowerCase())) {
+            e.preventDefault();
+          }
+        }
+      });
+
+      document.addEventListener('dragstart', e => e.preventDefault());
+
+      document.addEventListener('selectstart', e => {
+        const tag = e.target.tagName.toLowerCase();
+        if (tag !== 'input' && tag !== 'textarea') {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
