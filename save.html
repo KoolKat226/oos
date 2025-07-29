@@ -142,17 +142,34 @@
     localStorage.removeItem('oos_urls');
 
     // ─── Service Worker ────────────────────────────────────────────
-    async function registerSW() {
-      log(`‣ Requesting OOS install server…`);
-      if (!('serviceWorker' in navigator)) {
-        log('❌ SW unsupported');
-        throw new Error('SW unsupported');
-      }
-      await navigator.serviceWorker.register('./service-worker.js');
-      log('Connection Established');
-      await navigator.serviceWorker.ready;
-      log('OOS Server Ready');
-    }
+async function registerSW() {
+  log(`‣ Requesting OOS install server…`);
+
+  if (!('serviceWorker' in navigator)) {
+    log('❌ SW unsupported');
+    throw new Error('SW unsupported');
+  }
+
+  // Register the service worker
+  const reg = await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
+  log('✅ Connection Established');
+
+  // Wait until it's ready
+  await navigator.serviceWorker.ready;
+  log('✅ OOS Server Ready');
+
+  // Send a message to the active service worker
+  if (reg.active) {
+    reg.active.postMessage({ type: 'forceClaim' });
+    log('📩 forceClaim sent');
+  } else {
+    log('⚠️ No active SW to message');
+  }
+}
+
+// Call the function
+registerSW().catch(err => console.error(err));
+
 
     // ─── Crawl pages ────────────────────────────────────────────────
     async function crawl() {
