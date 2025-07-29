@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Resetting Site Storage…</title>
+  <title>Resetting Offline Cache…</title>
   <script>
-    async function clearAllDataAndRedirect() {
+    async function resetOfflineCacheOnly() {
       // 1. Unregister all service workers
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
@@ -14,7 +14,7 @@
         }
       }
 
-      // 2. Delete all Cache Storage entries
+      // 2. Delete all service worker caches (leave localStorage and IndexedDB alone)
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         for (const name of cacheNames) {
@@ -23,35 +23,17 @@
         }
       }
 
-      // 3. Clear localStorage
-      localStorage.clear();
-      console.log('🧹 localStorage cleared');
-
-      // 4. Delete all IndexedDB databases
-      if (indexedDB && indexedDB.databases) {
-        const dbs = await indexedDB.databases();
-        for (const db of dbs) {
-          if (db.name) {
-            indexedDB.deleteDatabase(db.name);
-            console.log('📦 Deleted IndexedDB:', db.name);
-          }
-        }
-      } else {
-        // Fallback for older browsers
-        console.warn('⚠️ Could not enumerate IndexedDBs; some may persist.');
-      }
-
-      // 5. Redirect to save.html
+      // 3. Optional: reload or redirect (you can change this to whatever you want)
       setTimeout(() => {
-        window.location.href = './save.html';
-      }, 500); // short delay for cleanup
+        window.location.href = 'save.html'; // reload your offline setup page
+      }, 500);
     }
 
-    window.addEventListener('DOMContentLoaded', clearAllDataAndRedirect);
+    window.addEventListener('DOMContentLoaded', resetOfflineCacheOnly);
   </script>
 </head>
 <body>
-  <h1>Resetting Offline Data…</h1>
-  <p>Please wait while everything is cleared.</p>
+  <h1>Clearing Offline Files…</h1>
+  <p>This will remove cached files but keep your saved data.</p>
 </body>
 </html>
