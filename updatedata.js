@@ -49,7 +49,7 @@
     popup.querySelector('#upd-timer').textContent = seconds;
     if (seconds <= 0) {
       clearInterval(interval);
-      window.location.href = './save.html';
+      window.location.href = './reset.html';
     }
   }, 1000);
 })();
