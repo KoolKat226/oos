@@ -6,7 +6,7 @@
   const stored = parseFloat(localStorage.getItem('oos_version') || '0');
 
   // Bump this number whenever you release a new offline build!
-  const NEW_VERSION = 2.7;
+  const NEW_VERSION = 2;
 
   // If we already have this version (or newer), nothing to do
   if (stored >= NEW_VERSION) return;
