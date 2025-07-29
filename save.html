@@ -271,6 +271,12 @@ async function cacheAll(urls) {
   log(`${action} successful`);
   localStorage.setItem('oos_urls', JSON.stringify(urls));
   log(`‣ OOS 7 Installed…`);
+  localStorage.clear();
+indexedDB.databases().then(dbs => {
+  for (const db of dbs) {
+    indexedDB.deleteDatabase(db.name);
+  }
+});
   window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
 }
 
