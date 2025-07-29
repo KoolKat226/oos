@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resetting Site Storage…</title>
+  <script>
+    async function clearAllDataAndRedirect() {
+      // 1. Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+          await reg.unregister();
+          console.log('✅ Unregistered service worker:', reg.scope);
+        }
+      }
+
+      // 2. Delete all Cache Storage entries
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (const name of cacheNames) {
+          await caches.delete(name);
+          console.log('🗑️ Deleted cache:', name);
+        }
+      }
+
+      // 3. Clear localStorage
+      localStorage.clear();
+      console.log('🧹 localStorage cleared');
+
+      // 4. Delete all IndexedDB databases
+      if (indexedDB && indexedDB.databases) {
+        const dbs = await indexedDB.databases();
+        for (const db of dbs) {
+          if (db.name) {
+            indexedDB.deleteDatabase(db.name);
+            console.log('📦 Deleted IndexedDB:', db.name);
+          }
+        }
+      } else {
+        // Fallback for older browsers
+        console.warn('⚠️ Could not enumerate IndexedDBs; some may persist.');
+      }
+
+      // 5. Redirect to save.html
+      setTimeout(() => {
+        window.location.href = './save.html';
+      }, 500); // short delay for cleanup
+    }
+
+    window.addEventListener('DOMContentLoaded', clearAllDataAndRedirect);
+  </script>
+</head>
+<body>
+  <h1>Resetting Offline Data…</h1>
+  <p>Please wait while everything is cleared.</p>
+</body>
+</html>
