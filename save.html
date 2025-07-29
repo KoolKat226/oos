@@ -130,7 +130,7 @@
     }
 
     // ─── Config ─────────────────────────────────────────────────────
-    const CACHE_NAME = 'oosv2.7';
+    const CACHE_NAME = 'oosv2';
     const START_URL  = '/oos/';
     const ORIGIN     = window.location.origin;
     const MAX_PAGES  = 1000;
@@ -142,38 +142,21 @@
     localStorage.removeItem('oos_urls');
 
     // ─── Service Worker ────────────────────────────────────────────
-async function registerSW() {
-  log(`‣ Requesting OOS install server…`);
-
-  if (!('serviceWorker' in navigator)) {
-    log('❌ SW unsupported');
-    throw new Error('SW unsupported');
-  }
-
-  // Register the service worker
-  const reg = await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
-  log('✅ Connection Established');
-
-  // Wait until it's ready
-  await navigator.serviceWorker.ready;
-  log('✅ OOS Server Ready');
-
-  // Send a message to the active service worker
-  if (reg.active) {
-    reg.active.postMessage({ type: 'forceClaim' });
-    log('📩 forceClaim sent');
-  } else {
-    log('⚠️ No active SW to message');
-  }
-}
-
-// Call the function
-registerSW().catch(err => console.error(err));
-
+    async function registerSW() {
+      log(‣ Requesting OOS install server…);
+      if (!('serviceWorker' in navigator)) {
+        log('❌ SW unsupported');
+        throw new Error('SW unsupported');
+      }
+      await navigator.serviceWorker.register('./service-worker.js');
+      log('Connection Established');
+      await navigator.serviceWorker.ready;
+      log('OOS Server Ready');
+    }
 
     // ─── Crawl pages ────────────────────────────────────────────────
     async function crawl() {
-      log(`‣ Verfiying Files (max ${MAX_PAGES} blocks)…`);
+      log(‣ Verfiying Files (max ${MAX_PAGES} blocks)…);
       const visited = new Set();
       const queue   = [ new URL(START_URL, ORIGIN).href ];
       const found   = new Set();
@@ -190,14 +173,14 @@ registerSW().catch(err => console.error(err));
         if (visited.has(url)) continue;
         visited.add(url);
 
-        log(`Block ${visited.size} fetched`);
+        log(Block ${visited.size} fetched);
         let html;
         try {
           const res = await fetch(url, { credentials: 'same-origin' });
           if (!res.ok) continue;
           html = await res.text();
         } catch {
-          log(`⚠️  Fetch error, skipping`);
+          log(⚠️  Fetch error, skipping);
           continue;
         }
 
@@ -216,17 +199,17 @@ registerSW().catch(err => console.error(err));
         });
       }
 
-      log(`Verified ${visited.size} blocks`);
+      log(Verified ${visited.size} blocks);
       return Array.from(found);
     }
 
     // ─── Discover assets ────────────────────────────────────────────
     async function discoverAssets(pages) {
-      log(`‣ ${action} OOS 7…`);
+      log(‣ ${action} OOS 7…);
       const all = new Set();
 
       for (let i = 0; i < pages.length; i++) {
-        log(`Processing block ${i+1}/${pages.length}`);
+        log(Processing block ${i+1}/${pages.length});
         const iframe = document.createElement('iframe');
         Object.assign(iframe.style, {
           position: 'fixed', left: '-9999px',
@@ -249,51 +232,45 @@ registerSW().catch(err => console.error(err));
             (await win.__getAllAssets()).forEach(u => all.add(u));
           }
         } catch {
-          log(`⚠️  No asset helper on page ${i+1}`);
+          log(⚠️  No asset helper on page ${i+1});
         }
 
         document.body.removeChild(iframe);
       }
 
-      log(`Discovered ${all.size} unique blocks`);
+      log(Discovered ${all.size} unique blocks);
       return Array.from(all);
     }
 
     // ─── Cache everything ────────────────────────────────────────────
 async function cacheAll(urls) {
-  log(`‣ Deleting previous caches…`);
+  log(‣ Deleting previous caches…);
 
   const keys = await caches.keys();
   for (const key of keys) {
     if (key.startsWith('oos')) {
       await caches.delete(key);
-      log(`🗑️ Deleted cache: ${key}`);
+      log(🗑️ Deleted cache: ${key});
     }
   }
 
-  log(`‣ Adding ${urls.length} resources…`);
+  log(‣ Adding ${urls.length} resources…);
   const cache = await caches.open(CACHE_NAME);
 
   for (let i = 0; i < urls.length; i++) {
     try {
       await cache.add(new Request(urls[i], { cache: 'no-store' }));
-      log(`➕ Resource ${i+1}/${urls.length}`);
+      log(➕ Resource ${i+1}/${urls.length});
     } catch {
-      log(`❌ Failed ${i+1}/${urls.length}`);
+      log(❌ Failed ${i+1}/${urls.length});
     }
     const pct = Math.round((i+1) / urls.length * 100);
     progressBar.style.width = pct + '%';
   }
 
-  log(`${action} successful`);
+  log(${action} successful);
   localStorage.setItem('oos_urls', JSON.stringify(urls));
-  log(`‣ OOS 7 Installed…`);
-  localStorage.clear();
-indexedDB.databases().then(dbs => {
-  for (const db of dbs) {
-    indexedDB.deleteDatabase(db.name);
-  }
-});
+  log(‣ OOS 7 Installed…);
   window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
 }
 
@@ -321,7 +298,7 @@ indexedDB.databases().then(dbs => {
     const assets = await discoverAssets(pages);
     await cacheAll(assets);
   } catch (err) {
-    log(`❌ Error: ${err.message}`);
+    log(❌ Error: ${err.message});
   }
 })();
   </script>
