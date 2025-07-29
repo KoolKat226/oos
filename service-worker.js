@@ -4,18 +4,24 @@
 
 const CACHE_NAME = 'oosv2.3';
 
-// On install, skip waiting so it activates immediately
+// ─── Install Event: Activate Immediately ────────────────────────────
 self.addEventListener('install', (evt) => {
-  self.skipWaiting();
+  self.skipWaiting(); // Activate without waiting
 });
 
-// On activate, take control of uncontrolled clients immediately
+// ─── Activate Event: Take control immediately ───────────────────────
 self.addEventListener('activate', (evt) => {
   evt.waitUntil(self.clients.claim());
 });
 
-// Utility to strip form defaults from HTML, while exempting
-// <input id="scriptUrl">, <input id="gsUnique_shareLink">, and <input id="creator">
+// ─── Allow manual forceClaim from page via message ──────────────────
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'forceClaim') {
+    self.skipWaiting().then(() => self.clients.claim());
+  }
+});
+
+// ─── Helper: Strip form default values from HTML ────────────────────
 async function stripFormDefaultsIfHTML(response) {
   const contentType = response.headers.get('Content-Type') || '';
   if (!contentType.includes('text/html')) {
@@ -24,7 +30,7 @@ async function stripFormDefaultsIfHTML(response) {
 
   const text = await response.text();
 
-  // 1) Remove value="…" from every <input> unless its id is "scriptUrl", "gsUnique_shareLink", or "creator"
+  // Remove value=… from most <input>s except certain ones
   const stripInputs = text.replace(/<input\b[^>]*>/gi, (match) => {
     if (/\bid=['"](scriptUrl|gsUnique_shareLink|creator)['"]/.test(match)) {
       return match;
@@ -32,7 +38,7 @@ async function stripFormDefaultsIfHTML(response) {
     return match.replace(/\svalue=['"][^'"]*['"]/i, '');
   });
 
-  // 2) Blank out any <textarea>…</textarea>
+  // Blank <textarea> content
   const stripTextareas = stripInputs.replace(
     /<textarea\b([^>]*)>[\s\S]*?<\/textarea>/gi,
     '<textarea$1></textarea>'
@@ -45,13 +51,13 @@ async function stripFormDefaultsIfHTML(response) {
   });
 }
 
+// ─── Fetch Handler ──────────────────────────────────────────────────
 self.addEventListener('fetch', (evt) => {
   const req = evt.request;
   const url = new URL(req.url);
   const accept = req.headers.get('accept') || '';
 
-  // ── 1) NEVER cache any Google-Sheets CSV requests ──
-  //    matches both ?format=csv exports and ?output=csv publishes
+  // ── 1) NEVER cache Google Sheets CSV exports ──
   if (
     url.hostname === 'docs.google.com' &&
     url.pathname.startsWith('/spreadsheets/d/') &&
@@ -62,25 +68,17 @@ self.addEventListener('fetch', (evt) => {
   ) {
     evt.respondWith(
       fetch(req)
-        .then(networkResponse => {
-          // Always return fresh CSV; do NOT cache.
-          return networkResponse;
-        })
-        .catch(() => {
-          // If offline, fall back to any cached copy
-          return caches.match(req).then(cached => {
-            if (cached) return cached;
-            return new Response('Offline and no cached CSV data.', {
-              status: 503,
-              statusText: 'Offline'
-            });
-          });
-        })
+        .then(networkResponse => networkResponse)
+        .catch(() =>
+          caches.match(req).then(cached => cached || new Response('Offline and no cached CSV data.', {
+            status: 503, statusText: 'Offline'
+          }))
+        )
     );
     return;
   }
 
-  // ── 2) NEVER cache any Google-Sheets "gviz/tq" requests ──
+  // ── 2) NEVER cache "gviz/tq" queries ──
   if (
     url.hostname === 'docs.google.com' &&
     url.pathname.startsWith('/spreadsheets/d/') &&
@@ -89,35 +87,28 @@ self.addEventListener('fetch', (evt) => {
     evt.respondWith(
       fetch(req)
         .then(networkResponse => networkResponse)
-        .catch(() => {
-          return caches.match(req).then(cached => {
-            if (cached) return cached;
-            return new Response('Offline and no cached sheet data.', {
-              status: 503,
-              statusText: 'Offline'
-            });
-          });
-        })
+        .catch(() =>
+          caches.match(req).then(cached => cached || new Response('Offline and no cached sheet data.', {
+            status: 503, statusText: 'Offline'
+          }))
+        )
     );
     return;
   }
 
-  // ── NEVER cache any Google Apps Script endpoints ──
+  // ── 3) NEVER cache Google Apps Script endpoints ──
   if (url.hostname === 'script.google.com') {
     evt.respondWith(
       fetch(req)
         .then(networkResponse => networkResponse)
-        .catch(() => {
-          return new Response('Offline and no cached Apps Script data.', {
-            status: 503,
-            statusText: 'Offline'
-          });
-        })
+        .catch(() => new Response('Offline and no cached Apps Script data.', {
+          status: 503, statusText: 'Offline'
+        }))
     );
     return;
   }
 
-  // ── 3) NEVER cache any “?action=get” endpoints ──
+  // ── 4) NEVER cache ?action=get requests ──
   if (
     url.searchParams.has('action') &&
     url.searchParams.get('action') === 'get'
@@ -125,48 +116,38 @@ self.addEventListener('fetch', (evt) => {
     evt.respondWith(
       fetch(req)
         .then(networkResponse => networkResponse)
-        .catch(() => {
-          return caches.match(req).then(cached => {
-            if (cached) return cached;
-            return new Response('Offline and no cached data.', {
-              status: 503,
-              statusText: 'Offline'
-            });
-          });
-        })
+        .catch(() =>
+          caches.match(req).then(cached => cached || new Response('Offline and no cached data.', {
+            status: 503, statusText: 'Offline'
+          }))
+        )
     );
     return;
   }
 
-  // ── 4) HTML navigations: CACHE FIRST + strip form defaults ──
+  // ── 5) HTML pages: cache-first, then sanitize ──
   if (req.mode === 'navigate' || accept.includes('text/html')) {
     evt.respondWith(
       caches.match(req).then(cached => {
         if (cached) {
-          // Serve the cached HTML immediately…
           return stripFormDefaultsIfHTML(cached);
         }
-        // Otherwise fetch from network and strip defaults
         return fetch(req)
           .then(networkResponse => stripFormDefaultsIfHTML(networkResponse))
-          .catch(() => {
-            // If offline and not in cache, show offline fallback
-            return new Response('Offline and no cached page.', {
-              status: 503,
-              statusText: 'Offline'
-            });
-          });
+          .catch(() =>
+            new Response('Offline and no cached page.', {
+              status: 503, statusText: 'Offline'
+            })
+          );
       })
     );
     return;
   }
 
-  // ── 5) Everything else (CSS/JS/images/fonts/etc.): cache-first ──
+  // ── 6) Other resources (JS/CSS/images/etc.): cache-first ──
   evt.respondWith(
     caches.match(req).then(cached => {
-      if (cached) {
-        return cached;
-      }
+      if (cached) return cached;
       return fetch(req).then(networkResponse => {
         if (
           req.method === 'GET' &&
@@ -174,17 +155,14 @@ self.addEventListener('fetch', (evt) => {
           networkResponse.status === 200
         ) {
           const copy = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(req, copy);
-          });
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
         return networkResponse;
-      }).catch(() => {
-        return new Response('Offline: resource not cached.', {
-          status: 503,
-          statusText: 'Offline'
-        });
-      });
+      }).catch(() =>
+        new Response('Offline: resource not cached.', {
+          status: 503, statusText: 'Offline'
+        })
+      );
     })
   );
 });
