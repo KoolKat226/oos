@@ -3,6 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <title>Resetting Offline Cache…</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #ffffff;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 60px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .title {
+      font-size: 1.4em;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #333;
+    }
+
+    .subtitle {
+      font-size: 1em;
+      font-weight: 400;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      background-color: black;
+      border-radius: 50%;
+      animation: bounce 1s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(1);
+        opacity: 0.4;
+      }
+      40% {
+        transform: scale(1.4);
+        opacity: 1;
+      }
+    }
+  </style>
   <script>
     async function resetOfflineCacheOnly() {
       // 1. Unregister all service workers
@@ -23,17 +93,24 @@
         }
       }
 
-      // 3. Optional: reload or redirect (you can change this to whatever you want)
+      // 3. Redirect after short delay
       setTimeout(() => {
-        window.location.href = 'save.html'; // reload your offline setup page
-      }, 500);
+        window.location.href = 'save.html';
+      }, 2000);
     }
 
     window.addEventListener('DOMContentLoaded', resetOfflineCacheOnly);
   </script>
 </head>
 <body>
-  <h1>Clearing Offline Files…</h1>
-  <p>This will remove cached files but keep your saved data.</p>
+  <div class="box">
+    <div class="title">Preparing to update…</div>
+    <div class="subtitle">Do NOT exit OOS during this process</div>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
 </body>
 </html>
