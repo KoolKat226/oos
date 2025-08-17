@@ -396,12 +396,21 @@
 }
 
     .filter-buttons {
+      position: fixed;
+      /* stays visible on scroll */
+      top: 16px;
+      /* adjust vertical position */
+      left: 56%;
+      transform: translateX(-50%);
+      /* horizontal centering */
+
       width: 300px;
-      margin: 0 auto;
       display: flex;
       gap: 1rem;
-      margin-bottom: 2rem;
+      z-index: 9999;
+      /* above other content */
     }
+
     .filter-btn {
       padding: 0.5rem 1rem;
       font-family: 'Nunito Sans', sans-serif;
@@ -418,6 +427,18 @@
     }
     .filter-btn:hover {
       background: #ffce91;
+    }
+    .center-loading-container {
+      display: flex;
+      justify-content: center; /* horizontal center */
+      align-items: center;     /* vertical center */
+      width: 100%;
+      height: 100%;
+    }
+
+    .center-loading-container img {
+      width: 70px;
+      height: 70px;
     }
 
   </style>
@@ -447,6 +468,10 @@
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn"       data-filter="games">Games</button>
       <button class="filter-btn"       data-filter="themes">Themes</button>
+    </div>
+    <div style="height: 2px;" ></div>
+    <div class="center-loading-container">
+      <img src="../images/unmomento.svg" alt="Un Momento">
     </div>
     <div style="display:none" class="app-grid" id="app-list"></div>
   </div>
@@ -832,6 +857,8 @@
 
       renderApps();
       document.getElementById('app-list').style.display = '';
+      document.querySelectorAll(".center-loading-container")
+        .forEach(el => el.style.display = "none");
       checkForUpdates();
     };
 
