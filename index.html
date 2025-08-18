@@ -1980,11 +1980,16 @@ function logincheck() {
       _pauseBgAudio();
       prohibitEmojiAudio();
     } else {
-      cheeseburger();
+      // only run cheeseburger() if appopened is false
+      if (appopened === false) {
+        cheeseburger();
+      }
+
       // only auto‐resume if user hasn't manually paused
       if (!manualPaused) _playBgAudio();
     }
   });
+
 
   // fallback blur/focus
   window.addEventListener('blur', () => {
@@ -2100,6 +2105,27 @@ function logincheck() {
       emojispeek = false;
       console.log("Emoji audio is now prohibited.");
     }
+
+    // Called to allow emoji audio and mark app as closed
+    function allowEmojiAudioToggle() {
+      const stored = localStorage.getItem("emojispeekEnabled");
+      if (stored === "false") {
+        console.log("allowEmojiAudioToggle() aborted: emoji audio is disabled.");
+        return;
+      }
+
+      emojispeek = true;
+      appopened = false;
+      console.log("Emoji audio is now allowed, appopened set to false.");
+    }
+
+    // Called to prohibit emoji audio and mark app as opened
+    function blockEmojiAudioToggle() {
+      emojispeek = false;
+      appopened = true;
+      console.log("Emoji audio is now prohibited, appopened set to true.");
+    }
+
 
     // Toggle function for convenience
     function toggleEmojiAudio() {
@@ -2496,7 +2522,7 @@ function logincheck() {
         codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
         playuisound('./sounds/deminimize.wav');
         prohibitAnimation();
-        prohibitEmojiAudio();
+        blockEmojiAudioToggle();
         pauseBgAudio();
         shadowToggle();
         toggleMenu();
@@ -2512,7 +2538,7 @@ function logincheck() {
 
       playuisound('./sounds/open.wav');
       prohibitAnimation();
-      prohibitEmojiAudio();
+      blockEmojiAudioToggle();
       pauseBgAudio();
       shadowToggle();
       toggleMenu();
@@ -2636,7 +2662,7 @@ function logincheck() {
       playuisound('./sounds/minimize.wav');
       shadowToggle();
       allowAnimation();
-      cheeseburger();
+      allowEmojiAudioToggle();
       playBgAudio();
       toggleMenu();
 
@@ -2654,7 +2680,7 @@ function logincheck() {
       playuisound('./sounds/close.wav');
       allowAnimation();
       shadowToggle();
-      cheeseburger();
+      allowEmojiAudioToggle();
       playBgAudio();
       toggleMenu();
 
