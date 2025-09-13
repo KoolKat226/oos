@@ -2469,9 +2469,9 @@ function logincheck() {
       });
 
       // Update Mii torso colors
-      miis.forEach(m => {
-        m.el.querySelector('.mii').style.backgroundColor = icons[m.iconIndex].color;
-      });
+     // miis.forEach(m => {
+      //  m.el.querySelector('.mii').style.backgroundColor = icons[m.iconIndex].color;
+  //    });
     }
 
     const iconEls = [];
@@ -2922,23 +2922,40 @@ document.addEventListener('touchcancel', () => {
       }
     }
 
-    function updateMiis(time) {
-      miis.forEach(m => {
-        m.transitionTimer -= 16.6;
-        if (m.transitionTimer <= 0) {
-          m.transitionTimer = Math.random() * 5000 + 3000;
-          m.transitioning = true;
-          m.targetActive = 1 - m.targetActive;
+  function updateMiis(time) {
+    miis.forEach(m => {
+      m.transitionTimer -= 16.6;
+      if (m.transitionTimer <= 0) {
+        m.transitionTimer = Math.random() * 5000 + 3000;
+        m.transitioning = true;
+        m.targetActive = 1 - m.targetActive;
+      }
+      if (m.transitioning) {
+        m.active += (m.targetActive - m.active) * 0.05;
+        if (Math.abs(m.active - m.targetActive) < 0.01) {
+          m.active = m.targetActive;
+          m.transitioning = false;
+          m.speedX = (Math.random() * 0.5 - 0.25) * m.active;
+          m.speedZ = (Math.random() * 0.5 - 0.25) * m.active;
         }
-        if (m.transitioning) {
-          m.active += (m.targetActive - m.active) * 0.05;
-          if (Math.abs(m.active - m.targetActive) < 0.01) {
-            m.active = m.targetActive;
-            m.transitioning = false;
-            m.speedX = (Math.random() * 0.5 - 0.25) * m.active;
-            m.speedZ = (Math.random() * 0.5 - 0.25) * m.active;
-          }
+      }
+
+      // --- NEW LOGIC ---
+      if (m.iconIndex === -1) {
+        // Center roaming
+        const range = 180;
+        if (m.active > 0.01) {
+          m.baseX += m.speedX;
+          m.baseZ += m.speedZ;
+          if (Math.abs(m.baseX) > range) m.speedX *= -1;
+          if (Math.abs(m.baseZ) > range) m.speedZ *= -1;
         }
+        const tx = m.baseX;
+        const tz = m.baseZ;
+        m.x += (tx - m.x) * m.smoothFactor;
+        m.z += (tz - m.z) * m.smoothFactor;
+      } else {
+        // Normal icon-following behavior
         const ico = iconPositions[m.iconIndex];
         if (!ico) return;
         const range = m.roamFar ? 180 : 90;
@@ -2951,14 +2968,16 @@ document.addEventListener('touchcancel', () => {
         const tx = ico.x + m.baseX, tz = ico.z + m.baseZ;
         m.x += (tx - m.x) * m.smoothFactor;
         m.z += (tz - m.z) * m.smoothFactor;
-        const hopH = Math.abs(Math.sin(time * 0.003 + m.yOffset)) * 10 * m.active;
-        const y = 150 + hopH;
-        const frontZ = m.z + 70;
-        m.el.style.transform = `translate3d(${m.x}px,${y}px,${frontZ}px)`;
-      });
-    }
+      }
+      // --- END NEW LOGIC ---
 
-    start();
+      const hopH = Math.abs(Math.sin(time * 0.003 + m.yOffset)) * 10 * m.active;
+      const y = 150 + hopH;
+      const frontZ = m.z + 70;
+      m.el.style.transform = `translate3d(${m.x}px,${y}px,${frontZ}px)`;
+    });
+  }
+start();
   </script>
 
   <script>
@@ -3112,9 +3131,7 @@ document.addEventListener('touchcancel', () => {
         const showChat = dateStr && isToday(dateStr);
         const iconUrl = iconC.v.trim();
         const iconIndex = icons.findIndex(ic => ic.src === iconUrl);
-        const finalIconIndex = iconIndex < 0
-          ? icons.findIndex(ic => ic.src === './appstore/appstoreicon.png')
-          : iconIndex;
+        const finalIconIndex = iconIndex < 0 ? -1 : iconIndex;
         const iconColor = await getDominantColor(iconUrl);
 
         entries.push({
@@ -3127,7 +3144,16 @@ document.addEventListener('touchcancel', () => {
       }
 
       const groups = {};
-      entries.forEach(e => (groups[e.iconIndex] ||= []).push(e));
+      entries.forEach(e => {
+        if (e.iconIndex === -1) {
+          // Center spawn (not grouped with icons)
+          e.baseX = 0;
+          e.baseZ = 0;
+        } else {
+          (groups[e.iconIndex] ||= []).push(e);
+        }
+      });
+
       Object.values(groups).forEach(group => {
         const n = group.length, R = 80, J = 10;
         group.forEach((e, i) => {
@@ -3136,6 +3162,7 @@ document.addEventListener('touchcancel', () => {
           e.baseZ = Math.sin(θ) * R + (Math.random() * J - J / 2);
         });
       });
+
 
       // Add new matching Miis
       entries.forEach(e => {
@@ -3527,7 +3554,7 @@ document.addEventListener('touchcancel', () => {
           // 1) ICON CHANGES (unchanged)
           if (data.iconUrl !== mii.currentIconUrl) {
             let idx = icons.findIndex(ic => ic.src === data.iconUrl);
-            if (idx < 0) idx = icons.findIndex(ic => ic.src === './appstore/appstoreicon.png');
+            if (idx < 0) idx = -1; // <- not the App Store!
             mii.iconIndex = idx;
             mii.currentIconUrl = data.iconUrl;
 
