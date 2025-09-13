@@ -1154,6 +1154,10 @@ opacity: 0.5;
       <input autocomplete="off" id="sayMain" type="text" placeholder="Say something...">
     </div>
 
+        <button onclick="refreshPlaza()" class="icon-btn" id="refreshBtn" title="Refresh People">
+      <img id="refreshIcon" src="./images/refreshbtn.png" alt="Refresh People">
+    </button>
+
     <!-- Audio icon placeholder -->
     <button onclick="disableBgAudioControl()" class="icon-btn" id="speakBtn" title="Play Menu Music">
       <img id="audioIcon" src="./images/soundbtn.png" alt="Audio Icon">
@@ -1694,6 +1698,8 @@ function logincheck() {
     const speakBtn = document.getElementById('speakBtn');
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsBtnDos = document.getElementById('settingsBtn2');
+    const refreshIcon = document.getElementById('refreshIcon');
+    const refreshBtn = document.getElementById('refreshBtn');
 
     // Swap to pressed image on press & revert on release
     function addPressEffect(btn, icon, normalSrc, pressedSrc) {
@@ -1703,6 +1709,8 @@ function logincheck() {
     }
 
     addPressEffect(settingsBtn, settingsIcon, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
+
+    addPressEffect(refreshBtn, refreshIcon, './images/refreshbtn.png', './images/refreshbtn_pressed.png');
 
     addPressEffect(settingsBtnDos, settingsIconDos, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
 
@@ -2482,7 +2490,7 @@ function logincheck() {
 
     async function appstoreclose() {
       await refreshData();
-      refreshPlaza();
+      //refreshPlaza();
     }
 
       
