@@ -2510,157 +2510,145 @@ function logincheck() {
 
     let appIsOpening = false;
 
-    function openApp(inner, data) {
-      if (appIsOpening) return;
-      appIsOpening = true;
+function openApp(inner, data) {
+  if (appIsOpening) return;
+  appIsOpening = true;
 
-      // Show clicked icon’s src in the text box (if it exists)
-      const iconUrlBox = document.getElementById('colG');
-      if (iconUrlBox) iconUrlBox.value = data.src || '';
-      cancelPlazaRefresh();
-      updatemyoos();
+  // Show clicked icon’s src in the text box (if it exists)
+  const iconUrlBox = document.getElementById('colG');
+  if (iconUrlBox) iconUrlBox.value = data.src || '';
+  cancelPlazaRefresh();
+  updatemyoos();
 
-      // If we’re un‐minimizing the same icon:
-      if (isMinimized && inner.parentElement === lastClickedIcon) {
-        isMinimized = false;
-        inner.classList.remove('hop');
-        overlay.classList.add('active');
-        codeContainer.style.opacity = '1';
-        codeContainer.style.pointerEvents = 'auto';
-        codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
-        playuisound('./sounds/deminimize.wav');
-        prohibitAnimation();
-        blockEmojiAudioToggle();
-        pauseBgAudio();
-        shadowToggle();
-        toggleMenu();
+  // If we’re un‐minimizing the same icon:
+  if (isMinimized && inner.parentElement === lastClickedIcon) {
+    isMinimized = false;
+    inner.classList.remove('hop');
+    overlay.classList.add('active');
+    codeContainer.style.opacity = '1';
+    codeContainer.style.pointerEvents = 'auto';
+    codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
+    playuisound('./sounds/deminimize.wav');
+    prohibitAnimation();
+    blockEmojiAudioToggle();
+    pauseBgAudio();
+    shadowToggle();
+    toggleMenu();
 
-        appIsOpening = false;
-        return;
-      }
+    appIsOpening = false;
+    return;
+  }
 
-      // Fresh icon click
-      iconEls.forEach(e => e.querySelector('.icon-inner').classList.remove('hop'));
-      lastClickedIcon = inner.parentElement;
-      isMinimized = false;
+  // Fresh icon click
+  iconEls.forEach(e => e.querySelector('.icon-inner').classList.remove('hop'));
+  lastClickedIcon = inner.parentElement;
+  isMinimized = false;
 
-      playuisound('./sounds/open.wav');
-      prohibitAnimation();
-      blockEmojiAudioToggle();
-      pauseBgAudio();
-      shadowToggle();
-      toggleMenu();
+  playuisound('./sounds/open.wav');
+  prohibitAnimation();
+  blockEmojiAudioToggle();
+  pauseBgAudio();
+  shadowToggle();
+  toggleMenu();
 
-      // Clone the icon-inner → animate it to full-screen
-      const r = inner.getBoundingClientRect();
-      const clone = inner.cloneNode(true);
-      Object.assign(clone.style, {
-        position: 'fixed',
-        left: `${r.left}px`,
-        top: `${r.top}px`,
-        width: `${r.width}px`,
-        height: `${r.height}px`,
-        borderRadius: '30px',
-        transition: 'all .8s ease',
-        zIndex: 998,
-        pointerEvents: 'none',
-        backgroundColor: 'black',
-        backgroundImage: 'none'
-      });
-      document.body.appendChild(clone);
-      requestAnimationFrame(() => {
-        clone.style.left = '0';
-        clone.style.top = '0';
-        clone.style.width = `${window.innerWidth}px`;
-        clone.style.height = `${window.innerHeight}px`;
-      });
+  // Clone the icon-inner → animate it to full-screen
+  const r = inner.getBoundingClientRect();
+  const clone = inner.cloneNode(true);
+  Object.assign(clone.style, {
+    position: 'fixed',
+    left: `${r.left}px`,
+    top: `${r.top}px`,
+    width: `${r.width}px`,
+    height: `${r.height}px`,
+    borderRadius: '30px',
+    transition: 'all .8s ease',
+    zIndex: 998,
+    pointerEvents: 'none',
+    backgroundColor: 'black',
+    backgroundImage: 'none'
+  });
+  document.body.appendChild(clone);
+  requestAnimationFrame(() => {
+    clone.style.left = '0';
+    clone.style.top = '0';
+    clone.style.width = `${window.innerWidth}px`;
+    clone.style.height = `${window.innerHeight}px`;
+  });
 
-      logoHolder.style.display = 'block';
-      overlay.classList.add('active');
+  logoHolder.style.display = 'block';
+  overlay.classList.add('active');
 
-      // Wait ~2s for the zoom animation, then inject code/HTML
-      setTimeout(() => {
-        logoHolder.style.display = 'none';
+  // ───────────────────────────────
+  // Decode + inject the app code *immediately* so it loads while animating
+  // ───────────────────────────────
+  const map = {
+    '*oosqu*': '"',
+    '*oosap*': "'",
+    '*oosfsl*': '/',
+    '*oosbsl*': '\\',
+    '*oosobr*': '[',
+    '*ooscbr*': ']',
+    '*oosbrco*': '{',
+    '*oosbrcc*': '}',
+    '*oospao*': '(',
+    '*oospac*': ')',
+    '*ooseq*': '=',
+    '*oosti*': '',
+    '*ooscom*': ',',
+    '*oosscol*': ';',
+    '*ooscol*': ':',
+    '*ooslin*': '|',
+    '*oosango*': '<',
+    '*oosangc*': '>'
+  };
 
-        // Map for decoding obfuscated symbols
-        const map = {
-          '*oosqu*': '"',
-          '*oosap*': "'",
-          '*oosfsl*': '/',
-          '*oosbsl*': '\\',
-          '*oosobr*': '[',
-          '*ooscbr*': ']',
-          '*oosbrco*': '{',
-          '*oosbrcc*': '}',
-          '*oospao*': '(',
-          '*oospac*': ')',
-          '*ooseq*': '=',
-          '*oosti*': '',
-          '*ooscom*': ',',
-          '*oosscol*': ';',
-          '*ooscol*': ':',
-          '*ooslin*': '|',
-          '*oosango*': '<',
-          '*oosangc*': '>'
-        };
+  let html = data.websiteurl;
+  for (let k in map) {
+    html = html.split(k).join(map[k]);
+  }
 
-        // Decode the stored HTML/JS from data.websiteurl
-        let html = data.websiteurl;
-        for (let k in map) {
-          html = html.split(k).join(map[k]);
-        }
+  // Inject decoded HTML
+  codeContainer.innerHTML = html;
 
-        // Inject decoded HTML into codeContainer
-        codeContainer.innerHTML = html;
+  // Transform + execute <script> tags right away
+  const inlineScripts = codeContainer.querySelectorAll('script');
+  inlineScripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
 
-        // ─────────────────────────────────────────────────────────────────────
-        // 1) Find every <script> inside codeContainer.
-        // 2) For each one, transform any `let ` or `const ` → `var `,
-        //    so that redeclaration on repeated opens won’t error.
-        // 3) Create a new <script> with that “safe” text (or copy src if external),
-        //    append it to <head> (which executes it globally), and track it.
-        // 4) Remove the original <script> from codeContainer.
-        // ─────────────────────────────────────────────────────────────────────
-        const inlineScripts = codeContainer.querySelectorAll('script');
-        inlineScripts.forEach(oldScript => {
-          const newScript = document.createElement('script');
-
-          if (oldScript.src) {
-            // External script: copy src, async, and defer flags
-            newScript.src = oldScript.src;
-            if (oldScript.async) newScript.async = true;
-            if (oldScript.defer) newScript.defer = true;
-          } else {
-            // Inline script: replace top-level `let`/`const` with `var`
-            const userCode = oldScript.textContent;
-            const safeCode = userCode
-              .replace(/\blet\s+/g, 'var ')
-              .replace(/\bconst\s+/g, 'var ');
-            newScript.textContent = safeCode;
-          }
-
-          // Appending to <head> causes the browser to parse+execute it immediately.
-          document.head.appendChild(newScript);
-          // Keep a reference so we can remove it later.
-          currentInjectedScripts.push(newScript);
-
-          // Remove the old <script> inside codeContainer (it never ran)
-          oldScript.remove();
-        });
-        // ─────────────────────────────────────────────────────────────────────
-
-        // Reveal codeContainer + any <iframe> inside it
-        codeContainer.style.opacity = '1';
-        codeContainer.style.pointerEvents = 'auto';
-        codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
-
-        // Remove the zoom‐clone from the DOM
-        clone.remove();
-
-        // Allow minimizeApp() and closeApp() again
-        appIsOpening = false;
-      }, 2000);
+    if (oldScript.src) {
+      newScript.src = oldScript.src;
+      if (oldScript.async) newScript.async = true;
+      if (oldScript.defer) newScript.defer = true;
+    } else {
+      const userCode = oldScript.textContent;
+      const safeCode = userCode
+        .replace(/\blet\s+/g, 'var ')
+        .replace(/\bconst\s+/g, 'var ');
+      newScript.textContent = safeCode;
     }
+
+    document.head.appendChild(newScript);
+    currentInjectedScripts.push(newScript);
+    oldScript.remove();
+  });
+
+  // Hide content visually until animation finishes
+  codeContainer.style.opacity = '0';
+  codeContainer.style.pointerEvents = 'none';
+
+  // ───────────────────────────────
+  // After ~2s animation, reveal already-loaded content
+  // ───────────────────────────────
+  setTimeout(() => {
+    logoHolder.style.display = 'none';
+    codeContainer.style.opacity = '1';
+    codeContainer.style.pointerEvents = 'auto';
+    codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
+
+    clone.remove();
+    appIsOpening = false;
+  }, 2000);
+}
 
     function minimizeApp() {
       if (appIsOpening) return;
