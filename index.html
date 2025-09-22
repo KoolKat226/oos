@@ -4449,55 +4449,50 @@ start();
     pointer-events: none;
     width: auto;  /* we set exact size in JS */
     height: auto;
-filter: drop-shadow(0px 7px 25px #000);
+filter: drop-shadow(0px 7px 9px #000);
   }
 </style>
 
 <script>
-  (function() {
-    const scene      = document.getElementById('scene');
-    const floorZ      = -100;    // Z‐depth of the floor plane
-    const bottomPx      = 100;     // how far down to drop into the floor (tweak as needed)
-    const maxFloorRad = 600;    // as before, full floor radius
+(function() {
+  const floorZ      = -200;    // same as your floor’s translateZ
+  const maxFloorRad = 600;     // radius of placement area
 
-    /**
-     * @param {string} src      – image URL
-     * @param {number} pct      – 0–100% of floor radius
-     * @param {number} sizePct  – 0–∞% scale (100 = natural size)
-     */
-    window.addtrinket = function(src, pct, sizePct) {
-      // clamp inputs
-      const p     = Math.max(0, Math.min(100, pct));
-      const scale = Math.max(0, sizePct) / 100;
-      const R     = (p / 100) * maxFloorRad;
-      const θ     = Math.random() * 2 * Math.PI;
-      const x     = Math.cos(θ) * R;
-      const z     = floorZ + Math.sin(θ) * R;
+  window.addtrinket = function(src, pct, sizePct) {
+    const p     = Math.max(0, Math.min(100, pct));
+    const scale = Math.max(0, sizePct) / 100;
+    const R     = (p / 100) * maxFloorRad;
+    const θ     = Math.random() * 2 * Math.PI;
+    const x     = Math.cos(θ) * R;
+    const z     = floorZ + Math.sin(θ) * R;
 
-      // create element
-      const el = document.createElement('img');
-      el.className = 'trinket';
-      el.src       = src;
-      el.alt       = 'Trinket';
+    const el = document.createElement('img');
+    el.className = 'trinket';
+    el.src       = src;
+    el.alt       = 'Trinket';
 
-      // once loaded, size & position
-      el.onload = () => {
-        const w = el.naturalWidth  * scale;
-        const h = el.naturalHeight * scale;
-        el.style.width  = `${w}px`;
-        el.style.height = `${h}px`;
+    el.onload = () => {
+      const w = el.naturalWidth  * scale;
+      const h = el.naturalHeight * scale;
+      el.style.width  = `${w}px`;
+      el.style.height = `${h}px`;
 
-        // horizontal offset via left + calc, vertical via bottom
-        el.style.left   = `calc(50% + ${x.toFixed(1)}px)`;
-        el.style.bottom = `${bottomPx}px`;
+      // center anchor
+      el.style.left = '50%';
+      el.style.top  = '50%';
 
-        // only depth in the transform
-        el.style.transform = `translateZ(${z.toFixed(1)}px)`;
-      };
-
-      scene.appendChild(el);
+      // Position in 3D space:
+      //  - X = floor radius
+      //  - Y = raised slightly above floor plane
+      //  - Z = floor depth
+      const yAboveFloor = 150; // tweak this to float higher
+      el.style.transform =
+        `translate(-50%, -50%) translateX(${x.toFixed(1)}px) translateY(${yAboveFloor}px) translateZ(${z.toFixed(1)}px)`;
     };
-  })();
+
+    scene.appendChild(el);
+  };
+})();
 </script>
   <iframe style="z-index: 4; opacity: 1;" id="tutorialFrame" src="./tutorial/index.html"></iframe>
   <script>
