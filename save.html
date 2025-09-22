@@ -254,10 +254,12 @@ async function cacheAll(urls) {
   localStorage.setItem('oos_urls', JSON.stringify(urls));
   log('‣ OOS 7 Installed…');
 
-  // Redirect only once
-  if (!localStorage.getItem('oos_redirected')) {
-    localStorage.setItem('oos_redirected', 'true');
+  // First-time redirect, otherwise normal redirect
+  if (!localStorage.getItem('oos_redirected_once')) {
+    localStorage.setItem('oos_redirected_once', 'true');
     window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
+  } else {
+    window.location.href = 'https://koolkat226.github.io/oos/index.html';
   }
 }
 
