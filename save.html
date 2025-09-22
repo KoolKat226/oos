@@ -225,36 +225,42 @@
       return Array.from(all);
     }
 
-    async function cacheAll(urls) {
-      log('‣ Deleting previous caches…');
+async function cacheAll(urls) {
+  log('‣ Deleting previous caches…');
 
-      const keys = await caches.keys();
-      for (const key of keys) {
-        if (key.startsWith('oos')) {
-          await caches.delete(key);
-          log(`🗑️ Deleted cache: ${key}`);
-        }
-      }
-
-      log(`‣ Adding ${urls.length} resources…`);
-      const cache = await caches.open(CACHE_NAME);
-
-      for (let i = 0; i < urls.length; i++) {
-        try {
-          await cache.add(new Request(urls[i], { cache: 'no-store' }));
-          log(`➕ Resource ${i + 1}/${urls.length}`);
-        } catch {
-          log(`❌ Failed ${i + 1}/${urls.length}`);
-        }
-        const pct = Math.round((i + 1) / urls.length * 100);
-        progressBar.style.width = pct + '%';
-      }
-
-      log(`${action} successful`);
-      localStorage.setItem('oos_urls', JSON.stringify(urls));
-      log('‣ OOS 7 Installed…');
-      window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
+  const keys = await caches.keys();
+  for (const key of keys) {
+    if (key.startsWith('oos')) {
+      await caches.delete(key);
+      log(`🗑️ Deleted cache: ${key}`);
     }
+  }
+
+  log(`‣ Adding ${urls.length} resources…`);
+  const cache = await caches.open(CACHE_NAME);
+
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      await cache.add(new Request(urls[i], { cache: 'no-store' }));
+      log(`➕ Resource ${i + 1}/${urls.length}`);
+    } catch {
+      log(`❌ Failed ${i + 1}/${urls.length}`);
+    }
+    const pct = Math.round((i + 1) / urls.length * 100);
+    progressBar.style.width = pct + '%';
+  }
+
+  log(`${action} successful`);
+  localStorage.setItem('oos_urls', JSON.stringify(urls));
+  log('‣ OOS 7 Installed…');
+
+  // Redirect only once
+  if (!localStorage.getItem('oos_redirected')) {
+    localStorage.setItem('oos_redirected', 'true');
+    window.location.href = 'https://koolkat226.github.io/oosg/initstart.html';
+  }
+}
+
 
     async function unregisterSW() {
       if ('serviceWorker' in navigator) {
