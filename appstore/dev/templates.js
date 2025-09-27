@@ -84,6 +84,7 @@ font-family*ooscol* *oosap*Inter*oosap**ooscom* sans-serif*oosscol*
 
 
 *oosango*!-- UI --*oosangc*
+*oosango*div class*ooseq**oosqu*app*oosqu**oosangc*
 *oosango*img style*ooseq**oosqu*margin-top*ooscol* 100px*oosscol* height*ooscol* 80px*oosscol* border-radius*ooscol* 17px*oosscol**oosqu* src*ooseq**oosqu*..*oosfsl*fallback.png*oosqu**oosangc*
 *oosango*h2 style*ooseq**oosqu*font-size*ooscol* 24px*oosscol* font-weight*ooscol* 600*oosscol**oosqu**oosangc*Theme Pack*oosango**oosfsl*h2*oosangc*
 *oosango*p style*ooseq**oosqu*margin-left*ooscol* 25%*oosscol* width*ooscol* 50%*oosscol**oosqu**oosangc*This theme pack will visually change the look of OlexOS*oosango**oosfsl*p*oosangc*
@@ -262,6 +263,11 @@ font-family*ooscol* *oosap*Inter*oosap**ooscom* sans-serif*oosscol*
     iframe.visible *oosbrco*
       opacity*ooscol* 1
     *oosbrcc*
+  .app *oosbrco*
+background-color*ooscol* #fff*oosscol*
+width*ooscol* 100%*oosscol*
+height*ooscol* 100%*oosscol*
+*oosbrcc*
 *oosango**oosfsl*style*oosangc*
 *oosango*script*oosangc*
   function replaceBgAudioSource*oospao**oospac* *oosbrco*
@@ -277,9 +283,9 @@ changeHatTo*oospao**oosap*CUSTOMHATIMAGEURL*oosap**oospac**oosscol*
 *oosango**oosfsl*textarea*oosangc*
 
 *oosango*!-- Buttons --*oosangc*
-*oosango*button class*ooseq**oosqu*btn btn-remove*oosqu* onclick*ooseq**oosqu*location.reload*oospao**oospac**oosscol**oosqu* id*ooseq**oosqu*removeBtn*oosqu**oosangc*Remove Theme*oosango**oosfsl*button*oosangc*
+*oosango*button class*ooseq**oosqu*btn btn-remove*oosqu* onclick*ooseq**oosqu*location.reload*oospao**oospac**oosscol**oosqu* id*ooseq**oosqu*removeBtn*oosqu**oosangc*Remove Current Theme*oosango**oosfsl*button*oosangc*
 *oosango*button class*ooseq**oosqu*btn btn-apply*oosqu* onclick*ooseq**oosqu*location.reload*oospao**oospac**oosscol**oosqu* id*ooseq**oosqu*saveBtn*oosqu**oosangc*Apply Theme*oosango**oosfsl*button*oosangc*
-*oosango*p style*ooseq**oosqu*font-size*ooscol* 12px*oosscol* color*ooscol* #f78819*oosscol* margin-left*ooscol* 25%*oosscol* width*ooscol* 50%*oosscol**oosqu**oosangc*Remove any other theme packs before applying*oosango**oosfsl*p*oosangc*
+*oosango*p style*ooseq**oosqu*font-size*ooscol* 12px*oosscol* color*ooscol* #f78819*oosscol* margin-left*ooscol* 25%*oosscol* width*ooscol* 50%*oosscol**oosqu**oosangc*You must remove any other theme packs before applying*oosango**oosfsl*p*oosangc*
 *oosango**oosfsl*div*oosangc*
 *oosango*br*oosangc*
 *oosango*button style*ooseq**oosqu*display*ooscol*none*oosscol**oosqu* class*ooseq**oosqu*btn btn-character*oosqu* onclick*ooseq**oosqu*document.getElementById*oospao**oosap*colC*oosap**oospac*.value *ooseq* *oosap*.*oosfsl*emoji*oosfsl*orbs*oosfsl*1.png*ooscom* .*oosfsl*emoji*oosfsl*mouths*oosfsl*1.png*ooscom* .*oosfsl*emoji*oosfsl*eyes*oosfsl*1.png*ooscom* .*oosfsl*emoji*oosfsl*hairs*oosfsl*1.png*ooscom* .*oosfsl*emoji*oosfsl*eyewear*oosfsl*1.png*ooscom* .*oosfsl*emoji*oosfsl*hats*oosfsl*1.png*oosap**oosscol* showToast*oospao**oospac**oosscol**oosqu**oosangc*Apply Custom Character*oosango**oosfsl*button*oosangc*
@@ -300,6 +306,7 @@ changeHatTo*oospao**oosap*CUSTOMHATIMAGEURL*oosap**oospac**oosscol*
     *oosbrcc**ooscom* 3000*oospac**oosscol*
   *oosbrcc*
 *oosango**oosfsl*script*oosangc*
+*oosango**oosfsl*div*oosangc*
 `.trim(),
 
   "blank": `
