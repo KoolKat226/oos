@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OOS VPN</title>
+
+<!-- Google Font: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0b0b0b;
+    --box: #111;
+    --muted: #c0c0c0;
+    --accent: #007bff;
+  }
+
+  html,body {
+    height: 100%;
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: var(--bg);
+    color: white;
+    overflow: hidden;
+  }
+
+  /* Full-screen overlay */
+  .welcome-popup {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(5,5,5,0.9);
+    z-index: 1000;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .welcome-popup.hide {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.05);
+  }
+
+  /* Box container */
+  .welcome-box {
+    background: var(--box);
+    border-radius: 28px;
+    padding: 36px 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    max-width: 520px;
+    width: calc(100% - 48px);
+    animation: boxIn 0.7s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes boxIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .welcome-box h1 {
+    font-size: 2.0rem;
+    margin: 0 0 10px;
+    font-weight: 700;
+    line-height: 1.05;
+  }
+
+  /* Ensure paragraph block is centered AND its text is centered */
+  .welcome-box p {
+    margin: 0 auto 20px;       /* centers the block itself */
+    max-width: 420px;         /* keep comfortable line-length */
+    text-align: center;       /* center the text inside the block */
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .welcome-box button {
+    padding: 12px 34px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .welcome-box button:hover { transform: translateY(-2px); }
+  .welcome-box button:focus { outline: 3px solid rgba(0,123,255,0.18); }
+
+  iframe {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: none;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="welcome-popup" id="popup">
+  <div class="welcome-box" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+    <h1 id="welcomeTitle">Welcome to OOS VPN!</h1>
+    <br>
+    <hr>
+    <p>IMPORTANT: If you ever get a popup asking if you would like to leave the page, be sure to press <strong>ESC</strong> or select <strong>CANCEL</strong>.</p>
+    <hr>
+    <br>
+    <button id="continueBtn" type="button">Continue</button>
+  </div>
+</div>
+
+<iframe id="mainFrame" src="" title="OOS Content Frame"></iframe>
+
+<script>
+  const button = document.getElementById("continueBtn");
+  const popup = document.getElementById("popup");
+  const frame = document.getElementById("mainFrame");
+
+  button.addEventListener("click", () => {
+    popup.classList.add("hide");
+    setTimeout(() => {
+      popup.style.display = "none";
+      frame.src = "https://learn.wiki-edu.xyz.cdn.cloudflare.net/";
+      frame.style.display = "block";
+    }, 600);
+  });
+</script>
+  <script>
+    window.addEventListener("beforeunload", function (e) {
+      const confirmationMessage = "Burger?";
+      e.preventDefault(); // Required for some browsers
+      e.returnValue = confirmationMessage; // Standard for modern browsers
+      return confirmationMessage; // For older browsers
+    });
+  </script>
+
+</body>
+</html>
