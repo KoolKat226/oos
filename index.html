@@ -55,6 +55,11 @@
       align-items: center;
       position: relative;
       touch-action: none;
+      pointer-events: none; /* allow clicks to pass through */
+    }
+
+    .scene .icon {
+      pointer-events: auto;
     }
 
     .floor {
@@ -582,6 +587,7 @@ opacity: 0.5;
       height: 58px;
       transition: background-color 0.2s;
       transition: .3s;
+      z-index: 999;
     }
 
     .icon-btn:hover {
@@ -2993,14 +2999,14 @@ start();
           eyeImg.src = originalSrc;
         }, 150); // Blink duration
 
-        const nextBlink = Math.random() * 4000 + 2000; // 2–6s
-        setTimeout(() => blinkMii(head), nextBlink);
-      }
+       // const nextBlink = Math.random() * 4000 + 2000; // 2–6s
+      //  setTimeout(() => blinkMii(head), nextBlink);
+    //  }
 
       // Start blinking for each head
-      heads.forEach(head => {
-        const delay = Math.random() * 4000 + 2000; // 1–4s
-        setTimeout(() => blinkMii(head), delay);
+    //  heads.forEach(head => {
+    //    const delay = Math.random() * 4000 + 2000; // 1–4s
+    //    setTimeout(() => blinkMii(head), delay);
       });
 
       // Talking animation flicker
