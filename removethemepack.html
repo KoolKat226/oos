@@ -78,7 +78,8 @@ font-family: 'Inter', sans-serif;
 <h2 style="font-size: 24px; font-weight: 600;">FALLLLL Theme Pack</h2>
 <p style="margin-left: 25%; width: 50%;">This theme pack will visually change the look of OlexOS and potentially modify system settings, only proceed if this content is from a trusted source.</p>
 <div id="editor-container">
-<textarea style="display:none" id="codeInput" placeholder="Type JavaScript code here…"></textarea>
+<textarea style="display:none" id="codeInput" placeholder="Type JavaScript code here…">
+</textarea>
 
 <!-- Buttons -->
 <button class="btn btn-remove"  id="removeBtn">Remove Theme</button>
@@ -104,124 +105,111 @@ font-family: 'Inter', sans-serif;
   }
 </script>
 <script>
-  (function() {
-    const STORAGE_KEY = 'savedHTMLContent';
-    let isEditorInitialized = false;
-    let injectedContainer = null;
-    let injectedScripts = [];
+(function () {
+  const STORAGE_KEY = 'savedHTMLContent';
+  let isEditorInitialized = false;
+  let injectedContainer = null;
+  let injectedScripts = [];
 
-    function injectHTML(content) {
-      if (injectedContainer) {
-        injectedContainer.remove();
-        injectedContainer = null;
-      }
-      injectedScripts.forEach(s => s.remove());
-      injectedScripts = [];
-
-      if (!content) return;
-
-      injectedContainer = document.createElement('div');
-      injectedContainer.id = 'injected-container';
-
-      const temp = document.createElement('div');
-      temp.innerHTML = content;
-
-      temp.querySelectorAll('script').forEach(oldScript => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach(attr =>
-          newScript.setAttribute(attr.name, attr.value)
-        );
-        newScript.textContent = oldScript.textContent;
-        document.body.appendChild(newScript);
-        injectedScripts.push(newScript);
-        oldScript.remove();
-      });
-
-      while (temp.firstChild) {
-        injectedContainer.appendChild(temp.firstChild);
-      }
-
-      document.body.appendChild(injectedContainer);
+  function injectHTML(content) {
+    if (injectedContainer) {
+      injectedContainer.remove();
+      injectedContainer = null;
     }
+    injectedScripts.forEach(s => s.remove());
+    injectedScripts = [];
 
-    function initEditor() {
-      if (isEditorInitialized) return;
-      isEditorInitialized = true;
+    if (!content) return;
 
-      const textarea = document.getElementById('codeInput');
-      const saveBtn  = document.getElementById('saveBtn');
-      const removeBtn = document.getElementById('removeBtn');
+    injectedContainer = document.createElement('div');
+    injectedContainer.id = 'injected-container';
 
-      // load into textarea
-      const existing = localStorage.getItem(STORAGE_KEY);
-      if (existing) textarea.value = existing;
+    const temp = document.createElement('div');
+    temp.innerHTML = content;
 
-      // Apply Theme button
-      saveBtn?.addEventListener('click', () => {
-        const html = textarea.value;
-        localStorage.setItem(STORAGE_KEY, html);
-        injectHTML(html); // << NO reload anymore
-        window.location.href = "./winter.html";
-      });
-
-      // Remove Theme button
-      removeBtn?.addEventListener('click', () => {
-        localStorage.removeItem(STORAGE_KEY);
-        injectHTML('');
-        textarea.value = '';
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-
-      // Auto-apply saved theme on load
-      if (saved) {
-        injectHTML(saved);
-      } else {
-        // If nothing saved yet, apply the default textarea contents once
-        const textarea = document.getElementById('codeInput');
-        if (textarea?.value.trim()) {
-          localStorage.setItem(STORAGE_KEY, textarea.value);
-          injectHTML(textarea.value);
-        }
-      }
-
-      if (document.getElementById('editor-container')) {
-        initEditor();
-      } else {
-        new MutationObserver(handleMutations)
-          .observe(document.body, { childList: true, subtree: true });
-      }
+    temp.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(attr =>
+        newScript.setAttribute(attr.name, attr.value)
+      );
+      newScript.textContent = oldScript.textContent;
+      document.body.appendChild(newScript);
+      injectedScripts.push(newScript);
+      oldScript.remove();
     });
 
-    function handleMutations(mutations) {
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node instanceof HTMLElement &&
-             (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
-            initEditor();
-          }
+    while (temp.firstChild) {
+      injectedContainer.appendChild(temp.firstChild);
+    }
+
+    document.body.appendChild(injectedContainer);
+  }
+
+  function initEditor() {
+    if (isEditorInitialized) return;
+    isEditorInitialized = true;
+
+    const textarea = document.getElementById('codeInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const removeBtn = document.getElementById('removeBtn');
+
+    // Load into textarea (if any)
+    const existing = localStorage.getItem(STORAGE_KEY);
+    if (existing) textarea.value = existing;
+
+    // Apply Theme button
+    saveBtn?.addEventListener('click', () => {
+      const html = textarea.value;
+      localStorage.setItem(STORAGE_KEY, html);
+      injectHTML(html);
+    });
+
+    // Remove Theme button
+    removeBtn?.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      injectHTML('');
+      textarea.value = '';
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // ❗ REMOVE ANY SAVED THEME ON PAGE LOAD
+    localStorage.removeItem(STORAGE_KEY);
+    injectHTML('');
+    window.location.href = "./winter.html";
+
+    // Clear editor textarea since theme was removed
+    const textarea = document.getElementById('codeInput');
+    if (textarea) textarea.value = '';
+
+    if (document.getElementById('editor-container')) {
+      initEditor();
+    } else {
+      new MutationObserver(handleMutations)
+        .observe(document.body, { childList: true, subtree: true });
+    }
+  });
+
+  function handleMutations(mutations) {
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (
+          node instanceof HTMLElement &&
+          (node.id === 'editor-container' || node.querySelector?.('#editor-container'))
+        ) {
+          initEditor();
         }
-        for (const node of m.removedNodes) {
-          if (node instanceof HTMLElement &&
-             (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
-            isEditorInitialized = false;
-          }
+      }
+      for (const node of m.removedNodes) {
+        if (
+          node instanceof HTMLElement &&
+          (node.id === 'editor-container' || node.querySelector?.('#editor-container'))
+        ) {
+          isEditorInitialized = false;
         }
       }
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) injectHTML(saved);
-
-      if (document.getElementById('editor-container')) {
-        initEditor();
-      } else {
-        new MutationObserver(handleMutations)
-          .observe(document.body, { childList: true, subtree: true });
-      }
-    });
-  })();
+  }
+})();
 </script>
+
