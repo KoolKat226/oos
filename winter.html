@@ -252,15 +252,15 @@ font-family: 'Inter', sans-serif;
     iframe.visible {
       opacity: 1
     }
-</style>
-<script>
-addtrinket('./images/christmaspres1.png', 30, 3);
-addtrinket('./images/christmaspres1.png', 30, 3);
-addtrinket('./images/christmaspres1.png', 50, 3);
-addtrinket('./images/christmaspres2.png', 40, 1.5);
-addtrinket('./images/christmaspres2.png', 30, 1.5);
-addtree('./images/christmastree.png');
-</script>
+  </style>
+  <script>
+  addtrinket('./images/christmaspres1.png', 30, 3);
+  addtrinket('./images/christmaspres1.png', 30, 3);
+  addtrinket('./images/christmaspres1.png', 50, 3);
+  addtrinket('./images/christmaspres2.png', 40, 1.5);
+  addtrinket('./images/christmaspres2.png', 30, 1.5);
+  addtree('./images/christmastree.png');
+  </script>
 
 </textarea>
 
@@ -288,123 +288,116 @@ addtree('./images/christmastree.png');
   }
 </script>
 <script>
-  (function() {
-    const STORAGE_KEY = 'savedHTMLContent';
-    let isEditorInitialized = false;
-    let injectedContainer = null;
-    let injectedScripts = [];
+(function () {
+  const STORAGE_KEY = 'savedHTMLContent';
+  let isEditorInitialized = false;
+  let injectedContainer = null;
+  let injectedScripts = [];
 
-    function injectHTML(content) {
-      if (injectedContainer) {
-        injectedContainer.remove();
-        injectedContainer = null;
-      }
-      injectedScripts.forEach(s => s.remove());
-      injectedScripts = [];
-
-      if (!content) return;
-
-      injectedContainer = document.createElement('div');
-      injectedContainer.id = 'injected-container';
-
-      const temp = document.createElement('div');
-      temp.innerHTML = content;
-
-      temp.querySelectorAll('script').forEach(oldScript => {
-        const newScript = document.createElement('script');
-        Array.from(oldScript.attributes).forEach(attr =>
-          newScript.setAttribute(attr.name, attr.value)
-        );
-        newScript.textContent = oldScript.textContent;
-        document.body.appendChild(newScript);
-        injectedScripts.push(newScript);
-        oldScript.remove();
-      });
-
-      while (temp.firstChild) {
-        injectedContainer.appendChild(temp.firstChild);
-      }
-
-      document.body.appendChild(injectedContainer);
+  function injectHTML(content) {
+    if (injectedContainer) {
+      injectedContainer.remove();
+      injectedContainer = null;
     }
+    injectedScripts.forEach(s => s.remove());
+    injectedScripts = [];
 
-    function initEditor() {
-      if (isEditorInitialized) return;
-      isEditorInitialized = true;
+    if (!content) return;
 
-      const textarea = document.getElementById('codeInput');
-      const saveBtn  = document.getElementById('saveBtn');
-      const removeBtn = document.getElementById('removeBtn');
+    injectedContainer = document.createElement('div');
+    injectedContainer.id = 'injected-container';
 
-      // load into textarea
-      const existing = localStorage.getItem(STORAGE_KEY);
-      if (existing) textarea.value = existing;
+    const temp = document.createElement('div');
+    temp.innerHTML = content;
 
-      // Apply Theme button
-      saveBtn?.addEventListener('click', () => {
-        const html = textarea.value;
-        localStorage.setItem(STORAGE_KEY, html);
-        injectHTML(html); // << NO reload anymore
-      });
-
-      // Remove Theme button
-      removeBtn?.addEventListener('click', () => {
-        localStorage.removeItem(STORAGE_KEY);
-        injectHTML('');
-        textarea.value = '';
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-
-      // Auto-apply saved theme on load
-      if (saved) {
-        injectHTML(saved);
-      } else {
-        // If nothing saved yet, apply the default textarea contents once
-        const textarea = document.getElementById('codeInput');
-        if (textarea?.value.trim()) {
-          localStorage.setItem(STORAGE_KEY, textarea.value);
-          injectHTML(textarea.value);
-        }
-      }
-
-      if (document.getElementById('editor-container')) {
-        initEditor();
-      } else {
-        new MutationObserver(handleMutations)
-          .observe(document.body, { childList: true, subtree: true });
-      }
+    // handle scripts inside injected HTML
+    temp.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(attr =>
+        newScript.setAttribute(attr.name, attr.value)
+      );
+      newScript.textContent = oldScript.textContent;
+      document.body.appendChild(newScript);
+      injectedScripts.push(newScript);
+      oldScript.remove();
     });
 
-    function handleMutations(mutations) {
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node instanceof HTMLElement &&
-             (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
-            initEditor();
-          }
+    while (temp.firstChild) {
+      injectedContainer.appendChild(temp.firstChild);
+    }
+
+    document.body.appendChild(injectedContainer);
+  }
+
+  function initEditor() {
+    if (isEditorInitialized) return;
+    isEditorInitialized = true;
+
+    const textarea = document.getElementById('codeInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const removeBtn = document.getElementById('removeBtn');
+
+    // Load existing saved theme into textarea
+    const existing = localStorage.getItem(STORAGE_KEY);
+    if (existing) textarea.value = existing;
+
+    // Apply Theme button
+    saveBtn?.addEventListener('click', () => {
+      const html = textarea.value;
+      localStorage.setItem(STORAGE_KEY, html);
+      injectHTML(html);
+    });
+
+    // Remove Theme button
+    removeBtn?.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      injectHTML('');
+      textarea.value = '';
+    });
+  }
+
+  function handleMutations(mutations) {
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (
+          node instanceof HTMLElement &&
+          (node.id === 'editor-container' || node.querySelector?.('#editor-container'))
+        ) {
+          initEditor();
         }
-        for (const node of m.removedNodes) {
-          if (node instanceof HTMLElement &&
-             (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
-            isEditorInitialized = false;
-          }
+      }
+      for (const node of m.removedNodes) {
+        if (
+          node instanceof HTMLElement &&
+          (node.id === 'editor-container' || node.querySelector?.('#editor-container'))
+        ) {
+          isEditorInitialized = false;
         }
       }
     }
+  }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) injectHTML(saved);
+  // AUTO-APPLY THEME ON PAGE LOAD
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const textarea = document.getElementById('codeInput');
 
-      if (document.getElementById('editor-container')) {
-        initEditor();
-      } else {
-        new MutationObserver(handleMutations)
-          .observe(document.body, { childList: true, subtree: true });
-      }
-    });
-  })();
+    if (saved) {
+      // Apply previously saved theme
+      injectHTML(saved);
+    } else if (textarea?.value.trim()) {
+      // Save default theme from textarea and apply it
+      localStorage.setItem(STORAGE_KEY, textarea.value);
+      injectHTML(textarea.value);
+    }
+
+    // Initialize editor panel when present
+    if (document.getElementById('editor-container')) {
+      initEditor();
+    } else {
+      new MutationObserver(handleMutations)
+        .observe(document.body, { childList: true, subtree: true });
+    }
+  });
+})();
 </script>
