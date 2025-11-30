@@ -384,29 +384,30 @@ font-family: 'Inter', sans-serif;
     }
   }
 
-  /* --- REMOVE THEME, THEN ADD SAVED ONE ON PAGE LOAD --- */
+  // AUTO-APPLY THEME ON PAGE LOAD
   window.addEventListener('DOMContentLoaded', () => {
-
-    // ALWAYS remove theme first
-    clearInjectedTheme();
-
     const saved = localStorage.getItem(STORAGE_KEY);
     const textarea = document.getElementById('codeInput');
 
-    let themeToApply = saved;
+    // --- ALWAYS REMOVE ANY PREVIOUSLY INJECTED THEME FIRST ---
+    if (injectedContainer) {
+      injectedContainer.remove();
+      injectedContainer = null;
+    }
+    injectedScripts.forEach(s => s.remove());
+    injectedScripts = [];
 
-    // If no saved theme, use textarea default and save it
-    if (!themeToApply && textarea?.value.trim()) {
-      themeToApply = textarea.value;
-      localStorage.setItem(STORAGE_KEY, themeToApply);
+    // --- NOW APPLY NEW THEME ---
+    if (saved) {
+      // Apply previously saved theme
+      injectHTML(saved);
+    } else if (textarea?.value.trim()) {
+      // Save default theme from textarea and apply it
+      localStorage.setItem(STORAGE_KEY, textarea.value);
+      injectHTML(textarea.value);
     }
 
-    // Inject after clearing old theme
-    if (themeToApply) {
-      injectHTML(themeToApply);
-    }
-
-    // Initialize UI editor
+    // Initialize editor panel when present
     if (document.getElementById('editor-container')) {
       initEditor();
     } else {
