@@ -266,7 +266,7 @@ font-family: 'Inter', sans-serif;
 
 <!-- Buttons -->
 <button class="btn btn-remove"  id="removeBtn">Remove Theme</button>
-<button class="btn btn-apply" onclick="location.reload();" id="saveBtn">Apply Theme</button>
+<button class="btn btn-apply" id="saveBtn">Apply Theme</button>
 </div>
 <br>
 <button style="display:none;" class="btn btn-character" onclick="document.getElementById('colC').value = './emoji/orbs/1.png, ./emoji/mouths/1.png, ./emoji/eyes/1.png, ./emoji/hairs/1.png, ./emoji/eyewear/1.png, ./emoji/hats/1.png'; showToast();">Apply Custom Character</button>
@@ -290,130 +290,93 @@ font-family: 'Inter', sans-serif;
 <script>
 (function () {
   const STORAGE_KEY = 'savedHTMLContent';
-  let isEditorInitialized = false;
-  let injectedContainer = null;
+  let injectedContainer = document.getElementById('injected-container') || null;
   let injectedScripts = [];
 
-  /* --- Remove injected theme --- */
   function clearInjectedTheme() {
-    if (injectedContainer) {
-      injectedContainer.remove();
-      injectedContainer = null;
-    }
-    injectedScripts.forEach(s => s.remove());
+    if (injectedContainer) injectedContainer.remove();
+    injectedContainer = null;
+    injectedScripts.forEach(s => s.parentNode?.remove());
     injectedScripts = [];
   }
 
-  /* --- Inject saved/new theme --- */
   function injectHTML(content) {
-    clearInjectedTheme(); // ← remove theme FIRST
-
     if (!content) return;
-
+    clearInjectedTheme();
     injectedContainer = document.createElement('div');
     injectedContainer.id = 'injected-container';
 
     const temp = document.createElement('div');
     temp.innerHTML = content;
 
-    // Rebuild scripts in content
     temp.querySelectorAll('script').forEach(oldScript => {
       const newScript = document.createElement('script');
       Array.from(oldScript.attributes).forEach(attr =>
         newScript.setAttribute(attr.name, attr.value)
       );
       newScript.textContent = oldScript.textContent;
+      newScript.dataset.injectedTheme = 'true';
       document.body.appendChild(newScript);
       injectedScripts.push(newScript);
       oldScript.remove();
     });
 
-    while (temp.firstChild) {
-      injectedContainer.appendChild(temp.firstChild);
-    }
-
+    while (temp.firstChild) injectedContainer.appendChild(temp.firstChild);
     document.body.appendChild(injectedContainer);
   }
 
-  /* --- Setup UI editor once --- */
-  function initEditor() {
-    if (isEditorInitialized) return;
-    isEditorInitialized = true;
+  function showToastMessage(message) {
+    if (typeof showToast === 'function') showToast(message);
+    else alert(message);
+  }
 
+  function neutralizeInlineReload(saveBtn) {
+    if (!saveBtn) return;
+    if (saveBtn.hasAttribute('onclick')) saveBtn.removeAttribute('onclick');
+    try { saveBtn.onclick = null; } catch(e) {}
+  }
+
+  function applyNewTheme() {
     const textarea = document.getElementById('codeInput');
+    if (!textarea) return;
+    const html = textarea.value.trim();
+    if (!html) return;
+
+    localStorage.removeItem(STORAGE_KEY);
+    clearInjectedTheme();
+    localStorage.setItem(STORAGE_KEY, html);
+    injectHTML(html);
+    showToastMessage('Theme applied successfully!');
+  }
+
+  function initEditorButtons() {
     const saveBtn = document.getElementById('saveBtn');
     const removeBtn = document.getElementById('removeBtn');
-
-    const existing = localStorage.getItem(STORAGE_KEY);
-    if (existing) textarea.value = existing;
-
-    // Apply Theme button
-    saveBtn?.addEventListener('click', () => {
-      const html = textarea.value;
-      localStorage.setItem(STORAGE_KEY, html);
-      injectHTML(html);
-    });
-
-    // Remove Theme button
-    removeBtn?.addEventListener('click', () => {
-      localStorage.removeItem(STORAGE_KEY);
-      clearInjectedTheme();
-      textarea.value = '';
-    });
-  }
-
-  /* --- Watch for editor added/removed --- */
-  function handleMutations(mutations) {
-    for (const m of mutations) {
-      for (const node of m.addedNodes) {
-        if (
-          node instanceof HTMLElement &&
-          (node.id === 'editor-container' || node.querySelector?.('#editor-container'))
-        ) {
-          initEditor();
-        }
-      }
-      for (const node of m.removedNodes) {
-        if (
-          node instanceof HTMLElement &&
-          (node.id === 'editor-container' || node.querySelector?.('#editor-container'))
-        ) {
-          isEditorInitialized = false;
-        }
-      }
-    }
-  }
-
-  // AUTO-APPLY THEME ON PAGE LOAD
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem(STORAGE_KEY);
     const textarea = document.getElementById('codeInput');
 
-    // --- ALWAYS REMOVE ANY PREVIOUSLY INJECTED THEME FIRST ---
-    if (injectedContainer) {
-      injectedContainer.remove();
-      injectedContainer = null;
-    }
-    injectedScripts.forEach(s => s.remove());
-    injectedScripts = [];
+    neutralizeInlineReload(saveBtn);
 
-    // --- NOW APPLY NEW THEME ---
-    if (saved) {
-      // Apply previously saved theme
-      injectHTML(saved);
-    } else if (textarea?.value.trim()) {
-      // Save default theme from textarea and apply it
-      localStorage.setItem(STORAGE_KEY, textarea.value);
-      injectHTML(textarea.value);
+    if (saveBtn) {
+      saveBtn.replaceWith(saveBtn.cloneNode(true));
+      const newSaveBtn = document.getElementById('saveBtn');
+      newSaveBtn.addEventListener('click', applyNewTheme);
+
+      // ✅ Automatically click the apply button on page load
+      newSaveBtn.click();
     }
 
-    // Initialize editor panel when present
-    if (document.getElementById('editor-container')) {
-      initEditor();
-    } else {
-      new MutationObserver(handleMutations)
-        .observe(document.body, { childList: true, subtree: true });
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        localStorage.removeItem(STORAGE_KEY);
+        clearInjectedTheme();
+        if (textarea) textarea.value = '';
+        showToastMessage('Theme removed.');
+      });
     }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    initEditorButtons();
   });
 })();
 </script>
