@@ -294,13 +294,19 @@ font-family: 'Inter', sans-serif;
   let injectedContainer = null;
   let injectedScripts = [];
 
-  function injectHTML(content) {
+  /* --- Remove injected theme --- */
+  function clearInjectedTheme() {
     if (injectedContainer) {
       injectedContainer.remove();
       injectedContainer = null;
     }
     injectedScripts.forEach(s => s.remove());
     injectedScripts = [];
+  }
+
+  /* --- Inject saved/new theme --- */
+  function injectHTML(content) {
+    clearInjectedTheme(); // ← remove theme FIRST
 
     if (!content) return;
 
@@ -310,7 +316,7 @@ font-family: 'Inter', sans-serif;
     const temp = document.createElement('div');
     temp.innerHTML = content;
 
-    // handle scripts inside injected HTML
+    // Rebuild scripts in content
     temp.querySelectorAll('script').forEach(oldScript => {
       const newScript = document.createElement('script');
       Array.from(oldScript.attributes).forEach(attr =>
@@ -329,6 +335,7 @@ font-family: 'Inter', sans-serif;
     document.body.appendChild(injectedContainer);
   }
 
+  /* --- Setup UI editor once --- */
   function initEditor() {
     if (isEditorInitialized) return;
     isEditorInitialized = true;
@@ -337,7 +344,6 @@ font-family: 'Inter', sans-serif;
     const saveBtn = document.getElementById('saveBtn');
     const removeBtn = document.getElementById('removeBtn');
 
-    // Load existing saved theme into textarea
     const existing = localStorage.getItem(STORAGE_KEY);
     if (existing) textarea.value = existing;
 
@@ -351,11 +357,12 @@ font-family: 'Inter', sans-serif;
     // Remove Theme button
     removeBtn?.addEventListener('click', () => {
       localStorage.removeItem(STORAGE_KEY);
-      injectHTML('');
+      clearInjectedTheme();
       textarea.value = '';
     });
   }
 
+  /* --- Watch for editor added/removed --- */
   function handleMutations(mutations) {
     for (const m of mutations) {
       for (const node of m.addedNodes) {
@@ -377,21 +384,29 @@ font-family: 'Inter', sans-serif;
     }
   }
 
-  // AUTO-APPLY THEME ON PAGE LOAD
+  /* --- REMOVE THEME, THEN ADD SAVED ONE ON PAGE LOAD --- */
   window.addEventListener('DOMContentLoaded', () => {
+
+    // ALWAYS remove theme first
+    clearInjectedTheme();
+
     const saved = localStorage.getItem(STORAGE_KEY);
     const textarea = document.getElementById('codeInput');
 
-    if (saved) {
-      // Apply previously saved theme
-      injectHTML(saved);
-    } else if (textarea?.value.trim()) {
-      // Save default theme from textarea and apply it
-      localStorage.setItem(STORAGE_KEY, textarea.value);
-      injectHTML(textarea.value);
+    let themeToApply = saved;
+
+    // If no saved theme, use textarea default and save it
+    if (!themeToApply && textarea?.value.trim()) {
+      themeToApply = textarea.value;
+      localStorage.setItem(STORAGE_KEY, themeToApply);
     }
 
-    // Initialize editor panel when present
+    // Inject after clearing old theme
+    if (themeToApply) {
+      injectHTML(themeToApply);
+    }
+
+    // Initialize UI editor
     if (document.getElementById('editor-container')) {
       initEditor();
     } else {
