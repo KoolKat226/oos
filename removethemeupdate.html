@@ -1,0 +1,34 @@
+<script>
+(function () {
+  const STORAGE_KEY = 'savedHTMLContent';
+
+  function clearInjectedTheme() {
+    const injectedContainer = document.getElementById('injected-container');
+    if (injectedContainer) injectedContainer.remove();
+
+    document.querySelectorAll('script[data-injected-theme="true"]').forEach(s => s.remove());
+  }
+
+  function removeTheme() {
+    localStorage.removeItem(STORAGE_KEY);
+    clearInjectedTheme();
+
+    if (typeof showToast === 'function') {
+      showToast('Theme removed.');
+    } else {
+      alert('Theme removed.');
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const removeBtn = document.getElementById('removeBtn');
+
+    if (removeBtn) {
+      removeBtn.addEventListener('click', removeTheme);
+    }
+
+    // Optional: auto-remove theme on page load
+     removeTheme();
+  });
+})();
+</script>
