@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OvalOS Material Wallpaper</title>
+	<link rel="stylesheet" href="styles.css">
+    <script>
+        // Function to refresh the page when resized
+        function refreshOnResize() {
+            window.location.reload();
+        }
+
+        // Add event listener for window resize event
+        window.addEventListener('resize', refreshOnResize);
+    </script>
+</head>
+<body>
+
+	<div id="board"></div>
+	<div style="display:none" id="btn"></div>
+	<section style="display:none" id="config_panel">
+		<div>
+			<h4>Number of Objects: <output id="myRangeValue">10</output></h4>
+			<div class="slidecontainer">
+				<input type="range" min="1" max="20" value="10" class="slider" id="myRange">
+			</div>
+		</div>
+	</section>
+
+	<script type="text/javascript" src="lib/saveSvgAsPng.js"></script>
+	<script type="text/javascript" src="MaterialImageGenerator.js"></script>
+
+	<script type="text/javascript">
+		window.onload = function() {
+			const board = document.getElementById("board");
+			const btn = document.getElementById("btn");
+			const slider = document.getElementById("myRange");
+			const outputRangeValue = document.getElementById("myRangeValue");
+
+			const config = {
+				width: window.innerWidth,
+				height:window.innerHeight,
+				holder:board,
+				animation: true,
+				count: slider.value
+			};
+
+			let materialImageGenerator = new MaterialImageGenerator(config);
+			let settleDownTimer = null;
+
+			slider.oninput = function() {
+				config.count = this.value;
+				outputRangeValue.innerText = this.value;
+
+				if(settleDownTimer) {
+					clearTimeout(settleDownTimer);
+					settleDownTimer = null;
+				}
+				
+				settleDownTimer = setTimeout(() => {
+					materialImageGenerator = new MaterialImageGenerator(config);
+					materialImageGenerator.make();
+				}, 500);
+			};
+
+			btn.addEventListener("click", function(e) {
+				materialImageGenerator.make();
+			});
+			
+			/** Create one on boot **/
+			materialImageGenerator.make();
+		}
+	</script>
+</body>
+</html>
