@@ -6,7 +6,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OlexOS 7</title>
   <link href="./fontfiles/font.css" rel="stylesheet">
-    <style>
+  <script>
+    (function () {
+      let flag = localStorage.getItem("redirectFlag");
+
+      // Default to 0 if not set
+      if (flag === null) {
+        flag = "0";
+        localStorage.setItem("redirectFlag", "0");
+      }
+
+      // If flag = 1 → redirect
+      if (flag === "1") {
+        window.location.replace("./desktopmode/index.html");
+
+      }
+      // If flag = 0 → stay on this page (do nothing)
+    })();
+
+    function toggleoos() {
+      let flag = localStorage.getItem("redirectFlag");
+
+      if (flag === "0") {
+        localStorage.setItem("redirectFlag", "1");
+        location.reload();
+      } else {
+        localStorage.setItem("redirectFlag", "0");
+        location.reload();
+      }
+    }
+  </script>
+
+  <style>
     iframe {
       width: 100vw;
       height: 100vh;
@@ -14,7 +45,6 @@
     }
   </style>
   <style>
-
     .nunito-variable {
       font-family: 'Nunito Sans', sans-serif;
       font-optical-sizing: auto;
@@ -22,8 +52,7 @@
       font-style: italic;
       font-variation-settings: "wdth" 100, "YTLC" 500;
     }
-
-    </style>
+  </style>
   <!-- in <head> or before </body> -->
   <script>
     // force a fresh load of updatedata.js so it's never served from SW cache
@@ -55,7 +84,8 @@
       align-items: center;
       position: relative;
       touch-action: none;
-      pointer-events: none; /* allow clicks to pass through */
+      pointer-events: none;
+      /* allow clicks to pass through */
     }
 
     .scene .icon {
@@ -74,7 +104,7 @@
       transform: rotateX(90deg) translateZ(-200px);
       transform-origin: center;
       box-shadow: 0 0 130px rgba(0, 0, 0, 0.3) inset;
-      border-radius: 150px;
+      border-radius: 250px;
       z-index: -1;
       /* make sure children position relative to this */
       overflow: hidden;
@@ -325,7 +355,7 @@
       border-radius: 50%;
       pointer-events: none;
       filter: blur(2px);
-opacity: 0.5;
+      opacity: 0.5;
       z-index: 1;
       margin-top: -17px;
       /* 🔽 Push it downward */
@@ -364,8 +394,6 @@ opacity: 0.5;
       pointer-events: none;
       white-space: nowrap;
     }
-
-
   </style>
   <style>
     /* Toggle button */
@@ -408,7 +436,8 @@ opacity: 0.5;
       top: 0;
       left: 0;
       width: 50%;
-      height: 50%; /* This gives you a larger mouse zone */
+      height: 50%;
+      /* This gives you a larger mouse zone */
       opacity: 0;
       transition: opacity 0.4s ease;
       z-index: 1000;
@@ -416,7 +445,8 @@ opacity: 0.5;
 
     /* Preserve visual style — don't stretch header */
     #logoImage .header {
-      height: auto; /* Only as tall as content */
+      height: auto;
+      /* Only as tall as content */
     }
 
 
@@ -557,8 +587,9 @@ opacity: 0.5;
       border-radius: 30px;
       border: none;
       font-size: 16px;
-      background: #b2c3cf;
+      background: #ebebeb;
       color: #353a3d;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.3));
       font-family: "Work Sans", sans-serif;
       font-optical-sizing: auto;
       font-weight: 500;
@@ -574,7 +605,7 @@ opacity: 0.5;
     }
 
     .icon-btn {
-      background-color: #b2c3cf;
+      background-color: #ebebeb;
       border: none;
       cursor: pointer;
       padding: 12px;
@@ -585,6 +616,7 @@ opacity: 0.5;
       border-radius: 50%;
       width: 58px;
       height: 58px;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.3));
       transition: background-color 0.2s;
       transition: .3s;
       z-index: 999;
@@ -606,6 +638,7 @@ opacity: 0.5;
     .icon-btn img {
       width: 24px;
       height: 24px;
+      filter: grayscale(100%);
     }
 
     /* Modal styles */
@@ -626,7 +659,7 @@ opacity: 0.5;
     .modal {
       border-radius: 40px;
       padding: 40px;
-      width: 500px;
+      width: 650px;
       position: relative;
     }
 
@@ -673,28 +706,28 @@ opacity: 0.5;
     .modal button:active {
       transform: scale(0.9);
       transition: 0.15s ease;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
     }
   </style>
   <style>
-  .video-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    perspective: 1000px;
-    overflow: hidden;
-  }
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      perspective: 1000px;
+      overflow: hidden;
+    }
 
-  #skyvid {
-    width: 120%;
-    height: 120%;
-    object-fit: cover;
-    transform: translate(-10%, -10%) rotateX(0deg) rotateY(0deg) scale(1.05);
-    will-change: transform;
-    pointer-events: none;
-  }
+    #skyvid {
+      width: 120%;
+      height: 120%;
+      object-fit: cover;
+      transform: translate(-10%, -10%) rotateX(0deg) rotateY(0deg) scale(1.05);
+      will-change: transform;
+      pointer-events: none;
+    }
 
     video {
       object-fit: cover;
@@ -816,17 +849,15 @@ opacity: 0.5;
       transition: 0.4s;
     }
 
-    input:checked + .slider {
+    input:checked+.slider {
       background-color: #fff;
     }
 
-    input:checked + .slider::before {
+    input:checked+.slider::before {
       transform: translateX(22px);
     }
-
-</style>
+  </style>
   <style>
-
     /* ======================================================
        2) SPLASH OVERLAY
        ====================================================== */
@@ -840,7 +871,8 @@ opacity: 0.5;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 9999; /* Always on top */
+      z-index: 9999;
+      /* Always on top */
 
       /* Start fully blurred; blur-in on load (0→1s) */
       filter: blur(20px);
@@ -855,10 +887,17 @@ opacity: 0.5;
         opacity 2s ease-in;
       transform-origin: center;
     }
+
     @keyframes blurIn {
-      0%   { filter: blur(20px); }
-      100% { filter: blur(0);   }
+      0% {
+        filter: blur(20px);
+      }
+
+      100% {
+        filter: blur(0);
+      }
     }
+
     /* On exit, intensify to 308px blur, zoom, fade over 2s */
     #splash.exiting {
       filter: blur(308px);
@@ -870,19 +909,23 @@ opacity: 0.5;
        3) LOGO CONTAINER (CENTERED)
        ====================================================== */
     #logo-container {
-      position: relative; /* for ripple positioning */
+      position: relative;
+      /* for ripple positioning */
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
     /* Each logo image transitions its own blur over 2s */
     #logo-container img {
       display: block;
-      max-height: 150px; /* adjust if needed */
+      max-height: 150px;
+      /* adjust if needed */
       margin: 0 10px;
       transition: filter 2s ease-in;
       filter: blur(0);
     }
+
     /* During exit, blur each image to 308px */
     #splash.exiting #logo-container img {
       filter: blur(308px);
@@ -894,10 +937,19 @@ opacity: 0.5;
     #logo-icon {
       animation: bounce 1s infinite ease-in-out;
     }
+
     @keyframes bounce {
-      0%   { transform: translateY(0); }
-      50%  { transform: translateY(-50px); }
-      100% { transform: translateY(0); }
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-50px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
     }
 
     /* ======================================================
@@ -914,13 +966,27 @@ opacity: 0.5;
       transform: translate(-50%, -50%) scale(0);
       filter: blur(8px);
       pointer-events: none;
-      z-index: -1; /* Behind the logo images */
+      z-index: -1;
+      /* Behind the logo images */
     }
+
     @keyframes rippleExpand {
-      0%   { transform: translate(-50%, -50%) scale(0);   opacity: 0.5; }
-      70%  { transform: translate(-50%, -50%) scale(3);   opacity: 0.2; }
-      100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0;   }
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.5;
+      }
+
+      70% {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0.2;
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(3.5);
+        opacity: 0;
+      }
     }
+
     .animate-ripple {
       animation: rippleExpand 0.6s forwards ease-out;
     }
@@ -937,16 +1003,17 @@ opacity: 0.5;
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: rgba(255,255,255,0.95);
+      background-color: rgba(255, 255, 255, 0.95);
       border: 1px solid #ccc;
       padding: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       z-index: 10000;
       display: none;
       max-width: 300px;
       text-align: center;
       font-size: 16px;
     }
+
     #timeout-popup button {
       margin-top: 10px;
       padding: 6px 12px;
@@ -955,7 +1022,7 @@ opacity: 0.5;
     }
   </style>
   <script>
-    (function() {
+    (function () {
       const STORAGE_KEY = 'savedHTMLContent';
       let isEditorInitialized = false;
       let injectedContainer = null;
@@ -1000,7 +1067,7 @@ opacity: 0.5;
         isEditorInitialized = true;
 
         const textarea = document.getElementById('codeInput');
-        const saveBtn  = document.getElementById('saveBtn');
+        const saveBtn = document.getElementById('saveBtn');
         const removeBtn = document.getElementById('removeBtn');
 
         // load into textarea
@@ -1025,13 +1092,13 @@ opacity: 0.5;
         for (const m of mutations) {
           for (const node of m.addedNodes) {
             if (node instanceof HTMLElement &&
-               (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
+              (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
               initEditor();
             }
           }
           for (const node of m.removedNodes) {
             if (node instanceof HTMLElement &&
-               (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
+              (node.id === 'editor-container' || node.querySelector('#editor-container'))) {
               isEditorInitialized = false;
             }
           }
@@ -1046,7 +1113,7 @@ opacity: 0.5;
           initEditor();
         } else {
           new MutationObserver(handleMutations)
-            .observe(document.body, { childList: true, subtree: true });
+            .observe(document.body, {childList: true, subtree: true});
         }
       });
     })();
@@ -1061,56 +1128,56 @@ opacity: 0.5;
       Your browser does not support the video tag.
     </video>
   </div>
-<script>
-  const video = document.getElementById('skyvid');
-  let targetX = 0;
-  let targetY = 0;
-  let currentX = 0;
-  let currentY = 0;
-  let skyAnimOn = false;
-  let skyAnimFrame = null;
+  <script>
+    const video = document.getElementById('skyvid');
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let skyAnimOn = false;
+    let skyAnimFrame = null;
 
-  document.addEventListener('mousemove', (e) => {
-    if (!skyAnimOn) return;
+    document.addEventListener('mousemove', (e) => {
+      if (!skyAnimOn) return;
 
-    const x = (e.clientX / window.innerWidth - 0.5) * 2;
-    const y = (e.clientY / window.innerHeight - 0.5) * 2;
+      const x = (e.clientX / window.innerWidth - 0.5) * 2;
+      const y = (e.clientY / window.innerHeight - 0.5) * 2;
 
-    // Inverted to face away from cursor
-    targetY = x * 5;
-    targetX = y * -5;
-  });
+      // Inverted to face away from cursor
+      targetY = x * 5;
+      targetX = y * -5;
+    });
 
-  function animatesky() {
-    if (!skyAnimOn) return;
+    function animatesky() {
+      if (!skyAnimOn) return;
 
-    currentX += (targetX - currentX) * 0.1;
-    currentY += (targetY - currentY) * 0.1;
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
 
-    video.style.transform = `
+      video.style.transform = `
       translate(-10%, -10%)
       rotateX(${currentX}deg)
       rotateY(${currentY}deg)
       scale(1.05)
     `;
 
-    skyAnimFrame = requestAnimationFrame(animatesky);
-  }
-
-  function toggleSkyAnimation() {
-    if (skyAnimOn) {
-      skyAnimOn = false;
-      cancelAnimationFrame(skyAnimFrame);
-      video.style.transform = `translate(-10%, -10%) scale(1.05)`; // reset rotation
-    } else {
-      skyAnimOn = true;
-      animatesky();
+      skyAnimFrame = requestAnimationFrame(animatesky);
     }
-  }
 
-  // enable on load
-  toggleSkyAnimation();
-</script>
+    function toggleSkyAnimation() {
+      if (skyAnimOn) {
+        skyAnimOn = false;
+        cancelAnimationFrame(skyAnimFrame);
+        video.style.transform = `translate(-10%, -10%) scale(1.05)`; // reset rotation
+      } else {
+        skyAnimOn = true;
+        animatesky();
+      }
+    }
+
+    // enable on load
+    toggleSkyAnimation();
+  </script>
 
   <!-- ============================================
        FULL-SCREEN SPLASH OVERLAY
@@ -1145,22 +1212,23 @@ opacity: 0.5;
         font-size: 13px;
         text-align: center;
         margin-bottom: 0px;
-        transition: 0.15s ease;" type="text" id="gsUnique_shareLink" value="https://sites.google.com/view/oosshare/" readonly>
+        transition: 0.15s ease;" type="text" id="gsUnique_shareLink" value="https://sites.google.com/view/oosshare/"
+        readonly>
       <br><br>
       <button class="gsUnique_copyBtn" onclick="gsUnique_copyShareLink()">Copy</button>
     </div>
   </div>
-  <textarea style="display:none" id="gsUnique_resultOutput" rows="3" readonly placeholder="Result will appear here..."></textarea>
+  <textarea style="display:none" id="gsUnique_resultOutput" rows="3" readonly
+    placeholder="Result will appear here..."></textarea>
   <div class="header">
     <!-- Placeholder logo image -->
-    <div class="logo"><img src="./images/oos7.png"
-        alt="OOS7"></div>
+    <div class="logo"><img src="./images/oos7w.png" alt="OOS7"></div>
 
     <div class="say-input">
       <input autocomplete="off" id="sayMain" type="text" placeholder="Say something...">
     </div>
 
-        <button onclick="refreshPlaza()" class="icon-btn" id="refreshBtn" title="Refresh People">
+    <button onclick="refreshPlaza()" class="icon-btn" id="refreshBtn" title="Refresh People">
       <img id="refreshIcon" src="./images/refreshbtn.png" alt="Refresh People">
     </button>
 
@@ -1173,6 +1241,9 @@ opacity: 0.5;
       <img id="fullscreenIcon" src="./images/fullscreenbtn.png" alt="Fullscreen Icon">
     </button>
 
+    <button id="desktopBtn" onclick="toggleoos();" class="icon-btn" title="Desktop Mode">
+      <img id="desktopIcon" src="./images/desktopbtn.png" alt="Desktop Mode">
+    </button>
 
     <!-- Settings icon placeholder -->
     <button class="icon-btn" id="settingsBtn" title="Settings">
@@ -1235,8 +1306,13 @@ opacity: 0.5;
           <span class="slider"></span>
           <div class="toggle-label">Relay messages<br>on menu</div>
         </label>
+        <label class="toggle-container">
+          <input type="checkbox" id="potatoToggle" />
+          <span class="slider"></span>
+          <div class="toggle-label">Potato</div>
+        </label>
       </div>
-       <audio style="display:none" src="./oosstartup.mp3" alt="" autoplay="autoplay"></audio>
+      <audio style="display:none" src="./oosstartup.mp3" alt="" autoplay="autoplay"></audio>
       <button style="display:none" id="loadBtn">Load Data</button>
       <style>
         .button-container {
@@ -1247,7 +1323,8 @@ opacity: 0.5;
         .center-wrapper {
           display: flex;
           justify-content: center;
-          margin-top: 5px; /* optional vertical spacing */
+          margin-top: 5px;
+          /* optional vertical spacing */
         }
       </style>
 
@@ -1285,49 +1362,49 @@ opacity: 0.5;
     });
   </script>
 
-<script>
-  function updateColBReadonlyStatus() {
-    const colI = document.getElementById("colI");
-    const colB = document.getElementById("colB");
-    if (!colI || !colB) return;
+  <script>
+    function updateColBReadonlyStatus() {
+      const colI = document.getElementById("colI");
+      const colB = document.getElementById("colB");
+      if (!colI || !colB) return;
 
-    const val = colI.value.trim();
-    if (val !== "" && val !== "undefined") {
-      colB.readOnly = true;
-    } else {
-      colB.readOnly = false;
+      const val = colI.value.trim();
+      if (val !== "" && val !== "undefined") {
+        colB.readOnly = true;
+      } else {
+        colB.readOnly = false;
+      }
     }
-  }
 
-  window.addEventListener("DOMContentLoaded", () => {
-    updateColBReadonlyStatus();
+    window.addEventListener("DOMContentLoaded", () => {
+      updateColBReadonlyStatus();
 
-    // Also check for JS-driven changes every 200ms
-    setInterval(updateColBReadonlyStatus, 200);
-  });
-</script>
-
+      // Also check for JS-driven changes every 200ms
+      setInterval(updateColBReadonlyStatus, 200);
+    });
+  </script>
 
 
-<script>
-function logincheck() {
-  if (navigator.onLine) {
-    window.location.href = './logon.html';
-  } else {
-    // Device is offline, do nothing
-    console.log("No internet connection. Staying on current page.");
-  }
-}
-</script>
+
+  <script>
+    function logincheck() {
+      if (navigator.onLine) {
+        window.location.href = './failconnect.html';
+      } else {
+        // Device is offline, do nothing
+        console.log("No internet connection. Staying on current page.");
+      }
+    }
+  </script>
 
   <script>
     // Keys in localStorage
-    const layersKey    = 'mii_layers';
+    const layersKey = 'mii_layers';
     const hairColorKey = 'mii_hair_color';
 
     // Grab the two inputs
     const layersInput = document.getElementById('colC');
-    const hairInput   = document.getElementById('colD');
+    const hairInput = document.getElementById('colD');
 
     if (!layersInput || !hairInput) {
       console.error('Missing #colC or #colD in the DOM:', {
@@ -1338,14 +1415,14 @@ function logincheck() {
 
     // 1) On load, pull the “correct” values from localStorage
     const storedLayers = localStorage.getItem(layersKey) || '';
-    const storedHair   = localStorage.getItem(hairColorKey) || '';
+    const storedHair = localStorage.getItem(hairColorKey) || '';
 
     layersInput.value = storedLayers;
-    hairInput.value   = storedHair;
+    hairInput.value = storedHair;
 
     // 2) Initialize “previous” snapshots to exactly what was in localStorage
     let prevLayersValue = storedLayers;
-    let prevHairValue   = storedHair;
+    let prevHairValue = storedHair;
 
     // 3) Skip the very first pollSync so we don’t accidentally treat 
     //    the initial load as “new data.” After that, canSave isn’t needed.
@@ -1356,24 +1433,24 @@ function logincheck() {
         // Ensure the inputs match whatever is in localStorage right now,
         // then set prev… to those values, and bail out.
         const sLayers = localStorage.getItem(layersKey) || '';
-        const sHair   = localStorage.getItem(hairColorKey) || '';
+        const sHair = localStorage.getItem(hairColorKey) || '';
 
-        layersInput.value   = sLayers;
-        hairInput.value     = sHair;
-        prevLayersValue     = sLayers;
-        prevHairValue       = sHair;
-        skipFirstSync       = false;
+        layersInput.value = sLayers;
+        hairInput.value = sHair;
+        prevLayersValue = sLayers;
+        prevHairValue = sHair;
+        skipFirstSync = false;
 
         console.log('Initial sync complete. Loaded values:', {
           layers: sLayers,
-          hair:   sHair
+          hair: sHair
         });
         return;
       }
 
       // —— LAYERS FIELD ——
-      const currentLayers    = layersInput.value;
-      const storedLayersNow  = localStorage.getItem(layersKey) || '';
+      const currentLayers = layersInput.value;
+      const storedLayersNow = localStorage.getItem(layersKey) || '';
 
       if (currentLayers !== prevLayersValue) {
         // 🖉 The user (or JS) typed something new into “layers”:
@@ -1390,12 +1467,12 @@ function logincheck() {
         console.log('Detected external update for layers:', storedLayersNow);
 
         layersInput.value = storedLayersNow;
-        prevLayersValue   = storedLayersNow;
+        prevLayersValue = storedLayersNow;
         if (typeof updatemyoos === 'function') updatemyoos();
       }
 
       // —— HAIR FIELD ——
-      const currentHair   = hairInput.value;
+      const currentHair = hairInput.value;
       const storedHairNow = localStorage.getItem(hairColorKey) || '';
 
       if (currentHair !== prevHairValue) {
@@ -1413,7 +1490,7 @@ function logincheck() {
         console.log('Detected external update for hair:', storedHairNow);
 
         hairInput.value = storedHairNow;
-        prevHairValue   = storedHairNow;
+        prevHairValue = storedHairNow;
         if (typeof updatemyoos === 'function') updatemyoos();
       }
     }
@@ -1432,18 +1509,18 @@ function logincheck() {
     // 6) Optional manual save function (always writes what’s currently in the inputs)
     window.savemiimakerdata = function () {
       const cLayers = layersInput.value;
-      const cHair   = hairInput.value;
+      const cHair = hairInput.value;
 
       console.log('Manual save called with values:', {
         layers: cLayers,
-        hair:   cHair
+        hair: cHair
       });
 
       localStorage.setItem(layersKey, cLayers);
       localStorage.setItem(hairColorKey, cHair);
 
       prevLayersValue = cLayers;
-      prevHairValue   = cHair;
+      prevHairValue = cHair;
     };
   </script>
 
@@ -1468,7 +1545,7 @@ function logincheck() {
       <!-- Original header as-is -->
       <div class="header">
         <div class="logo">
-          <img src="./images/oos7.png" alt="OOS7">
+          <img src="./images/oos7w.png" alt="OOS7">
         </div>
 
         <div class="say-input">
@@ -1706,6 +1783,8 @@ function logincheck() {
     const settingsBtnDos = document.getElementById('settingsBtn2');
     const refreshIcon = document.getElementById('refreshIcon');
     const refreshBtn = document.getElementById('refreshBtn');
+    const desktopIcon = document.getElementById('desktopIcon');
+    const desktopBtn = document.getElementById('desktopBtn');
 
     // Swap to pressed image on press & revert on release
     function addPressEffect(btn, icon, normalSrc, pressedSrc) {
@@ -1717,6 +1796,8 @@ function logincheck() {
     addPressEffect(settingsBtn, settingsIcon, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
 
     addPressEffect(refreshBtn, refreshIcon, './images/refreshbtn.png', './images/refreshbtn_pressed.png');
+
+    addPressEffect(desktopBtn, desktopIcon, './images/desktopbtn.png', './images/desktopbtn_pressed.png');
 
     addPressEffect(settingsBtnDos, settingsIconDos, './images/settingsbtn.png', './images/settingsbtn_pressed.png');
 
@@ -1734,7 +1815,7 @@ function logincheck() {
         const url = getUrl();
         const id = document.getElementById('idInput').value.trim();
         if (!url || !id) {
-         // alert('Enter script URL and ID');
+          // alert('Enter script URL and ID');
           logincheck();
           return reject('Missing URL or ID');
         }
@@ -1743,7 +1824,7 @@ function logincheck() {
           .then(r => r.json())
           .then(data => {
             if (data.error) {
-             // alert(data.error);
+              // alert(data.error);
               return reject(data.error);
             }
             ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach((col, i) => {
@@ -1753,7 +1834,7 @@ function logincheck() {
           })
           .catch(err => {
             logincheck();
-           // console.error(err);
+            // console.error(err);
             //reject(err);
           });
       });
@@ -1776,7 +1857,7 @@ function logincheck() {
       const id = document.getElementById('idInput').value.trim();
       fetch(url, {
         method: 'POST',
-        body: JSON.stringify({ action: 'update', id, values })
+        body: JSON.stringify({action: 'update', id, values})
       })
         .then(r => r.json());
       // .then(resp => alert(resp.error || resp.status));
@@ -1862,8 +1943,8 @@ function logincheck() {
 
       submitUpdate(full);
       input.value = '';
-    document.getElementById("sayMain2").value = "";
-    document.getElementById("colE").value = "";
+      document.getElementById("sayMain2").value = "";
+      document.getElementById("colE").value = "";
     }
 
 
@@ -1873,9 +1954,9 @@ function logincheck() {
       if (savedID) document.getElementById('idInput').value = savedID;
       loadData().then(() => {
 
-  }).catch(err => {
-   logincheck();
-    });
+      }).catch(err => {
+        logincheck();
+      });
     });
 
 
@@ -1886,143 +1967,143 @@ function logincheck() {
       audio.play();
     }
   </script>
-<script>
-  // ← one place to change the file name
-  let bgAudioFile = './bg.mp3';
+  <script>
+    // ← one place to change the file name
+    let bgAudioFile = './bg.mp3';
 
-  const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-  const bgGainNode    = bgAudioContext.createGain();
-  bgGainNode.gain.value = 0;
+    const bgAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const bgGainNode = bgAudioContext.createGain();
+    bgGainNode.gain.value = 0;
 
-  // use the variable here
-  const bgAudioElement = new Audio(bgAudioFile);
-  bgAudioElement.loop = true;
+    // use the variable here
+    const bgAudioElement = new Audio(bgAudioFile);
+    bgAudioElement.loop = true;
 
-  const bgAudioSource = bgAudioContext.createMediaElementSource(bgAudioElement);
-  bgAudioSource.connect(bgGainNode).connect(bgAudioContext.destination);
+    const bgAudioSource = bgAudioContext.createMediaElementSource(bgAudioElement);
+    bgAudioSource.connect(bgGainNode).connect(bgAudioContext.destination);
 
-  const BG_FADE_DURATION = 1.5; // seconds
+    const BG_FADE_DURATION = 1.5; // seconds
 
-  // --- TRACK IF USER/CONTROLLED PAUSE HAPPENED ---
-  let manualPaused = false;
+    // --- TRACK IF USER/CONTROLLED PAUSE HAPPENED ---
+    let manualPaused = false;
 
-  // --- CORE PLAY/PAUSE ROUTINES ---
-  function _playBgAudio() {
-    // never play if disabled
-    if (localStorage.getItem('bgAudioDisabled') === 'true') return;
-    bgAudioContext.resume();
-    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
-    bgGainNode.gain.setValueAtTime(0, bgAudioContext.currentTime);
-    bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
-    bgAudioElement.play();
-  }
-
-  function _pauseBgAudio() {
-    bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
-    bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
-    bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
-    setTimeout(() => bgAudioElement.pause(), BG_FADE_DURATION * 1000);
-  }
-
-  // --- PUBLIC INTERFACES, WHICH SET manualPaused ---
-  window.playBgAudio = function() {
-    manualPaused = false;
-    _playBgAudio();
-    // remove first‐touch listeners if you still want that
-    document.removeEventListener("click", playBgAudio);
-    document.removeEventListener("keydown", playBgAudio);
-    document.removeEventListener("touchstart", playBgAudio);
-  };
-
-  window.pauseBgAudio = function() {
-    manualPaused = true;
-    _pauseBgAudio();
-  };
-
-  function updateAudioIcon() {
-    const icon = document.getElementById('audioIcon');
-    if (!icon) return;
-    const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
-    icon.src = isDisabled
-      ? './images/soundbtn_pressed.png'
-      : './images/soundbtn.png';
-  }
-
-  function disableBgAudioControl() {
-    const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
-
-    if (!isDisabled) {
-      window.pauseBgAudio();
-      // lock out future play calls
-      window.playBgAudio  = function () { manualPaused = true; /* noop */ };
-      window.pauseBgAudio = function () { /* already paused */ };
-      localStorage.setItem('bgAudioDisabled', 'true');
-      console.log('Background audio disabled');
-    } else {
-      localStorage.removeItem('bgAudioDisabled');
-      // restore normal controls
-      window.playBgAudio  = function() {
-        manualPaused = false;
-        _playBgAudio();
-      };
-      window.pauseBgAudio = function() {
-        manualPaused = true;
-        _pauseBgAudio();
-      };
-      window.playBgAudio();
-      console.log('Background audio enabled and playing');
+    // --- CORE PLAY/PAUSE ROUTINES ---
+    function _playBgAudio() {
+      // never play if disabled
+      if (localStorage.getItem('bgAudioDisabled') === 'true') return;
+      bgAudioContext.resume();
+      bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+      bgGainNode.gain.setValueAtTime(0, bgAudioContext.currentTime);
+      bgGainNode.gain.linearRampToValueAtTime(1, bgAudioContext.currentTime + BG_FADE_DURATION);
+      bgAudioElement.play();
     }
 
-    updateAudioIcon();
-  }
+    function _pauseBgAudio() {
+      bgGainNode.gain.cancelScheduledValues(bgAudioContext.currentTime);
+      bgGainNode.gain.setValueAtTime(bgGainNode.gain.value, bgAudioContext.currentTime);
+      bgGainNode.gain.linearRampToValueAtTime(0, bgAudioContext.currentTime + BG_FADE_DURATION);
+      setTimeout(() => bgAudioElement.pause(), BG_FADE_DURATION * 1000);
+    }
 
-  // Apply stored‐disabled state immediately
-  if (localStorage.getItem('bgAudioDisabled') === 'true') {
-    window.playBgAudio  = function () { manualPaused = true; };
-    window.pauseBgAudio = function () { /* noop */ };
-  }
+    // --- PUBLIC INTERFACES, WHICH SET manualPaused ---
+    window.playBgAudio = function () {
+      manualPaused = false;
+      _playBgAudio();
+      // remove first‐touch listeners if you still want that
+      document.removeEventListener("click", playBgAudio);
+      document.removeEventListener("keydown", playBgAudio);
+      document.removeEventListener("touchstart", playBgAudio);
+    };
 
-  window.disableBgAudioControl = disableBgAudioControl;
-  window.addEventListener('DOMContentLoaded', updateAudioIcon);
-
-  // ————————————————————————————————————————————————————————————
-  // PAUSE/RESUME WHEN TAB OR WINDOW BLURS/VISIBILITY CHANGES
-  // ————————————————————————————————————————————————————————————
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      // page hide always pauses
+    window.pauseBgAudio = function () {
+      manualPaused = true;
       _pauseBgAudio();
-      prohibitEmojiAudio();
-    } else {
-      // only run cheeseburger() if appopened is false
-      if (appopened === false) {
-        cheeseburger();
+    };
+
+    function updateAudioIcon() {
+      const icon = document.getElementById('audioIcon');
+      if (!icon) return;
+      const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
+      icon.src = isDisabled
+        ? './images/soundbtn_pressed.png'
+        : './images/soundbtn.png';
+    }
+
+    function disableBgAudioControl() {
+      const isDisabled = localStorage.getItem('bgAudioDisabled') === 'true';
+
+      if (!isDisabled) {
+        window.pauseBgAudio();
+        // lock out future play calls
+        window.playBgAudio = function () {manualPaused = true; /* noop */};
+        window.pauseBgAudio = function () { /* already paused */};
+        localStorage.setItem('bgAudioDisabled', 'true');
+        console.log('Background audio disabled');
+      } else {
+        localStorage.removeItem('bgAudioDisabled');
+        // restore normal controls
+        window.playBgAudio = function () {
+          manualPaused = false;
+          _playBgAudio();
+        };
+        window.pauseBgAudio = function () {
+          manualPaused = true;
+          _pauseBgAudio();
+        };
+        window.playBgAudio();
+        console.log('Background audio enabled and playing');
       }
 
-      // only auto‐resume if user hasn't manually paused
-      if (!manualPaused) _playBgAudio();
+      updateAudioIcon();
     }
-  });
+
+    // Apply stored‐disabled state immediately
+    if (localStorage.getItem('bgAudioDisabled') === 'true') {
+      window.playBgAudio = function () {manualPaused = true;};
+      window.pauseBgAudio = function () { /* noop */};
+    }
+
+    window.disableBgAudioControl = disableBgAudioControl;
+    window.addEventListener('DOMContentLoaded', updateAudioIcon);
+
+    // ————————————————————————————————————————————————————————————
+    // PAUSE/RESUME WHEN TAB OR WINDOW BLURS/VISIBILITY CHANGES
+    // ————————————————————————————————————————————————————————————
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // page hide always pauses
+        _pauseBgAudio();
+        prohibitEmojiAudio();
+      } else {
+        // only run cheeseburger() if appopened is false
+        if (appopened === false) {
+          cheeseburger();
+        }
+
+        // only auto‐resume if user hasn't manually paused
+        if (!manualPaused) _playBgAudio();
+      }
+    });
 
 
-  // fallback blur/focus
-  window.addEventListener('blur', () => {
-    _pauseBgAudio();
-  });
-  window.addEventListener('focus', () => {
-    if (!manualPaused) _playBgAudio();
-  });
+    // fallback blur/focus
+    window.addEventListener('blur', () => {
+      _pauseBgAudio();
+    });
+    window.addEventListener('focus', () => {
+      if (!manualPaused) _playBgAudio();
+    });
 
-  // ————————————————————————————————————————————————————————————
-  // ONE‑TIME USER INTERACTION TO UNLOCK AUDIO (if needed)
-  // ————————————————————————————————————————————————————————————
-  function playBgAudio(evt) {
-    window.playBgAudio();
-  }
-  document.addEventListener("click", playBgAudio);
-  document.addEventListener("keydown", playBgAudio);
-  document.addEventListener("touchstart", playBgAudio);
-</script>
+    // ————————————————————————————————————————————————————————————
+    // ONE‑TIME USER INTERACTION TO UNLOCK AUDIO (if needed)
+    // ————————————————————————————————————————————————————————————
+    function playBgAudio(evt) {
+      window.playBgAudio();
+    }
+    document.addEventListener("click", playBgAudio);
+    document.addEventListener("keydown", playBgAudio);
+    document.addEventListener("touchstart", playBgAudio);
+  </script>
 
 
 
@@ -2043,7 +2124,7 @@ function logincheck() {
       localStorage.setItem("emojispeekEnabled", emojispeek.toString());
       console.log(`Emoji audio is now ${emojispeek ? "allowed" : "prohibited"}.`);
     });
-    
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playRandomEmojiAudio(mii) {
       if (!emojispeek) {
@@ -2061,7 +2142,7 @@ function logincheck() {
         .then(buffer => {
           // If one is already playing, stop it
           if (mii._audioSource) {
-            try {mii._audioSource.stop();} catch {}
+            try {mii._audioSource.stop();} catch { }
             mii._audioSource = null;
           }
 
@@ -2150,59 +2231,65 @@ function logincheck() {
   </script>
   <!-- Yummy Toast Start -->
 
-    <style>
-      /* Toast container at bottom-right */
-      #toast-container {
-        position: fixed;
-        bottom: 1rem;
-        right: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        pointer-events: none;
-        z-index: 9999;
-      }
-      .toast {
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 0.75rem 1rem;
-        border-radius: 30px;
-        max-width: 300px;
-        font-family: 'Nunito Sans', sans-serif;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-      }
-      .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      #controls {
-        margin-bottom: 1rem;
-        font-family: 'Nunito Sans', sans-serif;
-      }
-      #controls label {
-        margin-left: 0.5rem;
-      }
-      #goBtn {
-        margin-left: 0.5rem;
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        cursor: pointer;
-      }
-      #goBtn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    </style>
+  <style>
+    /* Toast container at bottom-right */
+    #toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-    <p style="display:none;" id="status">Idle</p>
-    <div id="toast-container"></div>
+    .toast {
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 30px;
+      max-width: 300px;
+      font-family: 'Nunito Sans', sans-serif;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #controls {
+      margin-bottom: 1rem;
+      font-family: 'Nunito Sans', sans-serif;
+    }
+
+    #controls label {
+      margin-left: 0.5rem;
+    }
+
+    #goBtn {
+      margin-left: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #goBtn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+
+  <p style="display:none;" id="status">Idle</p>
+  <div id="toast-container"></div>
 
   <script>
     function toggleFullscreen() {
-      window.parent.postMessage({ type: "toggle-fullscreen" }, "*");
+      window.parent.postMessage({type: "toggle-fullscreen"}, "*");
     }
 
     // Listen for fullscreen state updates from parent
@@ -2222,14 +2309,14 @@ function logincheck() {
         : "./images/fullscreenbtn.png";
     }
   </script>
-    <script>
-    (function(){
-      const BASE_URL      = "https://docs.google.com/spreadsheets/d/1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0/gviz/tq?sheet=Sheet1&tqx=out:json";
+  <script>
+    (function () {
+      const BASE_URL = "https://docs.google.com/spreadsheets/d/1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0/gviz/tq?sheet=Sheet1&tqx=out:json";
       const POLL_INTERVAL = 10 * 1000;  // 10 seconds
 
-      let lastSeen    = {};
-      let watchGroup  = "";
-      let timerId     = null;
+      let lastSeen = {};
+      let watchGroup = "";
+      let timerId = null;
       let mouseInside = false;
 
       // Load persisted master toggle state
@@ -2244,15 +2331,15 @@ function logincheck() {
       const toastToggle = document.getElementById("toastToggle");
       toastToggle.checked = false;
 
-  // Expose function to toggle toasts
-  window.toasttoggle = function toasttoggle() {
-    toastToggle.checked = !toastToggle.checked;
-  };
+      // Expose function to toggle toasts
+      window.toasttoggle = function toasttoggle() {
+        toastToggle.checked = !toastToggle.checked;
+      };
 
 
       // Track pointer in/out
-      document.addEventListener("mouseenter", () => { mouseInside = true; });
-      document.addEventListener("mouseleave", () => { mouseInside = false; });
+      document.addEventListener("mouseenter", () => {mouseInside = true;});
+      document.addEventListener("mouseleave", () => {mouseInside = false;});
 
       // Make startWatching globally available
       window.startWatching = function startWatching() {
@@ -2261,7 +2348,7 @@ function logincheck() {
         const g = input.value.trim().toLowerCase();
         if (!g) return alert("Please enter a group name.");
         watchGroup = g;
-        lastSeen   = {};
+        lastSeen = {};
         document.getElementById("status").innerText = `Watching “${watchGroup}”…`;
         goBtn.disabled = true;
         goBtn.innerText = "Watching…";
@@ -2312,9 +2399,9 @@ function logincheck() {
 
         const newEntries = [];
         rows.forEach(row => {
-          const name    = (row[1] || "").trim();
+          const name = (row[1] || "").trim();
           const message = (row[4] || "").trim();
-          const group   = (row[7] || "").trim().toLowerCase();
+          const group = (row[7] || "").trim().toLowerCase();
           if (!name || group !== watchGroup) return;
 
           if (!(name in lastSeen)) {
@@ -2323,13 +2410,13 @@ function logincheck() {
           }
 
           if (message && message !== lastSeen[name]) {
-            newEntries.push({ name, message });
+            newEntries.push({name, message});
             lastSeen[name] = message;
           }
         });
 
         const masterOn = masterToggle.checked;
-        const toastOn  = toastToggle.checked;
+        const toastOn = toastToggle.checked;
 
         if (newEntries.length && masterOn) {
           if (mouseInside && toastOn) {
@@ -2338,7 +2425,7 @@ function logincheck() {
             );
           } else if (!mouseInside) {
             window.parent.postMessage({
-              type:    "batch-messages",
+              type: "batch-messages",
               entries: newEntries
             }, "*");
           }
@@ -2348,7 +2435,7 @@ function logincheck() {
           `Last checked @ ${new Date().toLocaleTimeString()}`;
       }
     })();
-    </script>
+  </script>
   <script>
     function monitorColHChanges() {
       const input = document.getElementById("colH");
@@ -2412,13 +2499,13 @@ function logincheck() {
           <iframe 
             name="appstore" 
             frameborder="0" 
-            style="position:absolute;top:0;left:0;border:none;width:100%;height:100%;" 
+style="background: white; position:absolute;top:0;left:0;border:none;width:100%;height:100%;" 
             src="./appstore/index.html">
           </iframe>`
       }
     ];
     for (let i = 0; i < 8; i++) {
-      icons.push({ src: './defaulticon.png', color: null, websiteurl: '' });
+      icons.push({src: './defaulticon.png', color: null, websiteurl: ''});
     }
 
     // Compute a dominant color by sampling a 1×1 pixel from the image
@@ -2475,9 +2562,9 @@ function logincheck() {
       });
 
       // Update Mii torso colors
-     // miis.forEach(m => {
+      // miis.forEach(m => {
       //  m.el.querySelector('.mii').style.backgroundColor = icons[m.iconIndex].color;
-  //    });
+      //    });
     }
 
     const iconEls = [];
@@ -2499,7 +2586,7 @@ function logincheck() {
       //refreshPlaza();
     }
 
-      
+
     function renderIcons() {
       icons.forEach((data, i) => {
         const ic = document.createElement('div');
@@ -2516,145 +2603,145 @@ function logincheck() {
 
     let appIsOpening = false;
 
-function openApp(inner, data) {
-  if (appIsOpening) return;
-  appIsOpening = true;
+    function openApp(inner, data) {
+      if (appIsOpening) return;
+      appIsOpening = true;
 
-  // Show clicked icon’s src in the text box (if it exists)
-  const iconUrlBox = document.getElementById('colG');
-  if (iconUrlBox) iconUrlBox.value = data.src || '';
-  cancelPlazaRefresh();
-  updatemyoos();
+      // Show clicked icon’s src in the text box (if it exists)
+      const iconUrlBox = document.getElementById('colG');
+      if (iconUrlBox) iconUrlBox.value = data.src || '';
+      cancelPlazaRefresh();
+      updatemyoos();
 
-  // If we’re un‐minimizing the same icon:
-  if (isMinimized && inner.parentElement === lastClickedIcon) {
-    isMinimized = false;
-    inner.classList.remove('hop');
-    overlay.classList.add('active');
-    codeContainer.style.opacity = '1';
-    codeContainer.style.pointerEvents = 'auto';
-    codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
-    playuisound('./sounds/deminimize.wav');
-    prohibitAnimation();
-    blockEmojiAudioToggle();
-    pauseBgAudio();
-    shadowToggle();
-    toggleMenu();
+      // If we’re un‐minimizing the same icon:
+      if (isMinimized && inner.parentElement === lastClickedIcon) {
+        isMinimized = false;
+        inner.classList.remove('hop');
+        overlay.classList.add('active');
+        codeContainer.style.opacity = '1';
+        codeContainer.style.pointerEvents = 'auto';
+        codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
+        playuisound('./sounds/deminimize.wav');
+        prohibitAnimation();
+        blockEmojiAudioToggle();
+        pauseBgAudio();
+        shadowToggle();
+        toggleMenu();
 
-    appIsOpening = false;
-    return;
-  }
+        appIsOpening = false;
+        return;
+      }
 
-  // Fresh icon click
-  iconEls.forEach(e => e.querySelector('.icon-inner').classList.remove('hop'));
-  lastClickedIcon = inner.parentElement;
-  isMinimized = false;
+      // Fresh icon click
+      iconEls.forEach(e => e.querySelector('.icon-inner').classList.remove('hop'));
+      lastClickedIcon = inner.parentElement;
+      isMinimized = false;
 
-  playuisound('./sounds/open.wav');
-  prohibitAnimation();
-  blockEmojiAudioToggle();
-  pauseBgAudio();
-  shadowToggle();
-  toggleMenu();
+      playuisound('./sounds/open.wav');
+      prohibitAnimation();
+      blockEmojiAudioToggle();
+      pauseBgAudio();
+      shadowToggle();
+      toggleMenu();
 
-  // Clone the icon-inner → animate it to full-screen
-  const r = inner.getBoundingClientRect();
-  const clone = inner.cloneNode(true);
-  Object.assign(clone.style, {
-    position: 'fixed',
-    left: `${r.left}px`,
-    top: `${r.top}px`,
-    width: `${r.width}px`,
-    height: `${r.height}px`,
-    borderRadius: '30px',
-    transition: 'all .8s ease',
-    zIndex: 998,
-    pointerEvents: 'none',
-    backgroundColor: 'black',
-    backgroundImage: 'none'
-  });
-  document.body.appendChild(clone);
-  requestAnimationFrame(() => {
-    clone.style.left = '0';
-    clone.style.top = '0';
-    clone.style.width = `${window.innerWidth}px`;
-    clone.style.height = `${window.innerHeight}px`;
-  });
+      // Clone the icon-inner → animate it to full-screen
+      const r = inner.getBoundingClientRect();
+      const clone = inner.cloneNode(true);
+      Object.assign(clone.style, {
+        position: 'fixed',
+        left: `${r.left}px`,
+        top: `${r.top}px`,
+        width: `${r.width}px`,
+        height: `${r.height}px`,
+        borderRadius: '30px',
+        transition: 'all .8s ease',
+        zIndex: 998,
+        pointerEvents: 'none',
+        backgroundColor: 'black',
+        backgroundImage: 'none'
+      });
+      document.body.appendChild(clone);
+      requestAnimationFrame(() => {
+        clone.style.left = '0';
+        clone.style.top = '0';
+        clone.style.width = `${window.innerWidth}px`;
+        clone.style.height = `${window.innerHeight}px`;
+      });
 
-  logoHolder.style.display = 'block';
-  overlay.classList.add('active');
+      logoHolder.style.display = 'block';
+      overlay.classList.add('active');
 
-  // ───────────────────────────────
-  // Decode + inject the app code *immediately* so it loads while animating
-  // ───────────────────────────────
-  const map = {
-    '*oosqu*': '"',
-    '*oosap*': "'",
-    '*oosfsl*': '/',
-    '*oosbsl*': '\\',
-    '*oosobr*': '[',
-    '*ooscbr*': ']',
-    '*oosbrco*': '{',
-    '*oosbrcc*': '}',
-    '*oospao*': '(',
-    '*oospac*': ')',
-    '*ooseq*': '=',
-    '*oosti*': '',
-    '*ooscom*': ',',
-    '*oosscol*': ';',
-    '*ooscol*': ':',
-    '*ooslin*': '|',
-    '*oosango*': '<',
-    '*oosangc*': '>'
-  };
+      // ───────────────────────────────
+      // Decode + inject the app code *immediately* so it loads while animating
+      // ───────────────────────────────
+      const map = {
+        '*oosqu*': '"',
+        '*oosap*': "'",
+        '*oosfsl*': '/',
+        '*oosbsl*': '\\',
+        '*oosobr*': '[',
+        '*ooscbr*': ']',
+        '*oosbrco*': '{',
+        '*oosbrcc*': '}',
+        '*oospao*': '(',
+        '*oospac*': ')',
+        '*ooseq*': '=',
+        '*oosti*': '',
+        '*ooscom*': ',',
+        '*oosscol*': ';',
+        '*ooscol*': ':',
+        '*ooslin*': '|',
+        '*oosango*': '<',
+        '*oosangc*': '>'
+      };
 
-  let html = data.websiteurl;
-  for (let k in map) {
-    html = html.split(k).join(map[k]);
-  }
+      let html = data.websiteurl;
+      for (let k in map) {
+        html = html.split(k).join(map[k]);
+      }
 
-  // Inject decoded HTML
-  codeContainer.innerHTML = html;
+      // Inject decoded HTML
+      codeContainer.innerHTML = html;
 
-  // Transform + execute <script> tags right away
-  const inlineScripts = codeContainer.querySelectorAll('script');
-  inlineScripts.forEach(oldScript => {
-    const newScript = document.createElement('script');
+      // Transform + execute <script> tags right away
+      const inlineScripts = codeContainer.querySelectorAll('script');
+      inlineScripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
 
-    if (oldScript.src) {
-      newScript.src = oldScript.src;
-      if (oldScript.async) newScript.async = true;
-      if (oldScript.defer) newScript.defer = true;
-    } else {
-      const userCode = oldScript.textContent;
-      const safeCode = userCode
-        .replace(/\blet\s+/g, 'var ')
-        .replace(/\bconst\s+/g, 'var ');
-      newScript.textContent = safeCode;
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
+          if (oldScript.async) newScript.async = true;
+          if (oldScript.defer) newScript.defer = true;
+        } else {
+          const userCode = oldScript.textContent;
+          const safeCode = userCode
+            .replace(/\blet\s+/g, 'var ')
+            .replace(/\bconst\s+/g, 'var ');
+          newScript.textContent = safeCode;
+        }
+
+        document.head.appendChild(newScript);
+        currentInjectedScripts.push(newScript);
+        oldScript.remove();
+      });
+
+      // Hide content visually until animation finishes
+      codeContainer.style.opacity = '0';
+      codeContainer.style.pointerEvents = 'none';
+
+      // ───────────────────────────────
+      // After ~2s animation, reveal already-loaded content
+      // ───────────────────────────────
+      setTimeout(() => {
+        logoHolder.style.display = 'none';
+        codeContainer.style.opacity = '1';
+        codeContainer.style.pointerEvents = 'auto';
+        codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
+
+        clone.remove();
+        appIsOpening = false;
+      }, 2000);
     }
-
-    document.head.appendChild(newScript);
-    currentInjectedScripts.push(newScript);
-    oldScript.remove();
-  });
-
-  // Hide content visually until animation finishes
-  codeContainer.style.opacity = '0';
-  codeContainer.style.pointerEvents = 'none';
-
-  // ───────────────────────────────
-  // After ~2s animation, reveal already-loaded content
-  // ───────────────────────────────
-  setTimeout(() => {
-    logoHolder.style.display = 'none';
-    codeContainer.style.opacity = '1';
-    codeContainer.style.pointerEvents = 'auto';
-    codeContainer.querySelectorAll('iframe').forEach(f => f.classList.add('visible'));
-
-    clone.remove();
-    appIsOpening = false;
-  }, 2000);
-}
 
     function minimizeApp() {
       if (appIsOpening) return;
@@ -2777,32 +2864,32 @@ function openApp(inner, data) {
 
     let touchStartX = null;
 
-// on touch start, grab initial X
-document.addEventListener('touchstart', e => {
-  if (e.touches.length === 1) {
-    touchStartX = e.touches[0].clientX;
-  }
-});
+    // on touch start, grab initial X
+    document.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+      }
+    });
 
-// on touch move, use horizontal movement
-document.addEventListener('touchmove', e => {
-  if (e.touches.length === 1 && touchStartX !== null) {
-    const currentX = e.touches[0].clientX;
-    const deltaX = currentX - touchStartX;
-    // larger multiplier for more pronounced spin
-    targetRotation += deltaX * 0.005;
-    touchStartX = currentX;   // reset baseline
-    e.preventDefault();       // prevent page scroll
-  }
-}, { passive: false });
+    // on touch move, use horizontal movement
+    document.addEventListener('touchmove', e => {
+      if (e.touches.length === 1 && touchStartX !== null) {
+        const currentX = e.touches[0].clientX;
+        const deltaX = currentX - touchStartX;
+        // larger multiplier for more pronounced spin
+        targetRotation += deltaX * 0.005;
+        touchStartX = currentX;   // reset baseline
+        e.preventDefault();       // prevent page scroll
+      }
+    }, {passive: false});
 
-// clear on touch end/cancel
-document.addEventListener('touchend', () => {
-  touchStartX = null;
-});
-document.addEventListener('touchcancel', () => {
-  touchStartX = null;
-});
+    // clear on touch end/cancel
+    document.addEventListener('touchend', () => {
+      touchStartX = null;
+    });
+    document.addEventListener('touchcancel', () => {
+      touchStartX = null;
+    });
 
 
     // Mii functions
@@ -2866,15 +2953,15 @@ document.addEventListener('touchcancel', () => {
         const hairFilter = getRandomHairFilter();
 
         const layers = [
-          { data: orb },
-          { data: mouth, class: invertForWhite ? 'emoji-layer invert' : 'emoji-layer' },
-          { data: eyes, class: invertForWhite ? 'emoji-layer invert' : 'emoji-layer' },
-          { data: hair },
-          { data: eyewear },
-          { data: hat }
+          {data: orb},
+          {data: mouth, class: invertForWhite ? 'emoji-layer invert' : 'emoji-layer'},
+          {data: eyes, class: invertForWhite ? 'emoji-layer invert' : 'emoji-layer'},
+          {data: hair},
+          {data: eyewear},
+          {data: hat}
         ];
 
-        layers.forEach(({ data, class: cls }) => {
+        layers.forEach(({data, class: cls}) => {
           if (!data) return;
           const img = document.createElement('img');
           img.src = data.src;
@@ -2916,62 +3003,62 @@ document.addEventListener('touchcancel', () => {
       }
     }
 
-  function updateMiis(time) {
-    miis.forEach(m => {
-      m.transitionTimer -= 16.6;
-      if (m.transitionTimer <= 0) {
-        m.transitionTimer = Math.random() * 5000 + 3000;
-        m.transitioning = true;
-        m.targetActive = 1 - m.targetActive;
-      }
-      if (m.transitioning) {
-        m.active += (m.targetActive - m.active) * 0.05;
-        if (Math.abs(m.active - m.targetActive) < 0.01) {
-          m.active = m.targetActive;
-          m.transitioning = false;
-          m.speedX = (Math.random() * 0.5 - 0.25) * m.active;
-          m.speedZ = (Math.random() * 0.5 - 0.25) * m.active;
+    function updateMiis(time) {
+      miis.forEach(m => {
+        m.transitionTimer -= 16.6;
+        if (m.transitionTimer <= 0) {
+          m.transitionTimer = Math.random() * 5000 + 3000;
+          m.transitioning = true;
+          m.targetActive = 1 - m.targetActive;
         }
-      }
+        if (m.transitioning) {
+          m.active += (m.targetActive - m.active) * 0.05;
+          if (Math.abs(m.active - m.targetActive) < 0.01) {
+            m.active = m.targetActive;
+            m.transitioning = false;
+            m.speedX = (Math.random() * 0.5 - 0.25) * m.active;
+            m.speedZ = (Math.random() * 0.5 - 0.25) * m.active;
+          }
+        }
 
-      // --- NEW LOGIC ---
-      if (m.iconIndex === -1) {
-        // Center roaming
-        const range = 180;
-        if (m.active > 0.01) {
-          m.baseX += m.speedX;
-          m.baseZ += m.speedZ;
-          if (Math.abs(m.baseX) > range) m.speedX *= -1;
-          if (Math.abs(m.baseZ) > range) m.speedZ *= -1;
+        // --- NEW LOGIC ---
+        if (m.iconIndex === -1) {
+          // Center roaming
+          const range = 180;
+          if (m.active > 0.01) {
+            m.baseX += m.speedX;
+            m.baseZ += m.speedZ;
+            if (Math.abs(m.baseX) > range) m.speedX *= -1;
+            if (Math.abs(m.baseZ) > range) m.speedZ *= -1;
+          }
+          const tx = m.baseX;
+          const tz = m.baseZ;
+          m.x += (tx - m.x) * m.smoothFactor;
+          m.z += (tz - m.z) * m.smoothFactor;
+        } else {
+          // Normal icon-following behavior
+          const ico = iconPositions[m.iconIndex];
+          if (!ico) return;
+          const range = m.roamFar ? 180 : 90;
+          if (m.active > 0.01) {
+            m.baseX += m.speedX;
+            m.baseZ += m.speedZ;
+            if (Math.abs(m.baseX) > range) m.speedX *= -1;
+            if (Math.abs(m.baseZ) > range) m.speedZ *= -1;
+          }
+          const tx = ico.x + m.baseX, tz = ico.z + m.baseZ;
+          m.x += (tx - m.x) * m.smoothFactor;
+          m.z += (tz - m.z) * m.smoothFactor;
         }
-        const tx = m.baseX;
-        const tz = m.baseZ;
-        m.x += (tx - m.x) * m.smoothFactor;
-        m.z += (tz - m.z) * m.smoothFactor;
-      } else {
-        // Normal icon-following behavior
-        const ico = iconPositions[m.iconIndex];
-        if (!ico) return;
-        const range = m.roamFar ? 180 : 90;
-        if (m.active > 0.01) {
-          m.baseX += m.speedX;
-          m.baseZ += m.speedZ;
-          if (Math.abs(m.baseX) > range) m.speedX *= -1;
-          if (Math.abs(m.baseZ) > range) m.speedZ *= -1;
-        }
-        const tx = ico.x + m.baseX, tz = ico.z + m.baseZ;
-        m.x += (tx - m.x) * m.smoothFactor;
-        m.z += (tz - m.z) * m.smoothFactor;
-      }
-      // --- END NEW LOGIC ---
+        // --- END NEW LOGIC ---
 
-      const hopH = Math.abs(Math.sin(time * 0.003 + m.yOffset)) * 10 * m.active;
-      const y = 150 + hopH;
-      const frontZ = m.z + 70;
-      m.el.style.transform = `translate3d(${m.x}px,${y}px,${frontZ}px)`;
-    });
-  }
-start();
+        const hopH = Math.abs(Math.sin(time * 0.003 + m.yOffset)) * 10 * m.active;
+        const y = 150 + hopH;
+        const frontZ = m.z + 70;
+        m.el.style.transform = `translate3d(${m.x}px,${y}px,${frontZ}px)`;
+      });
+    }
+    start();
   </script>
 
   <script>
@@ -2999,14 +3086,14 @@ start();
           eyeImg.src = originalSrc;
         }, 150); // Blink duration
 
-       // const nextBlink = Math.random() * 4000 + 2000; // 2–6s
-      //  setTimeout(() => blinkMii(head), nextBlink);
-    //  }
+        // const nextBlink = Math.random() * 4000 + 2000; // 2–6s
+        //  setTimeout(() => blinkMii(head), nextBlink);
+        //  }
 
-      // Start blinking for each head
-    //  heads.forEach(head => {
-    //    const delay = Math.random() * 4000 + 2000; // 1–4s
-    //    setTimeout(() => blinkMii(head), delay);
+        // Start blinking for each head
+        //  heads.forEach(head => {
+        //    const delay = Math.random() * 4000 + 2000; // 1–4s
+        //    setTimeout(() => blinkMii(head), delay);
       });
 
       // Talking animation flicker
@@ -3022,46 +3109,46 @@ start();
 
         setTimeout(() => flickerMouth(head), 200 + Math.random() * 100); // Flicker every 200–300ms
       }
-        // Talking proximity logic
-        function updateTalking() {
-          heads.forEach(head1 => {
-            const rect1 = head1.getBoundingClientRect();
-            const center1 = {
-              x: rect1.left + rect1.width / 2,
-              y: rect1.top + rect1.height / 2
+      // Talking proximity logic
+      function updateTalking() {
+        heads.forEach(head1 => {
+          const rect1 = head1.getBoundingClientRect();
+          const center1 = {
+            x: rect1.left + rect1.width / 2,
+            y: rect1.top + rect1.height / 2
+          };
+
+          let isTalking = false;
+
+          heads.forEach(head2 => {
+            if (head1 === head2) return;
+
+            const rect2 = head2.getBoundingClientRect();
+            const center2 = {
+              x: rect2.left + rect2.width / 2,
+              y: rect2.top + rect2.height / 2
             };
 
-            let isTalking = false;
-
-            heads.forEach(head2 => {
-              if (head1 === head2) return;
-
-              const rect2 = head2.getBoundingClientRect();
-              const center2 = {
-                x: rect2.left + rect2.width / 2,
-                y: rect2.top + rect2.height / 2
-              };
-
-              const distance = Math.hypot(center2.x - center1.x, center2.y - center1.y);
-              if (distance < 10) isTalking = true;
-            });
-
-            if (isTalking && head1.dataset.isTalking !== 'true') {
-              head1.dataset.isTalking = 'true';
-              flickerMouth(head1);
-            } else if (!isTalking && head1.dataset.isTalking !== 'false') {
-              head1.dataset.isTalking = 'false';
-              const mouthImg = Array.from(head1.querySelectorAll('img')).find(img => img.src.includes('/mouths/') || img.src.includes('talk.png'));
-              if (mouthImg) mouthImg.src = head1.dataset.originalMouth;
-            }
+            const distance = Math.hypot(center2.x - center1.x, center2.y - center1.y);
+            if (distance < 10) isTalking = true;
           });
 
-          //requestAnimationFrame(updateTalking);
-        }
+          if (isTalking && head1.dataset.isTalking !== 'true') {
+            head1.dataset.isTalking = 'true';
+            flickerMouth(head1);
+          } else if (!isTalking && head1.dataset.isTalking !== 'false') {
+            head1.dataset.isTalking = 'false';
+            const mouthImg = Array.from(head1.querySelectorAll('img')).find(img => img.src.includes('/mouths/') || img.src.includes('talk.png'));
+            if (mouthImg) mouthImg.src = head1.dataset.originalMouth;
+          }
+        });
 
-       // requestAnimationFrame(updateTalking);
+        //requestAnimationFrame(updateTalking);
       }
-    
+
+      // requestAnimationFrame(updateTalking);
+    }
+
     //window.addEventListener('load', startMiiBehavior);
   </script>
   <script>
@@ -3530,7 +3617,7 @@ start();
 
             // Stop any playing audio
             if (mii._audioSource) {
-              try {mii._audioSource.stop();} catch {}
+              try {mii._audioSource.stop();} catch { }
               mii._audioSource = null;
             }
 
@@ -3922,8 +4009,8 @@ start();
      ============================================ -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const splash       = document.getElementById("splash");
-      const logoIcon     = document.getElementById("logo-icon");
+      const splash = document.getElementById("splash");
+      const logoIcon = document.getElementById("logo-icon");
       const splashRipple = document.getElementById("splash-ripple");
       const triggerInput = document.getElementById("colB");
       const timeoutPopup = document.getElementById("timeout-popup");
@@ -3935,7 +4022,7 @@ start();
         splashRipple.addEventListener(
           "animationend",
           () => splashRipple.classList.remove("animate-ripple"),
-          { once: true }
+          {once: true}
         );
       }
 
@@ -4026,7 +4113,7 @@ start();
           if (abs.startsWith(location.origin)) {
             return abs;
           }
-        } catch (_) {}
+        } catch (_) { }
         return null;
       }
 
@@ -4080,7 +4167,7 @@ start();
           const absCss = normalize(href);
           if (!absCss) continue;
           try {
-            const resp = await fetch(absCss, { credentials: 'same-origin' });
+            const resp = await fetch(absCss, {credentials: 'same-origin'});
             if (!resp.ok) continue;
             const text = await resp.text();
 
@@ -4138,7 +4225,7 @@ start();
           const absJs = normalize(jsPath);
           if (!absJs) continue;
           try {
-            const resp = await fetch(absJs, { credentials: 'same-origin' });
+            const resp = await fetch(absJs, {credentials: 'same-origin'});
             if (!resp.ok) continue;
             const jsText = await resp.text();
             let m;
@@ -4225,7 +4312,7 @@ start();
     }
 
     // Example:
-    
+
   </script>
   <script>
     let _hatWatcherIntervalId = null;
@@ -4286,65 +4373,65 @@ start();
     window.stopHatWatcher = stopHatWatcher;
   </script>
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const bannedWordMap = {
-      "fuck": "fudge",
-      "fuk": "fudge",
-      "f*ck": "fudge",
-      "shit": "fudge",
-      "crap": "fudge",
-      "cunt": "fudge",
-      "bitch": "fudge",
-      "fag": "fudge",
-      "whore": "fudge",
-      "ass": "fudge",
-      "damn": "fudge",
-      "retard": "fudge",
-      "retarded": "fudge",
-      "nigger": "fudge",
-      "nigga": "fudge"
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+      const bannedWordMap = {
+        "fuck": "fudge",
+        "fuk": "fudge",
+        "f*ck": "fudge",
+        "shit": "fudge",
+        "crap": "fudge",
+        "cunt": "fudge",
+        "bitch": "fudge",
+        "fag": "fudge",
+        "whore": "fudge",
+        "ass": "fudge",
+        "damn": "fudge",
+        "retard": "fudge",
+        "retarded": "fudge",
+        "nigger": "fudge",
+        "nigga": "fudge"
+      };
 
-    function normalize(text) {
-      return text
-        .replace(/[^a-zA-Z]/g, '')   // remove non-letters
-        .replace(/(.)\1+/g, '$1')    // collapse repeat chars
-        .toLowerCase();
-    }
+      function normalize(text) {
+        return text
+          .replace(/[^a-zA-Z]/g, '')   // remove non-letters
+          .replace(/(.)\1+/g, '$1')    // collapse repeat chars
+          .toLowerCase();
+      }
 
-    function sanitizeInput(original) {
-      const words = original.split(/\b/); // split by word boundaries
-      return words.map(word => {
-        const norm = normalize(word);
-        for (const [badWord, replacement] of Object.entries(bannedWordMap)) {
-          if (norm === normalize(badWord)) {
-            return replacement;
+      function sanitizeInput(original) {
+        const words = original.split(/\b/); // split by word boundaries
+        return words.map(word => {
+          const norm = normalize(word);
+          for (const [badWord, replacement] of Object.entries(bannedWordMap)) {
+            if (norm === normalize(badWord)) {
+              return replacement;
+            }
           }
-        }
-        return word;
-      }).join('');
-    }
+          return word;
+        }).join('');
+      }
 
-    ['sayMain', 'sayMain2'].forEach(id => {
-      const input = document.getElementById(id);
-      if (!input) return;
+      ['sayMain', 'sayMain2'].forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return;
 
-      // Block commas
-      input.addEventListener('keydown', e => {
-        if (e.key === ',' || e.keyCode === 188) {
-          e.preventDefault();
-        }
-      });
+        // Block commas
+        input.addEventListener('keydown', e => {
+          if (e.key === ',' || e.keyCode === 188) {
+            e.preventDefault();
+          }
+        });
 
-      // Replace bad words with "fudge"
-      input.addEventListener('input', () => {
-        const clean = sanitizeInput(input.value);
-        if (clean !== input.value) {
-          input.value = clean;
-        }
+        // Replace bad words with "fudge"
+        input.addEventListener('input', () => {
+          const clean = sanitizeInput(input.value);
+          if (clean !== input.value) {
+            input.value = clean;
+          }
+        });
       });
     });
-  });
   </script>
   <script>
     let originalValue = '';
@@ -4407,99 +4494,121 @@ start();
   </script>
 
 
-<style>
-  /* 3D-tree styling */
-  .tree {
-    position: absolute;
-    left: 50%;
-    width: 200px;               /* adjust width as desired */
-    transform-style: preserve-3d;
-    transform-origin: 50% 100%; /* pivot at bottom-center */
-    pointer-events: none;       /* don’t block clicks */
-  }
-</style>
+  <style>
+    /* 3D-tree styling */
+    .tree {
+      position: absolute;
+      left: 50%;
+      width: 200px;
+      /* adjust width as desired */
+      transform-style: preserve-3d;
+      transform-origin: 50% 100%;
+      /* pivot at bottom-center */
+      pointer-events: none;
+      /* don’t block clicks */
+    }
+  </style>
+  <style>
+    /* POTATO MODE PERFORMANCE OVERRIDES */
+    html.potato-mode
+    *:not(.icon-btn *):not(.moving-shadow),
+    html.potato-mode
+    *:not(.icon-btn *):not(.moving-shadow)::before,
+    html.potato-mode
+    *:not(.icon-btn *):not(.moving-shadow)::after {
+      transition: none !important;
+      filter: none !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
 
-<script>
-  (function() {
-    const scene    = document.getElementById('scene');
-    const centerY  = 30;  // match your icons’ y-offset
-    const centerZ  = 30;  // match your icons’ z-offset
-    let treeEl     = null;
+    html.potato-mode {
+      scroll-behavior: auto !important;
+    }
+  </style>
+  <script>
+    (function () {
+      const scene = document.getElementById('scene');
+      const centerY = 30;  // match your icons’ y-offset
+      const centerZ = 30;  // match your icons’ z-offset
+      let treeEl = null;
 
-    // Expose global function
-    window.addtree = function(src) {
-      // Remove existing tree if present
-      if (treeEl) {
-        treeEl.remove();
-      }
+      // Expose global function
+      window.addtree = function (src) {
+        // Remove existing tree if present
+        if (treeEl) {
+          treeEl.remove();
+        }
 
-      // Create new tree element
-      treeEl = document.createElement('img');
-      treeEl.className = 'tree';
-      treeEl.src       = src;
-      treeEl.alt       = 'Christmas Tree';
+        // Create new tree element
+        treeEl = document.createElement('img');
+        treeEl.className = 'tree';
+        treeEl.src = src;
+        treeEl.alt = 'Christmas Tree';
 
-      // Position it in 3D space
-      treeEl.style.transform =
-        `translateX(-50%) translate3d(0, ${centerY}px, ${centerZ}px)`;
+        // Position it in 3D space
+        treeEl.style.transform =
+          `translateX(-50%) translate3d(0, ${centerY}px, ${centerZ}px)`;
 
-      scene.appendChild(treeEl);
-    };
-  })();
-</script>
-<style>
-  /* Trinket styling */
-  .trinket {
-    position: absolute;
-    transform-style: preserve-3d;
-    pointer-events: none;
-    width: auto;  /* we set exact size in JS */
-    height: auto;
- filter: drop-shadow(0px -5px 9px #000); 
-  }
-</style>
+        scene.appendChild(treeEl);
+      };
+    })();
+  </script>
+  <style>
+    /* Trinket styling */
+    .trinket {
+      position: absolute;
+      transform-style: preserve-3d;
+      pointer-events: none;
+      width: auto;
+      /* we set exact size in JS */
+      height: auto;
+      filter: drop-shadow(0px -5px 9px #000);
+    }
+  </style>
 
-<script>
-(function() {
-  const floorZ      = -200;    // same as your floor’s translateZ
-  const maxFloorRad = 600;     // radius of placement area
+  <script>
+    (function () {
+      const floorZ = -200;    // same as your floor’s translateZ
+      const maxFloorRad = 600;     // radius of placement area
 
-  window.addtrinket = function(src, pct, sizePct) {
-    const p     = Math.max(0, Math.min(100, pct));
-    const scale = Math.max(0, sizePct) / 100;
-    const R     = (p / 100) * maxFloorRad;
-    const θ     = Math.random() * 2 * Math.PI;
-    const x     = Math.cos(θ) * R;
-    const z     = floorZ + Math.sin(θ) * R;
+      window.addtrinket = function (src, pct, sizePct) {
+        const p = Math.max(0, Math.min(100, pct));
+        const scale = Math.max(0, sizePct) / 100;
+        const R = (p / 100) * maxFloorRad;
+        const θ = Math.random() * 2 * Math.PI;
+        const x = Math.cos(θ) * R;
+        const z = floorZ + Math.sin(θ) * R;
 
-    const el = document.createElement('img');
-    el.className = 'trinket';
-    el.src       = src;
-    el.alt       = 'Trinket';
+        const el = document.createElement('img');
+        el.className = 'trinket';
+        el.src = src;
+        el.alt = 'Trinket';
 
-    el.onload = () => {
-      const w = el.naturalWidth  * scale;
-      const h = el.naturalHeight * scale;
-      el.style.width  = `${w}px`;
-      el.style.height = `${h}px`;
+        el.onload = () => {
+          const w = el.naturalWidth * scale;
+          const h = el.naturalHeight * scale;
+          el.style.width = `${w}px`;
+          el.style.height = `${h}px`;
 
-      // center anchor
-      el.style.left = '50%';
-      el.style.top  = '50%';
+          // center anchor
+          el.style.left = '50%';
+          el.style.top = '50%';
 
-      // Position in 3D space:
-      //  - X = floor radius
-      //  - Y = raised slightly above floor plane
-      //  - Z = floor depth
-      const yAboveFloor = 150; // tweak this to float higher
-      el.style.transform =
-        `translate(-50%, -50%) translateX(${x.toFixed(1)}px) translateY(${yAboveFloor}px) translateZ(${z.toFixed(1)}px)`;
-    };
+          // Position in 3D space:
+          //  - X = floor radius
+          //  - Y = raised slightly above floor plane
+          //  - Z = floor depth
+          const yAboveFloor = 150; // tweak this to float higher
+          el.style.transform =
+            `translate(-50%, -50%) translateX(${x.toFixed(1)}px) translateY(${yAboveFloor}px) translateZ(${z.toFixed(1)}px)`;
+        };
 
-    scene.appendChild(el);
-  };
-})();
-</script>
+        scene.appendChild(el);
+      };
+    })();
+  </script>
   <iframe style="z-index: 4; opacity: 1;" id="tutorialFrame" src="./tutorial/index.html"></iframe>
   <script>
     // Check localStorage to see if tutorial should be skipped
@@ -4517,6 +4626,33 @@ start();
       }
     });
   </script>
+  <script>
+    const potatoToggle = document.getElementById("potatoToggle");
+    const ROOT = document.documentElement;
+    const STORAGE_KEY = "potatoMode";
+
+    function enablePotatoMode() {
+      ROOT.classList.add("potato-mode");
+      localStorage.setItem(STORAGE_KEY, "on");
+    }
+
+    function disablePotatoMode() {
+      ROOT.classList.remove("potato-mode");
+      localStorage.setItem(STORAGE_KEY, "off");
+    }
+
+    const savedMode = localStorage.getItem(STORAGE_KEY);
+
+    if (savedMode === "on") {
+      potatoToggle.checked = true;
+      enablePotatoMode();
+    }
+
+    potatoToggle.addEventListener("change", () => {
+      potatoToggle.checked ? enablePotatoMode() : disablePotatoMode();
+    });
+  </script>
+
 
 
 
