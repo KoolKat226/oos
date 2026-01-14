@@ -1,0 +1,5630 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <link rel="stylesheet" href="./scripts/clockstyle.css">
+  <script>
+    (function () {
+      let flag = localStorage.getItem("redirectFlag");
+
+      // Default to 0 if not set
+      if (flag === null) {
+        flag = "0";
+        localStorage.setItem("redirectFlag", "0");
+      }
+
+      // If flag = 0 → redirect
+      if (flag === "0") {
+        window.location.replace("../index.html");
+      }
+      // If flag = 1 → stay on this page (do nothing)
+    })();
+
+    function toggleoos() {
+      let flag = localStorage.getItem("redirectFlag");
+
+      if (flag === "0") {
+        localStorage.setItem("redirectFlag", "1");
+        location.reload();
+      } else {
+        localStorage.setItem("redirectFlag", "0");
+        location.reload();
+      }
+    }
+  </script>
+<!-- APP LAUNCHING CODE -->
+<style>
+.iframe-wrapper {
+  position: fixed;
+  left:15%;
+  top: 2%;
+  border-radius: 30px;
+  width: 70%; /* Adjust the initial width as desired */
+  height: 75%; /* Adjust the initial height as desired */
+  border: 0px solid #ccc;
+  overflow: hidden;
+    transform: scale(.3);
+cursor: url('assets/cursors/Normal.cur'), auto;
+transition: transform 0.3s ease;
+filter: blur(0px) drop-shadow(0 3mm 4mm rgb(31, 31, 31, .4));
+backdrop-filter: blur(5px);
+}
+
+  .iframe-wrapper.scaling-up {
+    transform: scale(1); /* Adjust the scale value to make it bigger */
+transition: transform 0.2s ease;
+  }
+
+  .minimizeiframe {
+    transform: scale(.3); /* Adjust the scale value to make it bigger */
+opacity: 0;
+transition: 0.5s ease;
+scale: 2 50%;
+margin-top: 400px;
+pointer-events: none;
+filter: blur(100px);
+  }
+
+.iframe-wrapper.fullscreen {
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  left: 0;
+  top: 0;
+filter: blur(0px) drop-shadow(0 0mm 0mm rgb(0, 0, 0, 0));
+backdrop-filter: blur(0px);
+transition: .2s;
+}
+
+  .iframe-wrapper.exitfullscreen {
+transition: .2s;
+}
+
+.iframe-wrapper .ui-resizable-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #fff;
+  border: 1px solid #000;
+}
+
+.iframe-wrapper.fullscreen .ui-resizable-handle {
+  pointer-events: none;
+}
+
+.iframe-wrapper.fullscreen .iframe-drag-bar {
+  pointer-events: none;
+}
+
+
+.iframe-wrapper .ui-resizable-e {
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: url('assets/cursors/Horizontal Resize.cur'), ew-resize;
+  height:100%;
+  opacity: 0;
+}
+
+.iframe-wrapper .ui-resizable-w {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: url('assets/cursors/Horizontal Resize.cur'), ew-resize;
+  height:100%;
+  opacity: 0;
+}
+
+.iframe-wrapper .ui-resizable-se {
+  right: 0;
+  bottom: 0;
+height: 4%;
+width: 4%;
+  cursor: url('assets/cursors/Diagonal Resize 1.cur'), nwse-resize;
+  opacity: 0;
+}
+
+.iframe-wrapper .ui-resizable-s {
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  cursor: url('assets/cursors/Vertical Resize.cur'), ns-resize;
+  width:100%;
+  opacity: 0;
+}
+
+.iframe-drag-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 35px; /* Adjust the height as desired */
+  z-index:100;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  opacity: 0;
+  background:rgba(217, 217, 217,0);
+  backdrop-filter: contrast(0%) blur(0px);
+  transition: .3s;
+}
+
+.iframe-drag-bar:hover {
+  backdrop-filter: contrast(40%) blur(3px);
+  opacity: 0;
+  transition: .3s;
+}
+
+.iframe-option-bar {
+  position: absolute;
+  top: 7px;
+  right: 22px;
+  width: 15px;
+  height: 15px; /* Adjust the height as desired */
+  border-radius: 50%;
+  cursor: url('assets/cursors/Link.cur'), pointer;
+  z-index:101;
+  transition: background .4s;
+  transition: .3s;
+  background:rgba(138, 138, 138,.6);
+  backdrop-filter: saturate(180%) blur(14px);
+}
+
+.iframe-option-bar:hover {
+  background:rgba(255, 202, 128,.6);
+transform: scale(1.2);
+}
+
+.iframe-option-bar:focus {
+  background:rgba(255, 202, 128,.6);
+transform: scale(.8);
+}
+
+.iframe-icon {
+  position: absolute;
+  top: 7px;
+  right: 97px;
+  width: 15px;
+  height: 15px; /* Adjust the height as desired */
+  border-radius: 50%;
+  cursor: url('assets/cursors/Link.cur'), pointer;
+  z-index:101;
+  pointer-events: none;
+  transition: background .4s;
+  transition: .3s;
+}
+
+.appiframe {
+  border-radius: 30px;
+  backdrop-filter: saturate(180%) blur(14px);
+}
+
+.fullscreen-button {
+  position: absolute;
+  top: 7px;
+  right: 47px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  cursor: url('assets/cursors/Link.cur'), pointer;
+  z-index: 101;
+  transition: background .4s;
+  transition: .3s;
+  background: rgba(138, 138, 138, .6);
+  backdrop-filter: saturate(180%) blur(14px);
+}
+
+.fullscreen-button:hover {
+  background: rgba(165, 207, 202, .6);
+transform: scale(1.2);
+}
+
+.fullscreen-button:focus {
+  background: rgba(165, 207, 202, .6);
+transform: scale(.5);
+}
+
+.iframe-wrapper.fullscreen .iframe-drag-bar {
+  border-radius: 0;
+}
+
+.iframe-wrapper.fullscreen .appiframe {
+  border-radius: 0;
+}
+
+.iframe-wrapper.fullscreen .iframe-drag-bar {
+  border-radius: 0;
+}
+
+  .iframe-wrapper.fullscreen {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    left: 0;
+    top: 0;
+  }
+
+  .mainwindow {
+z-index:9999999999999999;
+  }
+
+   .minimize-button {
+      position: absolute;
+      top: 7px;
+      right: 72px; /* Adjust the position as needed */
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+  cursor: url('assets/cursors/Link.cur'), pointer;
+      z-index: 101;
+      transition: background .4s;
+      transition: .3s;
+      background: rgba(138, 138, 138, .6);
+      backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    .minimize-button:hover {
+      background: rgba(255, 253, 209, .6);
+      transform: scale(1.2);
+    }
+
+    .minimize-button:focus {
+      background: rgba(255, 253, 209, .6);
+      transform: scale(.8);
+    }
+
+
+</style>
+
+<style>
+/* Set the background div to cover the entire page */
+ #background
+ {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Style the iframe */
+ #backgroundiframe iframe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none; /* Optional: Remove border if needed */
+}
+
+.wallpaperbarrier {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+</style>
+
+<script src="./scripts/darkmodebuttons.js"></script>
+
+<div style="display:none;" style="z-index: 9999999;">
+  <button style="" onclick="createIframe();">Create Content</button>
+  <button style="" onclick="createFullscreenIframe();">Create Fullscreen Content</button>
+  <input style="" type="text" id="iframeNameInput" placeholder="Enter content name">
+  <input style="" type="text" id="iframeIconInput" placeholder="Enter iframe icon">
+  <textarea style="" id="htmlContentInput" oninput="replaceCharacters()" placeholder="Enter HTML content"></textarea>
+  <textarea style="" id="cssContentInput" placeholder="Enter CSS content"></textarea>
+  <textarea style="" id="jsContentInput" placeholder="Enter JavaScript content"></textarea>
+  <input style="" type="text" id="iframex" placeholder="Enter content x dimension">
+  <input style="" type="text" id="iframey" placeholder="Enter content y dimension">
+  <input style="" type="text" id="iframetop" placeholder="Enter content top distance">
+  <input style="" type="text" id="iframebottom" placeholder="Enter content bottom distance">
+  <input style="" type="text" id="iframeleft" placeholder="Enter content left distance">
+  <input style="" type="text" id="iframeright" placeholder="Enter content right distance">
+</div>
+<div style="z-index: 9994; position:absolute" id="iframeContainer">
+</div>
+
+
+</div>
+<div style="display:none;" class="randomcrapfortheming">
+  <button style="" id="button2" class="popup" onclick="myFunction()">Install</button></a>
+  <cheese id="app-iframe" frameBorder="0" style="display: none; border-radius:30px;"></cheese>
+  <ul id="app-list"></ul>
+
+</div>
+
+<script src="./scripts/jquery-3.6.0.min.js"></script>
+<script src="./scripts/jquery-ui.min.js"></script>
+<script>
+function executeJsFromInput() {
+    // Retrieve the value from the input box
+    const jsCode = document.getElementById('jsContentInput').value;
+    
+    try {
+        // Use the Function constructor to execute the code
+        new Function(jsCode)();
+    } catch (error) {
+        console.error('Error executing JavaScript:', error);
+    }
+}
+</script>
+<script>
+var zIndexCounter = 1;
+var iframeStates = {};
+
+
+  var iframeName = document.getElementById("iframeNameInput").value;
+    var activeApp = null;
+
+    function setActiveIcon(icon) {
+      if (icon && icon.dataset) {
+        if (activeApp === icon) {
+          toggleIframeSize(icon);
+        } else {
+          activeApp = icon;
+        }
+      }
+    }
+
+function toggleIframeSize(icon) {
+  if (icon && icon.dataset) {
+    // Find the iframe corresponding to the clicked icon
+    var iframeName = icon.dataset.iframeName;
+    var iframes = document.querySelectorAll(".iframe-wrapper");
+    for (var i = 0; i < iframes.length; i++) {
+      if (iframes[i].dataset && iframes[i].dataset.iframeName === iframeName) {
+        var isScalingUp = iframes[i].classList.contains("scaling-up");
+        if (isScalingUp) {
+          iframes[i].classList.remove("scaling-up");
+        } else {
+          iframes[i].classList.add("scaling-up");
+        }
+        break;
+      }
+    }
+  }
+}
+
+
+    function minimizeIframe(icon) {
+      if (icon && icon.dataset) {
+        // Find the iframe corresponding to the clicked icon
+        var iframeName = icon.dataset.iframeName;
+        var iframes = document.querySelectorAll(".iframe-wrapper");
+        for (var i = 0; i < iframes.length; i++) {
+          if (iframes[i].dataset && iframes[i].dataset.iframeName === iframeName) {
+            iframes[i].classList.remove("scaling-up");
+            iframes[i].classList.add("minimizeiframe");
+            break;
+          }
+        }
+      }
+    }
+
+function toggleIframeSizeBasedOnState(iframe) {
+  if (iframe && iframe.dataset) {
+    var iframeName = iframe.dataset.iframeName;
+    var currentState = iframeStates[iframeName] || { scalingUp: true };
+
+    if (currentState.scalingUp) {
+      iframe.classList.remove("scaling-up");
+      iframe.classList.add("minimizeiframe");
+      document.getElementById("taskbar").classList.remove('taskbar-fullscreen');
+    } else {
+      iframe.classList.add("scaling-up");
+      iframe.classList.remove("minimizeiframe");
+    }
+
+    // Update the state
+    iframeStates[iframeName] = { scalingUp: !currentState.scalingUp };
+  }
+}
+
+    
+
+function createIframe() {
+    var audio = new Audio('./audio/open.mp3');
+    audio.play();
+    replaceCharacters();
+    var iframeName = document.getElementById("iframeNameInput").value;
+    var existingIframe = document.querySelector(`.iframe-wrapper[data-iframe-name="${iframeName}"]`);
+
+    // Remove from direct li element
+    var directTaskbarButton = document.querySelector(`li[data-id="${iframeName}"]`);
+    if (directTaskbarButton) {
+        directTaskbarButton.classList.add("activeoval");
+    }
+
+    // Remove from taskbar button inside .app-container
+    var taskbarButton = document.querySelector(`.app-container[data-iframe-name="${iframeName}"] .taskbar-button`);
+    if (taskbarButton) {
+        taskbarButton.classList.add("activeoval");
+    }
+
+    if (existingIframe) {
+        // If iframe with the same name already exists, toggle its size using the stored state
+        toggleIframeSizeBasedOnState(existingIframe);
+        existingIframe.style.zIndex = zIndexCounter++; // Move the existing iframe to the top
+    } else {
+        // Otherwise, create a new iframe
+        var iframeWrapper = document.createElement("div");
+        iframeWrapper.classList.add("iframe-wrapper");
+        iframeWrapper.dataset.iframeName = iframeName;
+        iframeWrapper.style.zIndex = zIndexCounter++;
+        iframeContainer.appendChild(iframeWrapper);
+
+        iframeStates[iframeName] = { scalingUp: true };
+
+        var iframeDragBar = document.createElement("div");
+        iframeDragBar.classList.add("iframe-drag-bar");
+        iframeWrapper.appendChild(iframeDragBar);
+
+        var iframeIcon = document.getElementById("iframeIconInput").value;
+
+        if (iframeIcon) {
+            var iframeIconElement = document.createElement("img");
+            iframeIconElement.classList.add("iframe-icon");
+            iframeIconElement.src = iframeIcon;
+            iframeWrapper.appendChild(iframeIconElement);
+        }
+
+        setTimeout(function() {
+            iframeWrapper.classList.add("scaling-up");
+        }, 10);
+
+        var iframeOptionBar = document.createElement("div");
+        iframeOptionBar.classList.add("iframe-option-bar");
+        iframeOptionBar.setAttribute('onclick', "removeIframeWrapper(this); document.getElementById('taskbar').classList.remove('taskbar-fullscreen');");
+        iframeOptionBar.setAttribute('tabindex', "0");
+        iframeWrapper.appendChild(iframeOptionBar);
+
+        var minimizeButton = document.createElement("div");
+        minimizeButton.classList.add("minimize-button");
+        minimizeButton.setAttribute('tabindex', "0");
+        minimizeButton.addEventListener('mouseout', () => {
+            minimizeButton.blur();
+        });
+
+        minimizeButton.addEventListener('click', () => {
+            minimizeButton.focus();
+
+            // Just minimize the existing iframe
+            iframeWrapper.classList.remove("scaling-up");
+            iframeWrapper.classList.add("minimizeiframe");
+
+            document.getElementById("taskbar").classList.remove('taskbar-fullscreen');
+        });
+
+
+        iframeWrapper.appendChild(minimizeButton);
+
+        var fullscreenButton = document.createElement("div");
+        fullscreenButton.classList.add("fullscreen-button");
+        fullscreenButton.setAttribute('tabindex', "0");
+        fullscreenButton.addEventListener('mouseout', () => {
+            fullscreenButton.blur(); 
+        });
+
+        fullscreenButton.addEventListener('click', () => {
+            fullscreenButton.focus();
+        });
+        fullscreenButton.setAttribute("onclick", "toggleFullscreen(this);");
+        iframeWrapper.appendChild(fullscreenButton);
+
+        var div = document.createElement("div");
+        document.body.appendChild(div);
+        div.innerHTML = `
+          <div style="z-index:9999999999999;" onclick="removeIframeWrapper(this);"></div>
+        `;
+        document.body.appendChild(div);
+
+        var htmlContent = document.getElementById("htmlContentInput").value;
+        var cssContent = document.getElementById("cssContentInput").value;
+        var jsContent = document.getElementById("jsContentInput").value;
+
+        // Create a container div to hold the custom content
+        var contentContainer = document.createElement("div");
+        contentContainer.style.width = "100%";
+        contentContainer.style.height = "100%";
+        contentContainer.classList.add("app-content");
+        iframeWrapper.appendChild(contentContainer);
+
+        // Inject HTML content
+        contentContainer.innerHTML = htmlContent;
+
+        // Apply CSS content
+        var styleElement = document.createElement("style");
+        styleElement.innerHTML = cssContent;
+        document.head.appendChild(styleElement);
+
+        // Apply JavaScript content
+        var scriptElement = document.createElement("script");
+        scriptElement.innerHTML = jsContent;
+        document.body.appendChild(scriptElement);
+
+        var xDimension = document.getElementById("iframex").value;
+        var yDimension = document.getElementById("iframey").value;
+        var topDistance = document.getElementById("iframetop").value;
+        var bottomDistance = document.getElementById("iframebottom").value;
+        var leftDistance = document.getElementById("iframeleft").value;
+        var rightDistance = document.getElementById("iframeright").value;
+
+        if (xDimension && yDimension) {
+            iframeWrapper.style.width = xDimension + "vw";
+            iframeWrapper.style.height = yDimension + "vh";
+            document.getElementById('iframex').value = ''; 
+            document.getElementById('iframey').value = '';
+        }
+
+        if (topDistance) {
+            iframeWrapper.style.top = topDistance + "%";
+            document.getElementById('iframetop').value = ' ';
+        }
+
+        if (bottomDistance) {
+            iframeWrapper.style.bottom = bottomDistance + "%";
+            document.getElementById('iframebottom').value = ' ';
+        }
+
+        if (leftDistance) {
+            iframeWrapper.style.left = leftDistance + "%";
+            document.getElementById('iframeleft').value = ' ';
+        }
+
+        if (rightDistance) {
+            iframeWrapper.style.right = rightDistance + "%";
+            document.getElementById('iframeright').value = ' ';
+        }
+
+        $(iframeWrapper).resizable({
+            handles: "e, s, w, se",
+            resize: function(event, ui) {
+                var newWidth = ui.size.width;
+                var newHeight = ui.size.height;
+                contentContainer.style.width = "100%"; // Set width to 100% to fill the container
+                contentContainer.style.height = "100%"; // Set height to 100% to fill the container
+            },
+            stop: function(event, ui) {
+                var wrapperWidth = $(iframeWrapper).width();
+                var wrapperHeight = $(iframeWrapper).height();
+                contentContainer.style.width = wrapperWidth + "px"; // Set width explicitly to match container size
+                contentContainer.style.height = wrapperHeight + "px"; // Set height explicitly to match container size
+            }
+        });
+
+        makeDraggable(iframeWrapper);
+
+        // Check if the iframeName is not "Appstore"
+        if (iframeName !== "Appstore") {
+            // Check if an app-container with the same iframeName already exists
+            var savedIframesTaskbar = document.getElementById("savedIframesTaskbar");
+            if (savedIframesTaskbar) {
+                var existingAppContainer = savedIframesTaskbar.querySelector(`.app-container[data-iframe-name="${iframeName}"]`);
+                if (!existingAppContainer) {
+                    // Create and append the temp-app-container element if it doesn't already exist
+                    var appContainer = document.createElement("div");
+                    appContainer.classList.add("temp-app-container");
+                    appContainer.dataset.iframeName = iframeName;
+
+                    var taskbarButton = document.createElement("a");
+                    taskbarButton.onclick = function() {
+                        setActiveIcon(this);
+                        loadAppData(iframeName);
+                        createIframe();
+                        this.blur();
+                    };
+                    taskbarButton.tabIndex = 0;
+                    taskbarButton.setAttribute("class", "taskbar-button activeoval");
+
+
+                    var img = document.createElement("img");
+                    img.src = iframeIcon;
+                    taskbarButton.appendChild(img);
+
+                    appContainer.appendChild(taskbarButton);
+                    savedIframesTaskbar.appendChild(appContainer);
+                }
+            }
+        }
+    }
+}
+
+function makeDraggable(element) {
+  var isDragging = false;
+  var mouseOffset = { x: 0, y: 0 };
+
+  element.addEventListener("mousedown", function(event) {
+    if (event.target.classList.contains("iframe-drag-bar")) {
+      // Bring the clicked iframe to the top
+      var iframes = document.querySelectorAll(".iframe-wrapper");
+      var clickedIframe = event.target.closest(".iframe-wrapper");
+      for (var i = 0; i < iframes.length; i++) {
+        iframes[i].style.zIndex = 1; // Move all iframes to the background
+      }
+      clickedIframe.style.zIndex = 2; // Bring the clicked iframe to the top
+
+      isDragging = true;
+      mouseOffset.x = event.clientX - element.offsetLeft;
+      mouseOffset.y = event.clientY - element.offsetTop;
+    }
+  });
+
+  document.addEventListener("mousemove", function(event) {
+    if (isDragging) {
+      element.style.left = event.clientX - mouseOffset.x + "px";
+      element.style.top = event.clientY - mouseOffset.y + "px";
+    }
+  });
+
+  document.addEventListener("mouseup", function() {
+    isDragging = false;
+    document.body.style.cursor = "url('assets/cursors/Normal.cur'), auto";
+  });
+}
+
+function removeIframeWrapper(element) {
+    var audio = new Audio('./audio/close.mp3');
+    audio.play();
+    slowmode();
+    addSlowTaskbarStyle();
+    
+    var iframeWrapper = element.parentNode;
+    iframeWrapper.style.transition = "transform 0.3s ease"; // Add a smooth transition for scaling-out
+    iframeWrapper.style.transform = "scale(0)"; // Scale-out to 80% of its original size
+
+    // Remove the activeoval class from the corresponding taskbar button (if exists)
+    var iframeName = iframeWrapper.dataset.iframeName;
+
+    // Remove from taskbar button inside .app-container
+    var taskbarButton = document.querySelector(`.app-container[data-iframe-name="${iframeName}"] .taskbar-button`);
+    if (taskbarButton) {
+        taskbarButton.classList.remove("activeoval");
+    }
+
+    // Remove from direct li element
+    var directTaskbarButton = document.querySelector(`li[data-id="${iframeName}"]`);
+    if (directTaskbarButton) {
+        directTaskbarButton.classList.remove("activeoval");
+    }
+
+    // Remove the temp-app-container with the same iframeName from savedIframesTaskbar
+    var savedIframesTaskbar = document.getElementById("savedIframesTaskbar");
+    if (savedIframesTaskbar) {
+        var tempAppContainer = savedIframesTaskbar.querySelector(`.temp-app-container[data-iframe-name="${iframeName}"]`);
+        if (tempAppContainer) {
+            tempAppContainer.remove();
+        }
+    }
+
+    // Delay the removal of the iframe wrapper by 300 milliseconds (adjust as needed)
+    setTimeout(function() {
+        iframeWrapper.remove();
+    }, 300);
+}
+
+
+
+
+function createFullscreenIframe() {
+    replaceCharacters();
+    createIframe();
+    var iframeName = document.getElementById("iframeNameInput").value;
+    var iframeWrapper = document.querySelector(`.iframe-wrapper[data-iframe-name="${iframeName}"]`);
+
+    if (iframeWrapper) {
+        toggleFullscreen(iframeWrapper.querySelector(".fullscreen-button"));
+    }
+
+    // Update the onclick attribute of temp-app-container elements
+    var savedIframesTaskbar = document.getElementById("savedIframesTaskbar");
+    if (savedIframesTaskbar) {
+        var tempAppContainers = savedIframesTaskbar.querySelectorAll(`.temp-app-container[data-iframe-name="${iframeName}"]`);
+        tempAppContainers.forEach(function(tempAppContainer) {
+            var taskbarButton = tempAppContainer.querySelector(".taskbar-button");
+            if (taskbarButton) {
+                taskbarButton.setAttribute("onclick", `setActiveIcon(this); loadAppData('${iframeName}'); createFullscreenIframe(); this.blur();`);
+            }
+        });
+    }
+}
+
+</script>
+<script>
+function replaceCharacters() {
+    const inputBox = document.getElementById('htmlContentInput');
+    const inputValue = inputBox.value;
+
+    const replacements = {
+        '*oosqu*': '"',
+        '*oosap*': "'",
+        '*oosfsl*': '/',
+        '*oosbsl*': '\\',
+        '*oosobr*': '[',
+        '*ooscbr*': ']',
+        '*oosbrco*': '{',
+        '*oosbrcc*': '}',
+        '*oospao*': '(',
+        '*oospac*': ')',
+        '*ooseq*': '=',
+        '*oosti*': '`',
+        '*ooscom*': ',',
+        '*oosscol*': ';',
+        '*ooscol*': ':',
+        '*ooslin*': '|',
+        '*oosango*': '<',
+        '*oosangc*': '>'
+    };
+
+    // Escape regex metacharacters in keys
+    const escapedKeys = Object.keys(replacements).map(key =>
+        key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+    );
+
+    // Build ONE safe regex
+    const pattern = new RegExp(escapedKeys.join('|'), 'g');
+
+    // Replace using a callback
+    inputBox.value = inputValue.replace(pattern, match => replacements[match]);
+}
+
+</script>
+
+<!-- END APP LAUNCHING CODE -->
+
+<!-- START OvalOS BOOT -->
+<style>
+.startuplogo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000000000000000;
+    animation-duration: 0.6s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    transition: 0.3s ease;
+  background-image: url('./images/light.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed; 
+  background-size: 100% 100%;
+	pointer-events: none;
+}
+
+.bla {
+    transition: 0.3s ease;
+}
+
+.byebye {
+opacity: 0;
+pointer-events: none;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image {
+    position: absolute;
+    width: auto;
+    height: 100%;
+    z-index: 0;
+    animation-duration: 0.6s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    opacity: 0;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image-bluedot {
+    animation-name: image6;
+    animation-delay: 1s;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image-basicoval {
+    animation-name: image7;
+    animation-delay: 1s;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image-cooloval {
+    animation-name: image8;
+    animation-delay: 0.5s;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image-coolovalpulse {
+    animation: pulse1 1s 1.8s infinite;
+    animation-delay: 1.1s;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image-greendot {
+    animation-name: image9;
+    animation-delay: 0.9s;
+    transition: 0.3s ease;
+}
+
+.fullscreen-image-name {
+    animation-name: image18;
+    animation-delay: 0.9s;
+    transition: 0.3s ease;
+}
+
+@keyframes pulse1 {
+    0%, 100% {
+        transform: scale(1.01);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(0.97);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes pulse2 {
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    0%, 100% {
+        transform: scale(0.98);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image1 {
+    0% {
+        transform: scale(0) translate(0, 100%);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image2 {
+    0% {
+        transform: scale(0) translate(0, 100%);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    99.9% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image3 {
+    0% {
+        transform: scale(0) translate(0, 100%);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    99.9% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image4 {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image5 {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image6 {
+    0% {
+        transform: scale(0) translate(-100%, -50%);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image7 {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image8 {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    99.999% {
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(5px);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+        filter: blur(0);
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image18 {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+@keyframes image9 {
+    0% {
+        transform: scale(0) translate(100%, 50%);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+    }
+    transition: 0.3s ease;
+}
+
+.blur {
+    filter: saturate(200%) blur(100px);
+    transform: scale(1.8);
+    transition: 0.7s ease;
+}
+
+@keyframes blurEffect {
+    0% {
+        filter: blur(0);
+    }
+    100% {
+        filter: blur(5px);
+    }
+    transition: 0.3s ease;
+}
+
+</style>
+<div class="startuplogo">
+    <img class="bla fullscreen-image fullscreen-image-bluedot" src="./images/bluedot.png" alt="Image 6">
+    <img class="bla fullscreen-image fullscreen-image-basicoval" src="./images/classicoval.png" alt="Image 7">
+    <img class="bla fullscreen-image fullscreen-image-cooloval" src="./images/cooloval.png" alt="Image 8">
+    <img class="bla fullscreen-image fullscreen-image-coolovalpulse" src="./images/cooloval.png" alt="pulse 1">
+    <img class="bla fullscreen-image fullscreen-image-greendot" src="./images/greendot.png" alt="Image 9">
+    <img class="bla fullscreen-image fullscreen-image-name" src="./images/logo.png" alt="Image 5">
+</div>
+<script>
+    setTimeout(function() {
+        var images = document.querySelectorAll('.startuplogo');
+        images.forEach(function(image) {
+            image.classList.add('blur');
+        });
+    }, 5000);
+    setTimeout(function() {
+        var images = document.querySelectorAll('.startuplogo');
+        images.forEach(function(image) {
+            image.classList.add('byebye');
+        });
+    }, 5300);
+</script>
+<!-- END OvalOS BOOT -->
+
+<!-- START OvalOS SECURITY -->
+<div>
+  <style>
+    .toggle-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0;
+    }
+
+
+    .toggle-container {
+      background: #eee;
+      padding: 1rem;
+      border-radius: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      align-items: center;
+      width: 140px;
+    }
+
+    .toggle-label {
+      margin-top: 0.5rem;
+      text-align: center;
+      color: #444;
+      font-weight: 500;
+    }
+
+    /* Switch core style */
+    .toggle-container input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: relative;
+      display: inline-block;
+      margin-left: 25px;
+      width: 50px;
+      height: 28px;
+      background-color: #ddd;
+      border-radius: 50px;
+      transition: 0.4s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      top: 3px;
+      background-color: #8bc34a;
+      border-radius: 50%;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #fff;
+    }
+
+    input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+
+  </style>
+    <style>
+        /* Styles for the popup */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+pointer-events: none;
+opacity: 0%;
+transition:.3s;
+transform: scale(1.3);
+        }
+        .popup.show {
+pointer-events:auto;
+opacity: 100%;
+transition:.3s;
+transform: scale(1);
+        }
+        .popup-content {
+            padding: 20px;
+	    width: 60%;
+            border-radius: 30px;
+	          background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    transition:.3s;
+        }
+
+        .popup-contentdark {
+            padding: 20px;
+	    width: 60%;
+            border-radius: 30px;
+	          background: rgba(17, 17, 17, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    transition:.3s;
+        }
+
+        .incorrect {
+            border-radius: 20px;
+	          background: rgba(227, 159, 159, .8);
+transform: scale(1.2);
+    transition:.3s;
+        }
+
+@font-face {
+  font-family: SF Pro Display;
+  src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+#main-image2 {
+height:150px;
+border-radius: 100px;
+}
+
+.center {
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+div {
+  font-family: SF Pro Display;
+}
+
+h2 {
+  font-family: SF Pro Display;
+}
+
+ .youcanttouchthis {
+opacity: 50%;
+margin-bottom: -10px;
+pointer-events: none;
+    transition:.3s;
+  }
+
+ .logininput {
+font-family: SF Pro Display;
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #3D3D3D;
+  background: #d1dbe0;
+  border: none;
+  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width:20%;
+  height:30px;
+  margin-left: 5px;
+    box-sizing:border-box;
+    transition:.3s;
+  }
+
+  .logininput:hover{
+background: #bfb6aa;
+}
+  
+  .logininput:focus{
+    border-color:#42ffc0;
+background: #bfb6aa;
+  }
+
+ input[type=name] {
+font-family: SF Pro Display Semi-Bold;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  text-align: center;
+  height:30px;
+font-size: 25px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+pointer-events: none;
+color: #292929;
+    box-sizing:border-box;
+    transition: .3s;
+  }
+
+.logonbutton {
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #3D3D3D;
+  margin-left: 5px;
+  height:30px;
+  background: #d1dbe0;
+cursor:pointer;
+    transition:.3s;
+}
+
+.logonbutton:hover {
+    border-color:#42ffc0;
+  background: #bfb6aa;
+    transition:.3s;
+}
+
+.logonbutton:focus {
+transform: scale(.8);
+cursor: wait;
+    transition:.3s;
+}
+
+.restartbutton {
+margin-top: 100px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #3D3D3D;
+  height:30px;
+  background: #e8e8e8;
+  text-align: center;
+font-family: SF Pro Display Semi-Bold;
+display: flex;
+  justify-content: center;
+  align-items: center;
+    transition:.3s;
+cursor:pointer;
+}
+
+.restartbutton:hover {
+transform: scale(1.1);
+    transition:.3s;
+}
+
+.restartbutton:focus {
+transform: scale(.9);
+cursor: wait;
+    transition:.3s;
+}
+
+.restartbutton a {
+pointer-events: none;
+}
+    </style>
+</head>
+</div>
+        </div>
+    </div>
+</div>
+
+<div>
+
+<!-- END OvalOS SECURITY -->
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cool Name</title>
+  <style>
+    /* Reset default styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+@font-face {
+  font-family: SF Pro Display;
+  src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+div {
+  font-family: SF Pro Display;
+}
+
+    body {
+      background-image: url('');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+    user-select: none; /* Standard syntax */
+    -webkit-user-select: none; /* Chrome, Safari, Opera */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    }
+
+
+    /* Taskbar styles */
+    .taskbar {
+      position: fixed;
+      bottom: 2%;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 60%;
+      height: 50px;
+      background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 200px;
+      transition: 0.2s;
+      z-index: 9999;
+    }
+
+    .taskbar-fullscreen {
+      position: fixed;
+filter: saturate(200%) blur(30px);
+      left: 48%;
+      transform: translateX(-50%);
+      max-width: 60%;
+scale:.8;
+      background: rgba(238, 238, 238, .8);
+      backdrop-filter: opacity(0) saturate(180%) blur(3px);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 200px;
+      z-index: 9999;
+      opacity: .5;
+      transition: 0.2s;
+    }
+
+    .taskbar-fullscreen aside {
+      width: 100%;
+      transition: 0.2s;
+}
+
+    .taskbar-fullscreen:hover aside {
+      width: 0;
+      transition: 0.2s;
+}
+
+    .taskbar-fullscreen div img {
+      transition: 0.2s;
+}
+
+    .taskbar-fullscreen:hover div img {
+      transition: 0.2s;
+}
+
+
+    .taskbar-fullscreen:hover {
+      position: fixed;
+filter: saturate()  blur(0rem);
+scale:1;
+      bottom: 2%;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 60%;
+      height: 50px;
+      background: rgba(238, 238, 238, .8);
+      backdrop-filter: saturate(180%) blur(14px);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 200px;
+      transition: 0.2s;
+      opacity: 1;
+      z-index: 9999;
+    }
+
+    .apps {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      justify-content: flex-start;
+      align-items: center;
+      flex: 1;
+      border-radius: 200px;
+      scroll-behavior: smooth;
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .6));
+      white-space: nowrap;
+    }
+
+    .appsdark {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      justify-content: flex-start;
+      align-items: center;
+      flex: 1;
+      border-radius: 200px;
+      scroll-behavior: smooth;
+filter: drop-shadow(0 3mm 4mm rgb(224, 224, 224, .4));
+      white-space: nowrap;
+    }
+
+        .appsdark::-webkit-scrollbar {
+            display: none;
+        }
+
+.appsdark {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+}
+
+.taskbar-button:not(:focus):not(:hover) {
+      width: 50px;
+      height: 50px;
+      margin-right: 5px;
+      display: flex;
+      align-items: center;
+      transition: 0.3s ease;
+}
+
+
+.activeoval {
+filter: saturate(200%) blur(4px) drop-shadow(0 3mm 4mm rgb(31, 31, 31, .1));
+      transform: scale(0.9);
+}
+
+.activeoval:hover {
+      transition: 0.3s ease;
+filter: saturate(100%) blur(0px);
+      transform: scale(0.8);
+}
+
+
+    .taskbar-button {
+      /* Adjust the width based on your needs */
+      width: 50px;
+      height: 50px;
+      margin-right: 5px;
+      display: flex;
+      align-items: center;
+      transition: 0.3s ease;
+cursor: url('assets/cursors/Link.cur'), pointer;
+    }
+
+    .apps::-webkit-scrollbar {
+      display: none;
+    }
+
+    .taskbar-button:hover {
+      transform: scale(1.2);
+    }
+
+    .taskbar-button:focus {
+      transform: scale(0.8);
+    }
+
+    .taskbar-button img {
+      width: 34px;
+      height: 34px;
+      margin-left: 15px;
+      border-radius: 100%;
+      cursor: url('assets/cursors/Link.cur'), pointer;
+    }
+
+    .taskbar-button:last-child {
+      right: 30px;
+    }
+
+.center {
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+    .taskbar-startmenu {
+      position: fixed;
+      z-index: 9998;
+      bottom: 9%;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      transform-origin: bottom center;
+      width: 100%;
+      height: 300px;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+      display: none;
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+    }
+
+    .taskbar-startbutton {
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+      border: 5px solid #1c1c1c;
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, 1));
+      transition: 0.15s ease;
+    }
+
+    .taskbar-startbuttondark {
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+filter: drop-shadow(0 3mm 4mm rgb(224, 224, 224, 1));
+      border: 5px solid #e3e3e3;
+      transition: 0.3s ease;
+    }
+
+    .taskbar-startbuttondark:hover {
+      transform: scale(1.2);
+      background-color: gray;
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+filter: drop-shadow(0 3mm 4mm rgb(224, 224, 224, 1));
+      align-items: center;
+      border-radius: 200px;
+      border: 5px solid #e3e3e3;
+    }
+
+    .taskbar-startbuttondark:focus {
+      transform: scale(.7);
+      background-color: #e3e3e3;
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+      border: 5px solid #e3e3e3;
+    }
+
+    .taskbar-startbuttonplaceholder {
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+    }
+
+    .taskbar-widget {
+        width: 40%;
+        margin-left: 30%;
+        margin-top: 10px;
+        height: 73%;
+
+        display: flex;
+        flex-direction: column; /* IMPORTANT */
+        align-items: center;
+        justify-content: flex-start; /* NOT center */
+
+        border-radius: 30px;
+        background: rgba(238, 238, 238, .8);
+        backdrop-filter: saturate(180%) blur(14px);
+        filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+        transition: 0.3s ease;
+
+        overflow: hidden; /* HARD CLIP */
+    }
+
+
+.widgetdragging {
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+transform: scale(1.1);
+pointer-events: none;
+transition: scale 0.3s;
+}
+
+    .taskbar-search {
+      width: 50px;
+margin-left: 10px;
+      height: 50px;
+      border: none;
+      color: #1c1c1c;
+      font-size: 20px;
+      cursor: pointer;
+      align-items: center;
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+      background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    .taskbar-search:hover {
+      transform: scale(1.1);
+      background: rgba(138, 166, 171, .7);
+      border: none;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+    }
+
+    .taskbar-search:focus {
+      transform: scale(0.9);
+      font-size: 16px;
+    }
+
+   .taskbar-search img {
+width: 40px;
+}
+
+    .taskbar-lock {
+      width: 50px;
+margin-left: 10px;
+      height: 50px;
+      border: none;
+      color: #1c1c1c;
+      font-size: 20px;
+      cursor: pointer;
+      align-items: center;
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+      background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    .taskbar-lock:hover {
+      transform: scale(1.1);
+      background: rgba(138, 166, 171, .7);
+      border: none;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+    }
+
+    .taskbar-lock:focus {
+      transform: scale(0.9);
+      font-size: 16px;
+    }
+
+   .taskbar-lock img {
+width: 40px;
+}
+
+    .taskbar-darkmode {
+      width: 50px;
+margin-left: 10px;
+      height: 50px;
+      border: none;
+      color: #1c1c1c;
+      font-size: 20px;
+      cursor: pointer;
+      align-items: center;
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+      background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    .taskbar-darkmode:hover {
+      transform: scale(1.1);
+      background: rgba(138, 166, 171, .7);
+      border: none;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+    }
+
+    .taskbar-darkmode:focus {
+      transform: scale(0.9);
+      font-size: 16px;
+    }
+
+   .taskbar-darkmode img {
+width: 40px;
+}
+
+      .taskbar-message {
+        width: 50px;
+        height: 50px;
+        margin-left: 10px;
+        position: relative;
+        cursor: pointer;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 200px;
+        transition:
+          width 0.35s ease,
+          transform 0.3s ease,
+          background 0.3s ease;
+
+        background: rgba(238, 238, 238, .8);
+        filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+        backdrop-filter: saturate(180%) blur(14px);
+        overflow: hidden;
+      }
+
+      .taskbar-message:hover {
+        transform: scale(1.1);
+        background: rgba(138, 166, 171, .7);
+      }
+
+      /* EXPAND */
+      .taskbar-message.expanded {
+        width: 280px;
+        justify-content: flex-start;
+        padding-left: 10px;
+      }
+
+        .taskbar-message.expanded:hover {
+            transform: scale(1);
+            background: rgba(138, 166, 171, .7);
+        }
+
+      /* ICON — NEVER MOVES, NEVER HIDES */
+      .taskbar-message img {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      /* INPUT WRAPPER (does not affect icon layout) */
+      .message-input-wrap {
+        position: absolute;
+        left: 60px;
+        right: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      /* INPUT VISIBLE */
+      .taskbar-message.expanded .message-input-wrap {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .message-input-wrap input {
+        width: 100%;
+        height: 32px;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 16px;
+      }
+
+
+
+    .taskbar-profilephoto {
+      width: 50px;
+left: 0px;
+margin-left: 6px;
+      height: 50px;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      align-items: center;
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+    }
+
+   .taskbar-profilephoto img {
+width: 40px;
+border-radius: 100%;
+}
+
+    .taskbar-power {
+      width: 50px;
+margin-left: 0%;
+      height: 50px;
+      border: none;
+      color: #1c1c1c;
+      font-size: 20px;
+      cursor: pointer;
+      align-items: center;
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+      background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    .taskbar-power:hover {
+      transform: scale(1.1);
+      background: rgba(138, 166, 171, .7);
+      border: none;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+    }
+
+   .taskbar-power img {
+width: 40px;
+}
+
+    .taskbar-power:focus {
+      transform: scale(0.9);
+      font-size: 16px;
+    }
+
+    .taskbar-user {
+      width: 20%;
+margin-left: 10px;
+      height: 50px;
+      border: none;
+      color: #1c1c1c;
+      font-size: 18px;
+      cursor: pointer;
+      display:flex;
+      align-items: center;
+      border-radius: 200px;
+      transition: 0.3s ease;
+      background: rgba(238, 238, 238, .8);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    }
+
+    .taskbar-user:hover {
+      transform: scale(1.03);
+      background: rgba(138, 166, 171, .7);
+      border: none;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+    }
+
+    .taskbar-user:focus {
+      transform: scale(1.03);
+      background: rgba(138, 166, 171, .7);
+      border: none;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+      transform: scale(0.97);
+    }
+
+#nightlight {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events:none;
+    height: 100%;
+    background: url('./images/nightlight.png') no-repeat center center fixed; /* Replace 'your-image-url.jpg' with the path to your image */
+    background-size: cover; /* Ensure the background image covers the entire overlay */
+    display: flex;
+    display:none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999999999999999999999999999999999999999999999999; /* Ensure overlay is on top */
+}
+
+    .spacer {
+      width: 15px;
+      height: 30px;
+      opacity: 0%;
+      transition: 0.3s ease;
+    }
+
+    .taskbar-startbutton:hover {
+      transform: scale(1.2);
+      background-color: gray;
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, 1));
+      align-items: center;
+      border-radius: 200px;
+      border: 5px solid #1c1c1c;
+    }
+
+    .taskbar-startbutton:focus {
+      transform: scale(.7);
+      background-color: #1c1c1c;
+      width: 30px;
+      height: 30px;
+      border: none;
+      color: white;
+      font-size: 16px;
+      margin-right: 0px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-radius: 200px;
+      border: 5px solid #1c1c1c;
+    }
+        .context-menu {
+            display: none;
+            position: absolute;
+	    font-family: SF Pro Display;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 8px 0;
+	    background: rgba(255, 255, 255, .8);
+      	    backdrop-filter: saturate(180%) blur(14px);
+            z-index: 999999999999999999999999999;
+      transition: 0.3s ease;
+        }
+        .context-menu button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 8px 16px;
+            width: 100%;
+            text-align: left;
+            border-radius: 5px;
+	    font-family: SF Pro Display Semi-Bold;
+      transition: 0.3s ease;
+        }
+        .context-menu button:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+	    background: rgba(255, 255, 255, .8);
+            border-radius: 20px;
+      transition: 0.3s ease;
+        }
+  </style>
+<style>
+   {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;
+}
+</style>
+<style>
+
+  .sortable-list {
+      list-style-type: none;
+      padding: 12px;
+      margin: 0;
+
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      width: 100%;
+      height: 100%;              /* IMPORTANT */
+      overflow-y: auto;          /* scrolling happens HERE */
+
+      box-sizing: border-box;
+  }
+
+
+        .sortable-item {
+            margin: 10px;
+	    padding: 10px;
+	    width: 73px;
+	    height: 73px;
+	    border-radius: 15px;
+            text-align: center;
+            position: relative;
+	    background: rgba(237, 237, 237, .6);
+      	    backdrop-filter: saturate(180%) blur(14px);
+	    transition: 0.3s ease;
+	    cursor: url('assets/cursors/Link.cur'), pointer;
+        }
+
+.sortable-item:hover {
+      transform: scale(1.1);
+  z-index: 2147483647; /* max safe z-index */
+      transition: 0.3s ease;
+}
+
+.sortable-item:focus {
+      transform: scale(.9);
+      transition: 0.3s ease;
+      filter: saturate(200%) blur(7px);
+}
+
+        .sortable-item img {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+        }
+
+.sortable-item p {
+    margin: 0;
+    font-size: 12px;
+    white-space: nowrap;
+    font-family: SF Pro Display Semi-Bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    .start-app-button {
+      /* Adjust the width based on your needs */
+      margin-top: -10px;
+      width: 50px;
+      height: 50px;
+      margin-right: 5px;
+      display: flex;
+      align-items: center;
+      transition: 0.3s ease;
+    }
+
+  #custom-image-input {
+    display: none;
+pointer-events: none;
+  }
+
+@font-face {
+  font-family: SF Pro Display Semi-Bold;
+  src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+@font-face {
+  font-family: SF Pro Display;
+  src: url(./font/pro/SF-Pro-Display-Regular.otf);
+}
+
+@font-face {
+  font-family: SF Pro Display Bold;
+  src: url(./font/pro/SF-Pro-Display-Bold.otf);
+}
+
+        input[type=namestart] {
+
+margin-left: 7%;
+            height: 40px;
+            padding: 10px;
+  font-family: SF Pro Display Semi-Bold;
+            font-size: 18px;
+            border: none;
+            outline: none;
+            background-color: transparent;
+	    text-align: center;
+            color: #333;
+            overflow: hidden; /* Hide the scrollbar */
+            resize: none; /* Disable resizing */
+        }
+
+</style>
+<style>
+    #widgetwrapper {
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        align-items: center;
+overflow-x: hidden;
+        justify-content: center;
+    }
+
+    #widgetcontainer {
+        position: relative;
+        width: 70%;
+        height: 30%;
+        border: 0px solid #ccc;
+    }
+
+    .widgetdraggable {
+        position: absolute;
+        border:0px solid #ccc;
+        border-radius: 30px;
+        padding: 10px;
+        cursor: grab;
+transition: scale 0.3s;
+    }
+
+   .widgetdraggable:focus {
+transform: scale(1.1);
+}
+
+    .widgetremovebutton {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        color: #fff;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        display: none; /* Hide by default */
+  background:rgba(255, 202, 128,.6);
+backdrop-filter: saturate(180%) blur(14px);
+transform: scale(1.2);
+    }
+
+.widgetremovebutton:focus {
+  background:rgba(255, 202, 128,.6);
+transform: scale(.8);
+}
+
+
+    .widgetdraggable.scaling {
+        animation: widgetscaleUpDown 1s infinite;
+    }
+
+    @keyframes widgetscaleUpDown {
+        0%, 100% {
+            transform: scale(1);
+        transition: 0.3s;
+        }
+        50% {
+            transform: scale(1.01);
+        transition: 0.3s;
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+        }
+    }
+</style>
+      <style>
+        .header {
+          display: flex;
+          position: fixed;
+          z-index: 3;
+          align-items: center;
+          padding: 10px 20px;
+          background: linear-gradient(to bottom right, black 0%, transparent 50%);
+        }
+
+
+
+
+        .logo img {
+          width: 200px;
+          height: auto;
+          display: block;
+          margin-right: 10px;
+        }
+
+        .say-container {
+          display: flex;
+          align-items: center;
+          margin-left: 50px;
+        }
+
+        .say-input input {
+          width: 500px;
+          padding: 20px 20px;
+          border-radius: 30px;
+          border: none;
+          font-size: 16px;
+          background: #b2c3cf;
+          color: #353a3d;
+          font-family: "Work Sans", sans-serif;
+          font-optical-sizing: auto;
+          font-weight: 500;
+          font-style: normal;
+          transition: .3s;
+        }
+
+        .say-input input:focus {
+          border-radius: 20px;
+          background-color: #9cb3e6;
+          outline: none;
+          transition: .3s;
+        }
+
+        .icon-btn {
+          background-color: #b2c3cf;
+          border: none;
+          cursor: pointer;
+          padding: 12px;
+          margin-left: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          width: 58px;
+          height: 58px;
+          transition: background-color 0.2s;
+          transition: .3s;
+          z-index: 999;
+        }
+
+        .icon-btn:hover {
+          background-color: #9cb3e6;
+          border-radius: 40%;
+          transition: .3s;
+        }
+
+        .icon-btn:active {
+          background-color: #b2c3cf;
+          border-radius: 30%;
+          scale: 1.1;
+          transition: .3s;
+        }
+
+        .icon-btn img {
+          width: 24px;
+          height: 24px;
+        }
+
+        /* Modal styles */
+        #settingsModal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: saturate(100%) blur(14px);
+          align-items: center;
+          z-index: 9999999999999999999999999999999999999999999;
+          justify-content: center;
+        }
+
+        .modal {
+          border-radius: 40px;
+          padding: 40px;
+          width: 500px;
+          position: relative;
+        }
+
+        .modal .close {
+          position: absolute;
+          top: 16px;
+          right: 20px;
+          font-size: 24px;
+          cursor: pointer;
+        }
+
+        .modal label {
+          font-weight: bold;
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        .modal input[type="text"] {
+          width: 100%;
+          padding: 12px;
+          border-radius: 30px;
+          border: none;
+          background-color: #ccc;
+          margin-bottom: 20px;
+          font-size: 16px;
+          font-family: 'Nunito Sans', sans-serif;
+        }
+
+        .modal button {
+          width: 150px;
+          padding: 10px;
+          border-radius: 20px;
+          border: none;
+          background-color: #f0f0f0;
+          box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+          font-family: 'Nunito Sans', sans-serif;
+          font-size: 16px;
+          cursor: pointer;
+          display: block;
+          transition: 0.15s ease;
+          margin: 20px auto 0;
+        }
+
+        .modal button:active {
+          transform: scale(0.9);
+          transition: 0.15s ease;
+          box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        
+      </style>
+      <!-- Settings Modal -->
+      <div id="settingsModal">
+        <div class="modal">
+          <label style="display:none;" for="scriptUrl">Script URL:</label>
+          <input style="display:none;"
+            value="https://script.google.com/macros/s/AKfycbwm1M3hiUKFhUy8VaDKTQSeqW0KO32NeFZ5oz3BYduwsikdZ4gIHPLuqJTkclhs9fYI/exec"
+            type="text" id="scriptUrl" placeholder="https://.../exec">
+
+          <label for="idInput">OOS ID:</label>
+          <input readonly type="text" id="idInput">
+
+          <label for="colB">Name:</label>
+          <input type="text" id="colB">
+
+          <label for="colH">Group:</label>
+          <input type="text" id="colH">
+
+          <!-- Hidden fields for other columns -->
+          <input style="display:none" id="colC">
+          <input style="display:none" id="colD">
+          <input style="display:none" id="colE">
+          <input style="display:none" id="colF">
+          <input style="display:none" id="colG">
+          <input style="display:none" id="colI" placeholder="Column I Data">
+          <div style="" id="controls">
+            <button style="display:none" id="goBtn">Start Watching dingus</button>
+            <button style="display:none" onclick="startWatching()">gopls</button>
+
+            <!-- Master alerts toggle (persisted) -->
+
+
+            <!-- Toast-only toggle (off by default) -->
+            <label style="display:none">
+              <input type="checkbox" id="toastToggle" />
+              Toasts On
+            </label>
+          </div>
+          <div class="toggle-group">
+
+            <label class="toggle-container">
+              <input type="checkbox" id="masterToggle" />
+              <span class="slider"></span>
+              <div class="toggle-label">Notifications</div>
+            </label>
+            <label class="toggle-container">
+              <input type="checkbox" id="potatoToggle" />
+              <span class="slider"></span>
+              <div class="toggle-label">Potato</div>
+            </label>
+          </div>
+           <audio style="display:none" src="./oosstartup.mp3" alt="" autoplay="autoplay"></audio>
+          <button style="display:none" id="loadBtn">Load Data</button>
+          <style>
+            .button-container {
+              display: inline-flex;
+              gap: 10px;
+            }
+
+            .center-wrapper {
+              display: flex;
+              justify-content: center;
+              margin-top: 5px; /* optional vertical spacing */
+            }
+          </style>
+
+          <div class="center-wrapper">
+            <div class="button-container">
+              <button onclick="document.getElementById('settingsModal').style.display = 'none'" id="updateBtn">Save Changes</button>
+              <button onclick="window.location.href = '../logon.html';">Change Account</button>
+              <button onclick="window.location.href = '../reset.html';">Force Update</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        function updateColFDate() {
+          const input = document.getElementById('colF');
+          if (!input) return;
+          const now = new Date();
+          const formatted = `${now.getMonth() + 1}/${now.getDate()}`;
+          if (input.value !== formatted) {
+            input.value = formatted;
+          }
+        }
+
+        // Run initially
+        updateColFDate();
+
+        // Keep updating every minute to catch date changes even after long tab inactivity
+        setInterval(updateColFDate, 60000);
+
+        // Also update when the tab becomes visible again
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            updateColFDate();
+          }
+        });
+      </script>
+
+    <script>
+      function updateColBReadonlyStatus() {
+        const colI = document.getElementById("colI");
+        const colB = document.getElementById("colB");
+        if (!colI || !colB) return;
+
+        const val = colI.value.trim();
+        if (val !== "" && val !== "undefined") {
+          colB.readOnly = true;
+        } else {
+          colB.readOnly = false;
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        updateColBReadonlyStatus();
+
+        // Also check for JS-driven changes every 200ms
+        setInterval(updateColBReadonlyStatus, 200);
+      });
+    </script>
+
+
+
+    <script>
+    function logincheck() {
+      if (navigator.onLine) {
+        window.location.href = '../logon.html';
+      } else {
+        // Device is offline, do nothing
+        console.log("No internet connection. Staying on current page.");
+      }
+    }
+    </script>
+      <!-- Yummy Toast Start -->
+
+        <style>
+          /* Toast container at bottom-right */
+          #toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: none;
+            z-index: 9999;
+          }
+          .toast {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 30px;
+            max-width: 300px;
+            font-family: 'Nunito Sans', sans-serif;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+          }
+          .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          #controls {
+            margin-bottom: 1rem;
+            font-family: 'Nunito Sans', sans-serif;
+          }
+          #controls label {
+            margin-left: 0.5rem;
+          }
+          #goBtn {
+            margin-left: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+          }
+          #goBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+        </style>
+
+        <p style="display:none;" id="status">Idle</p>
+        <div id="toast-container"></div>
+
+      <script>
+        function toggleFullscreen() {
+          window.parent.postMessage({ type: "toggle-fullscreen" }, "*");
+        }
+
+        // Listen for fullscreen state updates from parent
+        window.addEventListener("message", (event) => {
+          const data = event.data;
+          if (data?.type === "fullscreen-state") {
+            updateIcon("fullscreenIcon", data.active);
+            updateIcon("fullscreenIcon2", data.active);
+          }
+        });
+
+        function updateIcon(id, isActive) {
+          const icon = document.getElementById(id);
+          if (!icon) return;
+          icon.src = isActive
+            ? "./images/fullscreenbtn_active.png"
+            : "./images/fullscreenbtn.png";
+        }
+      </script>
+        <script>
+        (function(){
+          const BASE_URL      = "https://docs.google.com/spreadsheets/d/1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0/gviz/tq?sheet=Sheet1&tqx=out:json";
+          const POLL_INTERVAL = 10 * 1000;  // 10 seconds
+
+          let lastSeen    = {};
+          let watchGroup  = "";
+          let timerId     = null;
+          let mouseInside = false;
+
+          // Load persisted master toggle state
+          const masterToggle = document.getElementById("masterToggle");
+          const savedMaster = localStorage.getItem("gmw_master_on");
+          masterToggle.checked = savedMaster === null ? true : savedMaster === "true";
+          masterToggle.addEventListener("change", () => {
+            localStorage.setItem("gmw_master_on", masterToggle.checked);
+          });
+
+          // Toast toggle off by default
+          const toastToggle = document.getElementById("toastToggle");
+          toastToggle.checked = false;
+
+      // Expose function to toggle toasts
+      window.toasttoggle = function toasttoggle() {
+        toastToggle.checked = !toastToggle.checked;
+      };
+
+
+          // Track pointer in/out
+          document.addEventListener("mouseenter", () => { mouseInside = true; });
+          document.addEventListener("mouseleave", () => { mouseInside = false; });
+
+          // Make startWatching globally available
+          window.startWatching = function startWatching() {
+            const input = document.getElementById("colH"); // Corrected ID
+            const goBtn = document.getElementById("goBtn");
+            const g = input.value.trim().toLowerCase();
+            if (!g) return alert("Please enter a group name.");
+            watchGroup = g;
+            lastSeen   = {};
+            document.getElementById("status").innerText = `Watching “${watchGroup}”…`;
+            goBtn.disabled = true;
+            goBtn.innerText = "Watching…";
+            if (timerId) clearInterval(timerId);
+            checkSheet();
+            timerId = setInterval(checkSheet, POLL_INTERVAL);
+          };
+
+          // Attach listener AFTER defining the function
+          document.getElementById("goBtn").addEventListener("click", startWatching);
+
+
+          async function fetchSheetJson() {
+            const url = `${BASE_URL}&cb=${Date.now()}`;
+            const res = await fetch(url);
+            const txt = await res.text();
+            const json = JSON.parse(txt.replace(/^[^\(]*\(|\);?$/g, ""));
+            return json.table.rows.map(r =>
+              r.c.map(cell => (cell && cell.v != null) ? String(cell.v) : "")
+            );
+          }
+
+          function showToast(text) {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = "toast";
+            toast.innerText = text;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add("show"));
+            setTimeout(() => {
+              toast.classList.remove("show");
+              setTimeout(() => container.removeChild(toast), 300);
+            }, 5000);
+          }
+
+          async function checkSheet() {
+            document.getElementById("status").innerText =
+              `Polling… (${new Date().toLocaleTimeString()})`;
+
+            let rows;
+            try {
+              rows = await fetchSheetJson();
+            } catch (err) {
+              console.error("Fetch error:", err);
+              document.getElementById("status").innerText = "Error fetching sheet.";
+              return;
+            }
+
+            const newEntries = [];
+            rows.forEach(row => {
+              const name    = (row[1] || "").trim();
+              const message = (row[4] || "").trim();
+              const group   = (row[7] || "").trim().toLowerCase();
+              if (!name || group !== watchGroup) return;
+
+              if (!(name in lastSeen)) {
+                lastSeen[name] = message;
+                return;
+              }
+
+              if (message && message !== lastSeen[name]) {
+                newEntries.push({ name, message });
+                lastSeen[name] = message;
+              }
+            });
+
+            const masterOn = masterToggle.checked;
+            const toastOn  = toastToggle.checked;
+
+            if (newEntries.length && masterOn) {
+              if (mouseInside && toastOn) {
+                newEntries.forEach(({name, message}) =>
+                  showToast(`📨 ${name}: ${message}`)
+                );
+              } else if (!mouseInside) {
+                window.parent.postMessage({
+                  type:    "batch-messages",
+                  entries: newEntries
+                }, "*");
+              }
+            }
+
+            document.getElementById("status").innerText =
+              `Last checked @ ${new Date().toLocaleTimeString()}`;
+          }
+        })();
+        </script>
+      <script>
+        function monitorColHChanges() {
+          const input = document.getElementById("colH");
+          let debounceTimer;
+
+          // Save the original value property
+          const originalDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+
+          Object.defineProperty(input, 'value', {
+            get() {
+              return originalDescriptor.get.call(this);
+            },
+            set(newVal) {
+              originalDescriptor.set.call(this, newVal);
+              triggerDebouncedStart();
+            }
+          });
+
+          // Also listen for user input
+          input.addEventListener("input", triggerDebouncedStart);
+
+          function triggerDebouncedStart() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+              if (input.value.trim()) {
+                startWatching();
+              }
+            }, 2000); // wait 2 seconds after last change
+          }
+        }
+
+        // Call this after DOM is ready
+        monitorColHChanges();
+
+      </script>
+      <!-- Yummy Toast End -->
+
+
+
+      <input style="display:none;" type="text" id="icon-url-box" placeholder="App icon URL will appear here" readonly>
+
+      <button style="display:none" id="menuToggleBtn">Toggle Menu</button>
+      <div id="hoverTrigger"></div>
+
+
+
+
+    <style>
+
+@font-face {
+  font-family: SF Pro Display;
+  src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+        .systempopup {
+            position: fixed;
+            top: -100%;
+            left: 35%;
+            width: 30%;
+font-family: SF Pro Display;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+background-color: rgba(237, 236, 230, 0.5);
+	    backdrop-filter: blur(30px);
+            padding: 15px;
+            box-sizing: border-box;
+	    border-radius: 30px;
+            transition: top 0.5s ease;
+            z-index: 99999;
+            text-align: center;
+    transition:.3s;
+        }
+        .systempopup.open {
+            top: 20px;
+        }
+        .systempopup button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+font-family: SF Pro Display;
+            background-color: #FFF;
+	    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: black;
+            cursor: pointer;
+            border-radius: 30px;
+transition:.3s;
+        }
+        .systempopup button.dismiss {
+            background-color: #e6e6e6;
+        }
+	.systempopup button:hover {
+transform: scale(1.1);
+	    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+    transition:.3s;
+}
+	.systempopup button:focus {
+transform: scale(.9);
+	    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition:.3s;
+}
+
+.passwordinputapp {
+    font-family: SF Pro Display;
+    padding: 6px 14px;
+    border-radius: 30px;
+    color: #3D3D3D;
+    background: #d1dbe0;
+    border: none;
+    box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width:50%;
+    height:30px;
+    margin-left: 5px;
+    box-sizing:border-box;
+    transition:.3s;
+}
+.passwordinputapp:hover{
+    background: #bfb6aa;
+}
+.passwordinputapp:focus{
+    border-color:#42ffc0;
+    background: #bfb6aa;
+}
+.logonbuttonapp {
+    padding: 6px 14px;
+    border-radius: 30px;
+    color: #3D3D3D;
+    margin-left: 5px;
+    height:30px;
+    background: #d1dbe0;
+    cursor:pointer;
+    transition:.3s;
+}
+.logonbuttonapp:hover {
+    border-color:#42ffc0;
+    background: #bfb6aa;
+    transition:.3s;
+}
+.logonbuttonapp:focus {
+    transform: scale(.8);
+    cursor: wait;
+    transition:.3s;
+}
+.incorrectapplogin {
+    background:rgba(255, 31, 31, .5);
+    transform: scale(1.1);
+    border-radius: 20px;
+    transition:.3s;
+}
+        /* Modal styles */
+        #settingsModal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: saturate(100%) blur(14px);
+          align-items: center;
+          z-index: 9999999999999999999999999999999999999999999;
+          justify-content: center;
+        }
+
+        .modal {
+          border-radius: 40px;
+          padding: 40px;
+          width: 500px;
+          position: relative;
+        }
+
+        .modal .close {
+          position: absolute;
+          top: 16px;
+          right: 20px;
+          font-size: 24px;
+          cursor: pointer;
+        }
+
+        .modal label {
+          font-weight: bold;
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        .modal input[type="text"] {
+          width: 100%;
+          padding: 12px;
+          border-radius: 30px;
+          border: none;
+          background-color: #ccc;
+          margin-bottom: 20px;
+          font-size: 16px;
+          font-family: 'Nunito Sans', sans-serif;
+        }
+
+        .modal button {
+          width: 150px;
+          padding: 10px;
+          border-radius: 20px;
+          border: none;
+          background-color: #f0f0f0;
+          box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+          font-family: 'Nunito Sans', sans-serif;
+          font-size: 16px;
+          cursor: pointer;
+          display: block;
+          transition: 0.15s ease;
+          margin: 20px auto 0;
+        }
+
+        .modal button:active {
+          transform: scale(0.9);
+          transition: 0.15s ease;
+          box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="systempopup" id="speedpopup">
+    <p style="font-size: 25px; height: 20px;">Speed up your Game?</p>
+<br>
+    <p style="color: #525252">You can enable fast mode and enjoy your game with less lag. Closing any apps will disable fast mode.</p>
+<br>
+    <button onclick="fastmode(); dismissSpeedPopup();">Enable</button>
+    <button class="dismiss" onclick="dismissSpeedPopup()">Dismiss</button>
+</div>
+<div class="systempopup" id="appstorepopup">
+    <p style="font-size: 22px; height: 20px;">Appstore is trying to install Software</p>
+<br>
+    <p id="instructionText" style="color: #525252">Please enter your password to make any changes to OvalOS</p>
+<br>
+    <div class="center" id="passwordInputContainer">
+        <input class="passwordinputapp" type="password" id="passwordInputApp" placeholder="Password">
+    </div>
+    <br>
+    <button onclick="checkPasswordSoftware()">Install Software</button>
+    <button class="dismiss" onclick="dismissInstallerPopup(); denyApp();">Cancel</button>
+</div>
+<div class="systempopup" i3="appstoresideloadpopup">
+    <p style="font-size: 22px; height: 20px;">Appstore is trying to install third party Software</p>
+<br><br><br>
+    <p id="sideloadInstructionText" style="color: #525252">Please enter your password to make any changes to OvalOS</p>
+<br>
+    <div class="center" id="sideloadPasswordInputContainer">
+        <input class="passwordinputapp" type="password" id="sideloadPasswordInputApp" placeholder="Password">
+    </div>
+    <br>
+    <button onclick="checkSideloadPasswordSoftware()">Install Software</button>
+    <button class="dismiss" onclick="dismissSideloadInstallerPopup(); denySideloadApp();">Cancel</button>
+</div>
+<div class="systempopup" id="settingpopup">
+    <p style="font-size: 25px; height: 20px;">You must sign in to use this app</p>
+<br>
+    <p style="color: #525252">Please enter your password to continue to this app</p>
+<br>
+    <div class="center" id="settingsPasswordInputContainer">
+        <input class="passwordinputapp" type="password" id="passwordInputSettings" placeholder="Password">
+    </div>
+    <br>
+    <button onclick="checkPasswordSettings()">Continue</button>
+    <button class="dismiss" onclick="dismissSettingsPopup(); denyApp();     removeIframeWrapperByName('Settings');
+    document.getElementById('taskbar').classList.remove('taskbar-fullscreen');
+        var audio = new Audio('./audio/close.mp3');">Cancel</button>
+</div>
+<div class="systempopup" id="appstorereminderpopup">
+    <p style="font-size: 25px; height: 20px;">Some Apps have updates</p>
+<br>
+    <p style="color: #525252">Some of your apps are not on the latest version, open the appstore to update.</p>
+<br>
+    <button onclick="openappstorepopup()">Open</button>
+    <button class="dismiss" onclick="dismissappstorereminderpopup()">Dismiss</button>
+</div>
+<script>
+    function showSpeedPopup() {
+        document.getElementById('speedpopup').classList.add('open');
+    }
+
+    function dismissSpeedPopup() {
+        document.getElementById('speedpopup').classList.remove('open');
+    }
+</script>
+<script>
+    function dismissInstallerPopup() {
+        document.getElementById('appstorepopup').classList.remove('open');
+    }
+</script>
+<script>
+    function dismissSideloadInstallerPopup() {
+        document.getElementById('appstoresideloadpopup').classList.remove('open');
+    }
+</script>
+<script>
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'requestSent' && event.newValue === 'true') {
+            console.log('Request received, showing installer popup');
+            showInstallerPopup();
+        }
+    });
+
+    function allowApp() {
+        localStorage.setItem('response', 'yes');
+        localStorage.removeItem('requestSent');
+        dismissInstallerPopup();
+    }
+
+    function denyApp() {
+        localStorage.setItem('response', 'no');
+        localStorage.removeItem('requestSent');
+        dismissInstallerPopup();
+    }
+</script>
+    <script>
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'requestSideloadSent' && event.newValue === 'true') {
+                // Show the yes and no buttons
+showSideloadInstallerPopup();
+            }
+        });
+
+        function allowSideloadApp() {
+            localStorage.setItem('responseSideload', 'yes');
+            localStorage.removeItem('requestSideloadSent');
+            dismissSideloadInstallerPopup();
+        }
+
+        function denySideloadApp() {
+            localStorage.setItem('responseSideload', 'no');
+            localStorage.removeItem('requestSideloadSent');
+            dismissSideloadInstallerPopup();
+        }
+
+denySideloadApp();
+    </script>
+<script src="./security/allowapp.js"></script>
+<script src="./security/allowsideloadapp.js"></script>
+<script>
+    function dismissSettingsPopup() {
+        document.getElementById('settingpopup').classList.remove('open');
+    }
+</script>
+<script src="./security/allowsettings.js"></script>
+<script>
+    function showappstorereminderpopup() {
+        document.getElementById('appstorereminderpopup').classList.add('open');
+    }
+
+    function dismissappstorereminderpopup() {
+        document.getElementById('appstorereminderpopup').classList.remove('open');
+    }
+
+    function openappstorepopup() {
+                    setActiveIcon(this);
+                    document.getElementById('iframeNameInput').value ='Appstore';
+                    document.getElementById('iframeIconInput').value ='./appstore/apps.png';
+		    document.getElementById('jsContentInput').value ='/* Version 3.1 */ ';
+                    document.getElementById('htmlContentInput').value ='*oosango*iframe frameborder*ooseq**oosqu*0*oosqu* style*ooseq**oosqu*height*ooscol* 100%*oosscol* width*ooscol* 100%*oosscol**oosqu* src*ooseq**oosqu*..*oosfsl*appstore*oosfsl*index.html*oosqu**oosangc**oosango**oosfsl*iframe*oosangc*';
+      
+      document.getElementById('iframex').value ='97.8';
+      document.getElementById('iframey').value ='93';
+                    document.getElementById('iframetop').value ='';
+                    document.getElementById('iframeleft').value ='1';
+                    createIframe(); dismissappstorereminderpopup();
+    }
+
+    // Function to check for updates from localStorage
+    function appstoreremindercheckforupdates() {
+        const updatesNeeded = localStorage.getItem('updatesNeeded') === 'true';
+
+        if (updatesNeeded) {
+            showappstorereminderpopup();
+        }
+    }
+
+    // Listen for changes to localStorage to detect updates dynamically
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'updatesNeeded' && event.newValue === 'true') {
+            showappstorereminderpopup();
+        }
+    });
+
+    // Initial check in case the update was detected before this script was loaded
+    appstoreremindercheckforupdates();
+</script>
+
+</head>
+
+    <!-- Context menu for removing app from taskbar -->
+    <div id="taskbarContextMenu" class="context-menu">
+        <button class="removeAppButton">Unpin App</button>
+	<button class="closeAppTaskbarButton">Close App</button>
+    </div>
+    <!-- End Context menu for removing app from taskbar -->
+
+    <!-- Start Context menu -->
+    <div id="contextMenu" class="context-menu">
+        <button id="deleteAppButton">Uninstall</button>
+        <button id="saveAppButton">Pin to Taskbar</button>
+        <button id="closeAppButton">Close</button>
+    </div>
+    <!-- End Start Context menu -->
+
+  <div class="taskbar" id="taskbar">
+    <a tabindex="0" style="position:fixed" class="taskbar-startbutton" onclick="toggleStartMenu(); var audio=new Audio('./audio/start.mp3');audio.play();"></a>
+<aside></aside>
+    <a tabindex="0" style="" class="taskbar-startbuttonplaceholder"></a>
+<div class="app-container appstore" style="filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, 1));" data-iframe-name="Appstore">
+                        <a onclick="
+                    setActiveIcon(this);
+                    document.getElementById('iframeNameInput').value ='Appstore';
+                    document.getElementById('iframeIconInput').value ='./appstore/apps.png';
+		    document.getElementById('jsContentInput').value ='/* Version 3.1 */ ';
+                    document.getElementById('htmlContentInput').value ='*oosango*iframe frameborder*ooseq**oosqu*0*oosqu* style*ooseq**oosqu*height*ooscol* 100%*oosscol* width*ooscol* 100%*oosscol**oosqu* src*ooseq**oosqu*..*oosfsl*appstore*oosfsl*index.html*oosqu**oosangc**oosango**oosfsl*iframe*oosangc*';
+                          document.getElementById('iframex').value ='97.8';
+                          document.getElementById('iframey').value ='93';
+                    document.getElementById('iframetop').value ='';
+                    document.getElementById('iframeleft').value ='1';
+                    createIframe();;
+                    " tabindex="0" class="taskbar-button"><img src="./images/startbuttons/appstore.svg"></a>
+                    </div>
+
+    <div id="savedIframesTaskbar" class="apps">
+ 
+    </div>
+  </div>
+
+<body>
+<div id="nightlight"></div>
+    
+  <div class="taskbar-startmenu" id="startMenu">
+<div style="width:100%;" class="center">
+    <div tabindex="0" class="taskbar-power" onclick="toggleoos();"><img src="./images/startbuttons/desk.svg"></div>    <div onclick="document.getElementById('settingsModal').style.display = 'flex'" tabindex="0" class="taskbar-search"><img src="./images/startbuttons/settings.svg"></div>
+
+    <style>
+    /* Container inside the taskbar */
+    .taskbar-profilephoto {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      margin-left: 10px; /* 👉 move emoji slightly right */
+    }
+
+    /* Floating emoji wrapper */
+    .emoji-avatar {
+      position: relative;
+      width: 64px;
+      aspect-ratio: 1 / 1;
+      pointer-events: none;
+
+      animation: emoji-float 4.5s ease-in-out infinite;
+    }
+
+    /* Emoji image layers */
+    .emoji-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: auto;
+    }
+
+    /* Soft shadow under emoji */
+    .emoji-avatar::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      width: 70%;
+      height: 12%;
+      background: rgba(0, 0, 0, 0.35);
+      filter: blur(6px);
+      transform: translateX(-80%);
+      border-radius: 50%;
+
+      animation: emoji-shadow 4.5s ease-in-out infinite;
+    }
+
+    /* Floating animation */
+        @keyframes miiFloat {
+          0%   { transform: translate3d(0, 0, 0); }
+          50%  { transform: translate3d(0, -8px, 0); }
+          100% { transform: translate3d(0, 0, 0); }
+        }
+
+
+    /* Shadow reacts to float */
+    @keyframes emoji-shadow {
+      0%   { transform: translateX(-50%) scale(1); opacity: 0.35; }
+      50%  { transform: translateX(-50%) scale(0.85); opacity: 0.2; }
+      100% { transform: translateX(-50%) scale(1); opacity: 0.35; }
+    }
+      /* Chat bubble below the Mii */
+      .chat-bubble {
+        position: absolute;
+        top: 110%; /* place below the Mii */
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        max-width: 160px;
+        padding: 6px 10px;
+        font-size: 12px;
+        line-height: 1.2;
+        background: white;
+        color: #000;
+        border-radius: 12px;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        z-index: 5;
+        white-space: normal;
+      }
+
+      .chat-bubble.visible {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+      }
+
+      /* Bubble tail pointing up */
+      .chat-bubble::after {
+        content: '';
+        position: absolute;
+        top: -6px; /* place tail above bubble */
+        left: 50%;
+        transform: translateX(-50%) rotate(180deg); /* flip the triangle */
+        border-width: 6px 6px 0;
+        border-style: solid;
+        border-color: white transparent transparent;
+      }
+
+
+        /* Keep Miis from stacking */
+        .app-mii-layer {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 10px;
+          z-index: 9999;
+          pointer-events: none;
+        }
+
+    </style>
+
+    <div tabindex="0" class="taskbar-darkmode" ><img src="./images/startbuttons/darkmode.svg"></div>
+    <div tabindex="0" class="taskbar-message" id="taskbarMessage">
+      <img src="./images/startbuttons/message.svg">
+      <div class="message-input-wrap">
+        <input autocomplete="off" id="sayMain" type="namestart" placeholder="Say something...">
+      </div>
+    </div>
+
+
+    <div id="image-container1" tabindex="0" class="taskbar-user">
+      <div class="taskbar-profilephoto" id="profileEmoji"></div>
+
+      <!-- Username input (hidden, still synced) -->
+      <input
+        id="myInput1"
+        maxlength="15"
+        style="width:100%; pointer-events: none;"
+        type="namestart"
+      >
+    </div>
+
+
+</div>
+      <script>
+        const taskbarMessage = document.getElementById('taskbarMessage');
+        const input = document.getElementById('sayMain');
+
+        taskbarMessage.addEventListener('click', (e) => {
+          e.stopPropagation();
+          taskbarMessage.classList.add('expanded');
+          input.focus();
+        });
+
+        document.addEventListener('click', () => {
+          taskbarMessage.classList.remove('expanded');
+          input.value = '';
+        });
+
+        taskbarMessage.addEventListener('click', e => e.stopPropagation());
+      </script>
+
+
+      <script>
+      /* -----------------------------
+         HAIR COLOR FILTERS
+      ----------------------------- */
+      const hairFilters = {
+        gray: 'grayscale(100%)',
+        brown: 'hue-rotate(280deg) contrast(200%) brightness(150%)',
+        black: 'brightness(0%)',
+        blonde: 'hue-rotate(290deg) contrast(120%) brightness(300%)',
+        red: 'hue-rotate(260deg) contrast(190%) brightness(300%)'
+      };
+
+      /* -----------------------------
+         LOAD USER DATA ON START
+      ----------------------------- */
+      window.addEventListener('load', () => {
+        const savedID = localStorage.getItem('savedID');
+        if (!savedID) return;
+
+        loadUserProfile(savedID);
+      });
+
+      /* -----------------------------
+         FETCH USER PROFILE
+      ----------------------------- */
+      function loadUserProfile(id) {
+        const scriptUrl =
+          'https://script.google.com/macros/s/AKfycby8j9rKg35LTT-xTKr4pvA87PRY06QaR9IzabiGz_mIAjTgoSH1FakrI_DPv_pnPpBk/exec';
+
+        fetch(scriptUrl + '?action=get&id=' + encodeURIComponent(id))
+          .then(r => r.json())
+          .then(data => {
+            if (data.error) return;
+
+            const [
+              username,     // B
+              emojiData,    // C
+              hairColor     // D
+            ] = data.values;
+
+            applyUsername(username);
+            buildEmojiAvatar(emojiData, hairColor);
+          })
+          .catch(() => {});
+      }
+
+      /* -----------------------------
+         APPLY USERNAME
+      ----------------------------- */
+      function applyUsername(name) {
+        const input = document.getElementById('myInput1');
+        if (!name || !input) return;
+
+        input.value = name;
+        localStorage.setItem('olexosuservalue', name);
+      }
+
+      /* -----------------------------
+         BUILD EMOJI AVATAR
+      ----------------------------- */
+          function buildEmojiAvatar(emojiString, hairColor) {
+            const container = document.getElementById('profileEmoji');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'emoji-avatar';
+
+            const layers = splitEmojiLayers(emojiString);
+
+            layers.forEach(rawSrc => {
+              const img = document.createElement('img');
+              img.className = 'emoji-layer';
+
+              const src = normalizeImageSrc(rawSrc);
+              img.src = src;
+
+              if (src.includes('/hairs/') && hairFilters[hairColor]) {
+                img.style.filter = hairFilters[hairColor];
+              }
+
+              avatar.appendChild(img);
+            });
+
+            container.appendChild(avatar);
+          }
+
+
+
+          function splitEmojiLayers(raw) {
+            if (!raw) return [];
+
+            return raw
+              .split(',')
+              .map(s => s.trim())
+              .reduce((layers, part) => {
+                if (part.startsWith('data:image')) {
+                  // Re-attach any previously split base64 pieces
+                  if (layers.length && layers[layers.length - 1].startsWith('data:image')) {
+                    layers[layers.length - 1] += ',' + part;
+                  } else {
+                    layers.push(part);
+                  }
+                } else {
+                  layers.push(part);
+                }
+                return layers;
+              }, [])
+              .map(src => {
+                // HARD CLEAN
+                src = src.replace(/\s+/g, '');
+                if (src.startsWith('data:image')) return src;
+                if (/^(https?:|\/|\.\/)/.test(src)) return src;
+                return src; // allow relative emoji paths
+              });
+          }
+
+          function normalizeImageSrc(src) {
+            if (!src) return '';
+
+            src = src.trim();
+
+            // 🔥 FIX: decode encoded data URLs
+            if (src.startsWith('data%3Aimage')) {
+              try {
+                src = decodeURIComponent(src);
+              } catch (e) {
+                console.warn('Failed to decode data URL', e);
+              }
+            }
+
+            return src;
+          }
+
+      </script>
+      <style>
+      /* Allow stacking */
+      .sortable-item {
+        position: relative;
+        overflow: visible;
+      }
+
+          /* Allow Miis to escape the start menu bounds */
+        .taskbar-widget {
+          overflow: hidden; /* layout stays intact */
+        }
+
+        .sortable-list {
+          overflow-y: auto;
+          overflow-x: hidden;
+          min-height: 0;
+        }
+
+          /* App item must allow overflow */
+          .sortable-item {
+            position: relative;
+            overflow: visible !important;
+          }
+
+
+          /* Container above icon */
+          .app-mii-layer {
+            position: absolute;
+            bottom: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0px;
+            z-index: 9999;
+                filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
+            pointer-events: none;
+                justify-content: center;
+                align-items: flex-end;
+          }
+
+        .start-mii {
+          position: absolute;
+          bottom: 0;
+          width: 40px;
+          height: 40px;
+          opacity: 0;
+          transform: translateY(8px) scale(0.95);
+          transition:
+            opacity 0.25s ease,
+            transform 0.35s cubic-bezier(.2,.8,.2,1);
+        }
+
+
+
+
+        .mii-float {
+          position: relative; /* allow floating inside start-mii */
+          display: block;
+          width: 100%;
+          height: 100%;
+          animation: miiFloatTop 9s ease-in-out infinite;
+          will-change: transform;
+        }
+
+
+          /* Smooth up AND down */
+        @keyframes miiFloatTop {
+          0%   { transform: translateY(0); }
+          50%  { transform: translateY(-8px); }
+          100% { transform: translateY(0); }
+        }
+
+
+          /* Slight desync so they don't move together */
+        .start-mii:nth-child(1) .mii-float { animation-delay: 0s; }
+        .start-mii:nth-child(2) .mii-float { animation-delay: 1.5s; }
+        .start-mii:nth-child(3) .mii-float { animation-delay: 3s; }
+        .start-mii:nth-child(4) .mii-float { animation-delay: 4.5s; }
+
+
+
+          /* Emoji layers */
+          .start-mii img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+
+
+          
+
+
+          .taskbar.has-new-messages {
+            background: rgba(194, 226, 255, .8);
+          }
+
+      /* Emoji layers */
+      .start-mii img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+
+      </style>
+    <style>
+      /* POTATO MODE PERFORMANCE OVERRIDES */
+      html.potato-mode *,
+      html.potato-mode *::before,
+      html.potato-mode *::after {
+        filter: none !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+
+      html.potato-mode {
+        scroll-behavior: auto !important;
+      }
+    </style>
+
+
+          
+<div tabindex="0" class="taskbar-widget"><ul id="sortable" class="sortable-list"></ul></div>
+    
+  </div>
+
+<script>
+  function toggleStartMenu() {
+    var startMenu = document.getElementById('startMenu');
+    startMenu.style.display = 'block';
+    setTimeout(function() {
+      startMenu.style.transform = (startMenu.style.transform === 'translateX(-50%) scale(1)' ? 'translateX(-50%) scale(0)' : 'translateX(-50%) scale(1)');
+    }, 0);
+  }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
+
+<script>
+  const taskbarButtons = document.querySelectorAll('.taskbar-button');
+
+  // Function to remove focus CSS styles
+  function removeFocusStyles() {
+    taskbarButtons.forEach(button => button.blur()); // Remove focus from all buttons
+  }
+
+  // Add event listener for mouseup event on the document
+  document.addEventListener('mouseup', removeFocusStyles);
+</script>
+
+<script>
+  const taskbarStartButton = document.querySelectorAll('.taskbar-startbutton');
+
+  // Function to remove focus CSS styles
+  function removeStartFocusStyles() {
+    taskbarStartButton.forEach(button => button.blur()); // Remove focus from all buttons
+  }
+
+  // Add event listener for mouseup event on the document
+  document.addEventListener('mouseup', removeStartFocusStyles);
+</script>
+
+<div style="z-index: 3;" id="widgetwrapper">
+    <div style="z-index: 3;" id="widgetcontainer"></div>
+</div>
+<div style="z-index: 2;" id="backgroundbarrier" class="wallpaperbarrier"></div>
+  <div id="backgroundiframe">
+    <iframe style="pointer-events: none" name="ovalwallpaper" src="./system/wallpaper.html"></iframe>
+  </div>
+
+
+</body>
+<!-- DARK MODE START-->
+
+<script>
+  function invertColors() {
+    function invert(str,type){
+      var t1 = str.split("(");
+      var t2 = t1[1].split(")");
+      var t3 = t2[0].split(",");
+      t3.forEach(function(v,i){
+        if(i<3){
+          if(type=="color")
+            t3[i] = (255 - parseInt(v))<50?120:(255 - parseInt(v));
+          else
+            t3[i] = (255 - parseInt(v));
+        }
+      })
+      t3 = t3.join(",");
+      return t1[0]+"("+t3+")";
+    }
+
+    //invert color and backgroundcolor of every dom node
+    document.querySelectorAll('*:not([invTouch])').forEach(function(node) {
+      var style  = window.getComputedStyle(node);
+      node.style.backgroundColor = invert(style.backgroundColor,"back");
+      node.style.color = invert(style.color,"color");
+      node.setAttribute("invTouch", "true");
+    });
+    console.log("Colors Inverted!");
+fixStartAppsDark();
+  }
+
+  // Call the function to invert colors when needed
+</script>
+<script>
+function applyBackgroundToPasswordInput() {
+    // Select the element with the ID "passwordInput"
+    const element = document.querySelector('#passwordInput');
+    
+    // Check if the element exists, then apply the background color
+    if (element) {
+        element.style.backgroundColor = "rgb(51, 51, 51)";
+    }
+}
+</script>
+<script>
+function changePowerDark() {
+    // Get all image elements
+    var darkmodeimages = document.getElementsByTagName('img');
+    
+    // Loop through each image element
+    for (var i = 0; i < darkmodeimages.length; i++) {
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/desk.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/deskdark.svg');
+        }
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/message.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/messagedark.svg');
+        }
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/appstore.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/appstoredark.svg');
+        }
+      if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/settings.svg') {
+          darkmodeimages[i].setAttribute('src', './images/startbuttons/settingsdark.svg');
+      }
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/darkmode.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/darkmodedark.svg');
+        }
+    }
+}
+
+function changeStartButton() {
+    // Get all div elements with class "taskbar-startbutton"
+    var buttons = document.getElementsByClassName('taskbar-startbutton');
+    
+    // Loop through each div element
+    for (var i = 0; i < buttons.length; i++) {
+        // Change the class name to "taskbar-startbuttondark"
+        buttons[i].className = 'taskbar-startbuttondark';
+    }
+removeStartButtonBackgroundColor();
+fixStartAppsDark();
+changeLogon();
+}
+
+function changeLogon() {
+    // Get all div elements with class "taskbar-startbutton"
+    var logonscreen = document.getElementsByClassName('popup-content');
+    
+    // Loop through each div element
+    for (var i = 0; i < logonscreen.length; i++) {
+        logonscreen[i].className = 'popup-contentdark';
+    }
+removeLogonBackgroundColor();
+removeLogonBackdrop();
+}
+
+function changeAppsDrop() {
+    var apps = document.getElementsByClassName('apps');
+    
+    // Loop through each div element
+    for (var i = 0; i < apps.length; i++) {
+
+        apps[i].className = 'appsdark';
+    }
+addappstoredrop();
+}
+
+function removeStartButtonBackgroundColor() {
+    var startButtons = document.getElementsByClassName('taskbar-startbuttondark');
+    for (var i = 0; i < startButtons.length; i++) {
+        startButtons[i].style.backgroundColor = '';
+    }
+}
+
+function fixStartAppsDark() {
+    var startAppText = document.getElementsByClassName('startapp-text');
+    var startApps = document.getElementsByClassName('sortable-item');
+    for (var i = 0; i < startApps.length; i++) {
+        startApps[i].style.backgroundColor = 'rgba(66, 66, 66, .5)';
+        startAppText[i].style.color = 'rgb(212, 212, 212)';
+    }
+}
+
+function removeLogonBackgroundColor() {
+    var logon = document.getElementsByClassName('popup-contentdark');
+    for (var i = 0; i < logon.length; i++) {
+        logon[i].style.backgroundColor = '';
+    }
+}
+
+function removeLogonBackdrop() {
+    var backdrop = document.getElementsByClassName('popup');
+    for (var i = 0; i < backdrop.length; i++) {
+        backdrop[i].style.backgroundColor = 'rgba(66, 66, 66, .5)';
+    }
+}
+
+function addappstoredrop() {
+    var appstore = document.getElementsByClassName('app-container appstore');
+    for (var i = 0; i < appstore.length; i++) {
+        appstore[i].style.filter = 'drop-shadow(0 3mm 4mm rgba(224, 224, 224, 0.6))';
+    }
+}
+
+
+function changeStartup() {
+    var logos = document.getElementsByClassName('startuplogo');
+    
+    // Loop through each div element
+    for (var i = 0; i < logos.length; i++) {
+        // Change the background image of the div element
+        logos[i].style.backgroundImage = "url('./images/dark.png')";
+    }
+}
+
+function addDarkToggle() {
+    // Get all elements with class "taskbar-darkmode"
+    var darkModeDivs = document.getElementsByClassName("taskbar-darkmode");
+
+    // Loop through each div and add onclick attribute
+    for (var i = 0; i < darkModeDivs.length; i++) {
+        var div = darkModeDivs[i];
+        div.setAttribute("onclick", "localStorage.setItem(`ovalosdarkmodeEnabled`, 'false'); window.open(`./index.html`, `_self`);");
+    }
+}
+
+function addLightToggle() {
+    // Get all elements with class "taskbar-darkmode"
+    var darkModeDivs = document.getElementsByClassName("taskbar-darkmode");
+
+    // Loop through each div and add onclick attribute
+    for (var i = 0; i < darkModeDivs.length; i++) {
+        var div = darkModeDivs[i];
+        div.setAttribute("onclick", "localStorage.setItem(`ovalosdarkmodeEnabled`, 'true'); window.open(`./index.html`, `_self`);");
+    }
+}
+</script>
+
+<!-- DARK MODE END-->
+
+<!-- DISABLE UI SOUNDS START -->
+<script>
+function disableUISounds() {
+    // Store the original play method
+    const originalAudioPlay = HTMLAudioElement.prototype.play;
+
+    // Override the play method of the HTMLAudioElement prototype
+    HTMLAudioElement.prototype.play = function() {
+        // Allow audio with the URL that includes 'bg.wav' to play
+        if (this.src.endsWith('/setup/bg.wav') || this.src.includes('bg.wav')) {
+            return originalAudioPlay.call(this);
+        }
+        // Disable all other audio play actions
+        return Promise.resolve();
+    };
+
+    // Optionally, you can also override the play method for video elements if needed
+    HTMLMediaElement.prototype.play = function() {
+        if (this instanceof HTMLVideoElement) {
+            return HTMLVideoElement.prototype.play.call(this);
+        } else {
+            return Promise.resolve();
+        }
+    };
+
+    console.log('audio.play() has been disabled on this webpage except for bg.wav.');
+}
+
+
+</script>
+<!-- DISABLE UI SOUNDS END -->
+
+<!-- OVALOS CUSTOM SETTINGS START-->
+<script>
+</script>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isSpeedPopupEnabled = localStorage.getItem('toggleSpeedPopupSwitchEnabled') === 'true';
+
+        if (isSpeedPopupEnabled) {
+                window.showSpeedPopup = function() {
+                    // Overridden function does nothing
+                };
+        } else {
+            // Here you can disable the function or perform any other necessary actions
+            // For example: deactivateFunction();
+        }
+    </script>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isOvalmojiEnabled = localStorage.getItem('ovalmojiSwitchEnabled') === 'true';
+
+        if (isOvalmojiEnabled) {
+    const emojiBoxes = document.querySelectorAll('div.emoji-box');
+    emojiBoxes.forEach(box => {
+        box.style.display = 'none';
+    });
+        } else {
+    const imageIds = ['main-image1', 'main-image2'];
+    imageIds.forEach(id => {
+        const image = document.getElementById(id);
+        if (image) {
+            image.style.display = 'none';
+        }
+    });
+        }
+    </script>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isnightlightEnabled = localStorage.getItem('nightlightswitchEnabled') === 'true';
+
+        if (isnightlightEnabled) {
+document.getElementById('nightlight').style.display = 'block';
+
+        } else {
+            // Here you can disable the function or perform any other necessary actions
+            // For example: deactivateFunction();
+        }
+    </script>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isuisoundsEnabled = localStorage.getItem('uisoundswitchEnabled') === 'true';
+
+        if (isuisoundsEnabled) {
+disableUISounds();
+        } else {
+
+        }
+    </script>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isAppUpdateRemindersEnabled = localStorage.getItem('updateReminderSwitchEnabled') === 'true';
+
+        if (isAppUpdateRemindersEnabled) {
+    var element = document.getElementById("appstorereminderpopup");
+    if (element) {
+        element.style.display = "none";
+    }
+        } else {
+        }
+    </script>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+        if (isEnabled) {
+  invertColors();
+applyBackgroundToPasswordInput();
+changePowerDark();
+changeStartButton();
+changeAppsDrop();
+changeStartup();
+addDarkToggle();
+        } else {
+addLightToggle();
+        }
+    </script>
+
+    <script>
+        function addCustomStyle() {
+            // Create a new <style> element
+            const customStyle = document.createElement('style');
+            customStyle.textContent = `
+                /* Your custom CSS style */
+                .iframe-wrapper {
+                    filter: drop-shadow(0 3mm 4mm rgb(120, 120, 120, 0.8));
+                }
+            `;
+
+            // Append the <style> element to the <body> (at the bottom)
+            document.body.appendChild(customStyle);
+        }
+
+        // Call the function to apply the style
+        addCustomStyle();
+    </script>
+<!-- OVALOS CUSTOM SETTINGS END-->
+
+<script>
+let lastKeyPressTime = 0;
+
+document.addEventListener("keydown", function(event) {
+  const currentTime = new Date().getTime();
+  const key = event.key.toUpperCase();
+
+  if (key === "[") {
+    if (currentTime - lastKeyPressTime < 300) {
+      executeDoubleClickFunction();
+    }
+    lastKeyPressTime = currentTime;
+  }
+
+  // Rest of your key press handling code
+});
+
+function executeDoubleClickFunction() {
+  // Replace this with the actual code you want to run
+  toggleStartMenu();
+}
+
+</script>
+<script>
+function checkAndApplyToggleSwitchState() {
+    // Check localStorage for the previous state of toggle switch 1
+    const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+    if (isEnabled) {
+        invertColors();
+    } else {
+return;
+    }
+}
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get all elements
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        const style = getComputedStyle(element);
+        if (style.cursor === 'pointer') {
+            element.style.cursor = "url('assets/cursors/Link.cur'), pointer";
+        }
+    });
+});
+
+</script>
+<script>
+function removeIframeWrapperByName(iframeName) {
+    var audio = new Audio('./audio/close.mp3');
+    audio.play();
+    var iframeWrapper = document.querySelector(`.iframe-wrapper[data-iframe-name="${iframeName}"]`);
+    if (iframeWrapper) {
+        iframeWrapper.style.transition = "transform 0.3s ease"; // Add a smooth transition for scaling-out
+        iframeWrapper.style.transform = "scale(0)"; // Scale-out to 80% of its original size
+
+        // Remove the activeoval class from the corresponding taskbar button (if exists)
+        var taskbarButton = document.querySelector(`.app-container[data-iframe-name="${iframeName}"] .taskbar-button`);
+        if (taskbarButton) {
+            taskbarButton.classList.remove("activeoval");
+        }
+
+        // Remove from direct li element
+        var directTaskbarButton = document.querySelector(`li[data-id="${iframeName}"]`);
+        if (directTaskbarButton) {
+            directTaskbarButton.classList.remove("activeoval");
+        }
+
+        // Remove the temp-app-container with the same iframeName from savedIframesTaskbar
+        var savedIframesTaskbar = document.getElementById("savedIframesTaskbar");
+        if (savedIframesTaskbar) {
+            var tempAppContainer = savedIframesTaskbar.querySelector(`.temp-app-container[data-iframe-name="${iframeName}"]`);
+            if (tempAppContainer) {
+                tempAppContainer.remove();
+            }
+        }
+
+        // Delay the removal of the iframe wrapper by 300 milliseconds (adjust as needed)
+        setTimeout(function() {
+            iframeWrapper.remove();
+        }, 300);
+    }
+}
+</script>
+<link rel="stylesheet" href="cursor.css">
+<audio src="./ovalos.mp3" alt="" autoplay="autoplay">
+<script>
+function initializewidgets() {
+    const container = document.getElementById('widgetcontainer');
+    let previousCodes = [];
+    let previousPositions = {};
+
+    function getRandomPosition() {
+        const containerRect = container.getBoundingClientRect();
+        const left = Math.random() * (containerRect.width - 100);
+        const top = Math.random() * (containerRect.height - 100);
+        return { left, top };
+    }
+
+    function generateDraggableElement(code, index, position) {
+        const draggable = document.createElement('div');
+        draggable.classList.add('widgetdraggable');
+        draggable.setAttribute('draggable', true);
+        draggable.setAttribute('data-index', index);
+        draggable.innerHTML = '<span class="widgetremovebutton"></span>' + code.htmlCode;
+        if (!position) {
+            position = getRandomPosition();
+            storePosition(index, position);
+        }
+        draggable.style.left = position.left + 'px';
+        draggable.style.top = position.top + 'px';
+        draggable.style.zIndex = position.zIndex || getZIndex();
+        draggable.addEventListener('mousedown', function(event) {
+            initiateDragging(event, draggable);
+        });
+        draggable.querySelector('.widgetremovebutton').addEventListener('click', function() {
+            removewidget(code.iframeName);
+        });
+        return draggable;
+    }
+
+    function retrieveCodes() {
+        const savedCodes = JSON.parse(localStorage.getItem('savedCodes')) || [];
+        const savedPositions = JSON.parse(localStorage.getItem('savedPositions')) || {};
+        container.innerHTML = '';
+        savedCodes.forEach(function(code, index) {
+            const draggable = generateDraggableElement(code, index, savedPositions[index]);
+            container.appendChild(draggable);
+        });
+        previousCodes = savedCodes;
+checkAndApplyToggleSwitchState();
+        previousPositions = savedPositions;
+    }
+
+    function getZIndex() {
+        const draggableElements = document.querySelectorAll('.widgetdraggable');
+        return draggableElements.length > 0 ? Math.max(...Array.from(draggableElements).map(el => parseInt(el.style.zIndex))) + 1 : 1;
+    }
+
+    function initiateDragging(e, elmnt) {
+                var audio = new Audio('./audio/grab.mp3');
+                audio.play();
+        e = e || window.event;
+        e.preventDefault();
+        elmnt.style.zIndex = getZIndex();
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = endDragging;
+        document.onmousemove = moveElement;
+
+        function moveElement(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+            storePositions();
+        }
+
+        function endDragging() {
+                var audio = new Audio('./audio/drop.mp3');
+                audio.play();
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    function storePositions() {
+        const draggableElements = document.querySelectorAll('.widgetdraggable');
+        let savedPositions = {};
+        draggableElements.forEach(function(draggable) {
+            const dataIndex = draggable.getAttribute('data-index');
+            savedPositions[dataIndex] = { left: draggable.offsetLeft, top: draggable.offsetTop, zIndex: parseInt(draggable.style.zIndex) };
+        });
+        localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+        previousPositions = savedPositions;
+    }
+
+    function storePosition(index, position) {
+        let savedPositions = JSON.parse(localStorage.getItem('savedPositions')) || {};
+        savedPositions[index] = position;
+        localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+        previousPositions = savedPositions;
+    }
+
+    function removewidget(iframeName) {
+        let savedCodes = JSON.parse(localStorage.getItem('savedCodes')) || [];
+        let savedPositions = JSON.parse(localStorage.getItem('savedPositions')) || {};
+        let indexToRemove = savedCodes.findIndex(code => code.iframeName === iframeName);
+        if (indexToRemove !== -1) {
+            savedCodes.splice(indexToRemove, 1);
+            delete savedPositions[indexToRemove];
+            localStorage.setItem('savedCodes', JSON.stringify(savedCodes));
+            localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+            retrieveCodes();
+        }
+    }
+
+    document.getElementById('widgetwrapper').addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        const closeButtons = document.querySelectorAll('.widgetremovebutton');
+        const draggables = document.querySelectorAll('.widgetdraggable');
+        closeButtons.forEach(button => button.style.display = 'flex');
+        draggables.forEach(draggable => draggable.classList.add('scaling'));
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.matches('.widgetremovebutton')) {
+            const closeButtons = document.querySelectorAll('.widgetremovebutton');
+            const draggables = document.querySelectorAll('.widgetdraggable');
+            closeButtons.forEach(button => button.style.display = 'none');
+            draggables.forEach(draggable => draggable.classList.remove('scaling'));
+        }
+    });
+
+    retrieveCodes();
+
+    setInterval(function() {
+        const savedCodes = JSON.parse(localStorage.getItem('savedCodes')) || [];
+        const savedPositions = JSON.parse(localStorage.getItem('savedPositions')) || {};
+        const currentCodes = container.querySelectorAll('.widgetdraggable');
+
+        let codesChanged = savedCodes.length !== previousCodes.length;
+        
+        if (!codesChanged) {
+            for (let i = 0; i < savedCodes.length; i++) {
+                if (savedCodes[i].htmlCode !== previousCodes[i].htmlCode) {
+                    codesChanged = true;
+                    break;
+                }
+            }
+        }
+
+        if (codesChanged) {
+            retrieveCodes();
+        } else {
+            let positionsChanged = false;
+            for (const index in savedPositions) {
+                const currentPosition = savedPositions[index];
+                if (!previousPositions[index] || 
+                    currentPosition.left !== previousPositions[index].left || 
+                    currentPosition.top !== previousPositions[index].top || 
+                    currentPosition.zIndex !== previousPositions[index].zIndex) {
+                    positionsChanged = true;
+                    break;
+                }
+            }
+
+            if (positionsChanged) {
+                retrieveCodes();
+            }
+        }
+    }, 1000);
+
+    // Expose removewidget function globally for testing
+    window.removewidget = removewidget;
+};
+initializewidgets();
+</script>
+  <!-- Slot-Based TaskbarAppScript (Pinned + Hidden Launch Reveal + Full Slot Watch) -->
+  <script>
+  if (typeof(Storage) === 'undefined') {
+    alert('Sorry, your browser does not support localStorage.');
+  }
+
+  const MAX_SLOTS = 8;
+  let slotSnapshot = "";
+
+  /* -----------------------------
+     BUILD TASKBAR (ALL SLOTS)
+  ----------------------------- */
+  function updateTaskbarFromSlots(playSound = false) {
+    const taskbar = document.getElementById('savedIframesTaskbar');
+    taskbar.innerHTML = "";
+
+    const slotKeys = Object.keys(localStorage)
+      .filter(k => /^slot_\d+$/.test(k))
+      .sort((a, b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1]));
+
+    slotKeys.forEach(slotKey => {
+      const raw = localStorage.getItem(slotKey);
+      if (!raw) return;
+
+      try {
+        const app = JSON.parse(raw);
+        const slotIndex = parseInt(slotKey.split('_')[1]);
+        const hidden = slotIndex >= MAX_SLOTS;
+
+        taskbar.insertAdjacentHTML("beforeend", `
+          <div class="app-container ${hidden ? 'hidden-slot' : 'pinned'}"
+               data-slot="${slotIndex}"
+               data-slot-key="${slotKey}"
+               data-iframe-name="${slotKey}"
+               style="${hidden ? 'display:none' : ''}">
+            <a class="taskbar-button" tabindex="0">
+              <img src="${app.icon}">
+            </a>
+          </div>
+        `);
+      } catch {}
+    });
+
+
+
+    bindTaskbarClicks();
+    enableReordering();
+    observeActiveStates();
+  }
+
+  /* -----------------------------
+     LOAD APP
+  ----------------------------- */
+  function loadAppBySlotKey(slotKey) {
+    const raw = localStorage.getItem(slotKey);
+    if (!raw) return;
+
+    const app = JSON.parse(raw);
+
+    iframeNameInput.value = slotKey;
+    iframeIconInput.value = app.icon || '';
+    htmlContentInput.value = app.code || '';
+    jsContentInput.value = '';
+
+    iframex.value = '97.8';
+    iframey.value = '93';
+    iframetop.value = '';
+    iframeleft.value = '1';
+  }
+
+  /* -----------------------------
+     REVEAL / HIDE HIDDEN ICONS
+  ----------------------------- */
+  function revealHiddenTaskbarIcon(slotKey) {
+    const el = document.querySelector(
+      `.app-container.hidden-slot[data-slot-key="${slotKey}"]`
+    );
+    if (el) el.style.display = '';
+  }
+
+  function hideHiddenTaskbarIcon(slotKey) {
+    const el = document.querySelector(
+      `.app-container.hidden-slot[data-slot-key="${slotKey}"]`
+    );
+    if (el) el.style.display = 'none';
+  }
+
+  /* -----------------------------
+     CLICK HANDLERS
+  ----------------------------- */
+  function bindTaskbarClicks() {
+    document.querySelectorAll('#savedIframesTaskbar .taskbar-button').forEach(btn => {
+      btn.onclick = () => {
+        const container = btn.closest('.app-container');
+        const slotKey = container.dataset.slotKey;
+
+        setActiveIcon(btn);
+        loadAppBySlotKey(slotKey);
+        createIframe();
+        btn.blur();
+      };
+    });
+  }
+
+  /* -----------------------------
+     OBSERVE activeoval STATE
+  ----------------------------- */
+  function observeActiveStates() {
+    document.querySelectorAll('.taskbar-button').forEach(btn => {
+      const observer = new MutationObserver(() => {
+        if (btn.classList.contains('activeoval')) {
+          const container = btn.closest('.app-container');
+          revealHiddenTaskbarIcon(container.dataset.slotKey);
+        }
+      });
+
+      observer.observe(btn, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    });
+  }
+
+  /* -----------------------------
+     CONTEXT MENU
+  ----------------------------- */
+  savedIframesTaskbar.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const target = e.target.closest('.app-container');
+    if (!target) return;
+
+    showTaskbarContextMenu(e.clientX, e.clientY, target.dataset.slotKey);
+  });
+
+  function showTaskbarContextMenu(x, y, slotKey) {
+    const menu = document.getElementById('taskbarContextMenu');
+    const removeBtn = document.querySelector('.removeAppButton');
+    const closeBtn = document.querySelector('.closeAppTaskbarButton');
+
+    const iframe = document.querySelector(
+      `.iframe-wrapper[data-iframe-name="${slotKey}"]`
+    );
+
+    closeBtn.style.display = iframe ? 'block' : 'none';
+    removeBtn.style.display = iframe ? 'none' : 'block';
+
+    menu.style.left = x + 'px';
+    menu.style.bottom = '60px';
+    menu.style.display = 'block';
+
+    closeBtn.onclick = () => {
+      removeIframeWrapperByName(slotKey);
+      hideHiddenTaskbarIcon(slotKey);
+      new Audio('./audio/close.mp3').play();
+      menu.style.display = 'none';
+    };
+
+    removeBtn.onclick = () => {
+      if (typeof unpinSlotApp === 'function') unpinSlotApp(slotKey);
+      updateTaskbarFromSlots(true);
+      menu.style.display = 'none';
+    };
+
+    window.addEventListener('click', () => {
+      menu.style.display = 'none';
+    }, { once: true });
+  }
+
+  /* -----------------------------
+     REORDERING (PINNED ONLY)
+  ----------------------------- */
+  function enableReordering() {
+    new Sortable(savedIframesTaskbar, {
+      animation: 150,
+      filter: '.hidden-slot',
+      onEnd(evt) {
+        const pinned = [...savedIframesTaskbar.children]
+          .filter(el => el.classList.contains('pinned'));
+
+        const a = pinned[evt.oldIndex]?.dataset.slot;
+        const b = pinned[evt.newIndex]?.dataset.slot;
+        if (a == null || b == null) return;
+
+        const da = localStorage.getItem(`slot_${a}`);
+        const db = localStorage.getItem(`slot_${b}`);
+
+        if (da) localStorage.setItem(`slot_${b}`, da);
+        else localStorage.removeItem(`slot_${b}`);
+
+        if (db) localStorage.setItem(`slot_${a}`, db);
+        else localStorage.removeItem(`slot_${a}`);
+
+        updateTaskbarFromSlots();
+      }
+    });
+  }
+
+  /* -----------------------------
+     LIVE SLOT WATCH (ALL SLOTS)
+  ----------------------------- */
+  function pollSlots() {
+    const snapshot = Object.keys(localStorage)
+      .filter(k => /^slot_\d+$/.test(k))
+      .map(k => k + localStorage.getItem(k))
+      .join('|');
+
+    if (snapshot !== slotSnapshot) {
+      const firstLoad = slotSnapshot === "";
+      slotSnapshot = snapshot;
+      updateTaskbarFromSlots(!firstLoad);
+    }
+  }
+
+  setInterval(pollSlots, 500);
+
+  /* Init */
+  updateTaskbarFromSlots();
+  </script>
+  <!-- END TASKBAR SCRIPT -->
+
+
+
+
+
+
+
+    <!-- StartAppScript - Slots-Based, Infinite Start Menu with Unpin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script>
+    if (typeof(Storage) === 'undefined') {
+        alert('Sorry, your browser does not support localStorage.');
+    }
+
+    function escapeHTML(str) {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /* Render Start Menu */
+    function updateStartMenu() {
+        const list = document.getElementById('sortable');
+        list.innerHTML = "";
+
+        Object.keys(localStorage)
+            .filter(key => key.startsWith('slot_'))
+            .sort((a,b) => parseInt(a.split('_')[1]) - parseInt(b.split('_')[1])) // Sort by slot number
+            .forEach(slotKey => {
+                const rawData = localStorage.getItem(slotKey);
+                if (!rawData) return; // hide empty slots
+
+                try {
+                    const app = JSON.parse(rawData);
+
+                    const li = document.createElement('li');
+                    li.className = 'sortable-item';
+                    li.dataset.id = slotKey;
+                    li.tabIndex = 0;
+
+                    li.innerHTML = `
+                        <img src="${app.icon || ''}" alt="App Icon">
+                        <p class="startapp-text">${app.name || 'Unnamed App'}</p>
+                    `;
+
+                    // Left click = launch app
+                    li.onclick = () => {
+                        loadStartMenuApp(slotKey);
+                        createIframe();
+                        toggleStartMenu();
+                    };
+
+                    // Right click = context menu
+                    li.oncontextmenu = e => {
+                        e.preventDefault();
+                        showStartContextMenu(e, slotKey);
+                        return false;
+                    };
+
+                    list.appendChild(li);
+                } catch(e) {
+                    console.error(`Failed to parse slot ${slotKey}`, e);
+                }
+            });
+
+        new Sortable(list, {
+            animation: 150,
+            ghostClass: 'sortable-ghost'
+        });
+      checkAndApplyToggleSwitchState();
+    }
+
+    /* Load app data into inputs */
+    function loadStartMenuApp(slotKey) {
+        const rawData = localStorage.getItem(slotKey);
+        if (!rawData) return;
+
+        const app = JSON.parse(rawData);
+        document.getElementById('iframeNameInput').value = slotKey;
+        document.getElementById('iframeIconInput').value = app.icon || '';
+        document.getElementById('htmlContentInput').value = app.code || '';
+        document.getElementById('jsContentInput').value = '';
+      document.getElementById('iframex').value ='97.8';
+      document.getElementById('iframey').value ='93';
+        document.getElementById('iframetop').value = '';
+        document.getElementById('iframeleft').value = '1';
+    }
+
+    /* Move app to Taskbar */
+        /* Pin app to Taskbar & first 8 slots */
+        function pinToTaskbar(slotKey) {
+            const rawData = localStorage.getItem(slotKey);
+            if (!rawData) return;
+
+            // Parse the app data
+            const app = JSON.parse(rawData);
+
+            // Check first 8 slots for empty
+            let targetSlot = null;
+            for (let i = 0; i < 8; i++) {
+                const data = localStorage.getItem(`slot_${i}`);
+                if (!data) {
+                    targetSlot = i;
+                    break;
+                }
+            }
+
+            // If no empty slot, replace slot 7
+            if (targetSlot === null) targetSlot = 7;
+
+            // Save app into the target slot
+            localStorage.setItem(`slot_${targetSlot}`, JSON.stringify(app));
+
+            // Remove from old slot if it was ≥ 8
+            const oldIndex = parseInt(slotKey.split('_')[1]);
+            if (oldIndex >= 8) localStorage.removeItem(slotKey);
+
+            // Add to taskbar if not already added
+            if (typeof addAppToTaskbar === 'function') addAppToTaskbar(`slot_${targetSlot}`);
+
+            // Update Start Menu + Taskbar
+            updateStartMenu();
+            if (typeof updateSavedTaskbarApps === 'function') updateSavedTaskbarApps();
+        }
+
+    /* Move app from Taskbar back to Start Menu */
+    function unpinSlotApp(slotKey) {
+        const slotIndex = parseInt(slotKey.split('_')[1]);
+        if (slotIndex > 7) return; // already outside first 8 slots
+
+        const appData = localStorage.getItem(slotKey);
+        if (!appData) return;
+
+        // Find first available slot ≥ 8
+        let newIndex = 8;
+        while (localStorage.getItem(`slot_${newIndex}`)) newIndex++;
+        localStorage.setItem(`slot_${newIndex}`, appData);
+
+        // Clear original slot
+        localStorage.removeItem(slotKey);
+
+        // Remove from taskbar
+        if (typeof removeAppFromTaskbar === 'function') removeAppFromTaskbar(slotKey);
+
+        updateStartMenu();
+        if (typeof updateSavedTaskbarApps === 'function') updateSavedTaskbarApps();
+    }
+
+    /* Fully uninstall app */
+    function uninstallSlotApp(slotKey) {
+        localStorage.removeItem(slotKey);
+        if (typeof removeAppFromTaskbar === 'function') removeAppFromTaskbar(slotKey);
+        removeIframeWrapperByName(slotKey);
+        updateStartMenu();
+        if (typeof updateSavedTaskbarApps === 'function') updateSavedTaskbarApps();
+    }
+
+    /* Context menu */
+        function showStartContextMenu(event, slotKey) {
+            const menu = document.getElementById('contextMenu');
+            const pinBtn = document.getElementById('saveAppButton');
+            const deleteBtn = document.getElementById('deleteAppButton');
+            const closeBtn = document.getElementById('closeAppButton');
+
+            menu.style.left = event.clientX + 'px';
+            menu.style.top = event.clientY + 'px';
+            menu.style.display = 'block';
+
+            const rawData = localStorage.getItem(slotKey);
+            if (!rawData) return;
+            const app = JSON.parse(rawData);
+
+            const slotIndex = parseInt(slotKey.split('_')[1]);
+
+            // Show Unpin only for slots 0-7
+            if (slotIndex >= 0 && slotIndex <= 7) {
+                pinBtn.textContent = 'Unpin from Taskbar';
+                pinBtn.onclick = () => { unpinSlotApp(slotKey); menu.style.display='none'; };
+            } else {
+                // Pin/unpin from Taskbar logic
+                const savedTaskbar = JSON.parse(localStorage.getItem('savedTaskbarApps') || '[]');
+                const isPinned = savedTaskbar.some(a => a.iframeName === slotKey);
+
+                if (isPinned) {
+                    pinBtn.textContent = 'Unpin from Taskbar';
+                    pinBtn.onclick = () => { removeAppFromTaskbar(slotKey); menu.style.display='none'; };
+                } else {
+                    pinBtn.textContent = 'Pin to Taskbar';
+                    pinBtn.onclick = () => { pinToTaskbar(slotKey); menu.style.display='none'; };
+                }
+            }
+
+            // Delete/uninstall
+            deleteBtn.textContent = 'Uninstall';
+            deleteBtn.onclick = () => { uninstallSlotApp(slotKey); menu.style.display='none'; };
+
+            // --- New Close App logic ---
+            const iframeWrapper = document.querySelector(`.iframe-wrapper[data-iframe-name="${slotKey}"]`);
+            if (iframeWrapper) {
+                closeBtn.style.display = 'block';
+                closeBtn.textContent = 'Close App';
+                closeBtn.onclick = () => {
+                    removeIframeWrapperByName(slotKey);
+                    var audio = new Audio('./audio/close.mp3');
+                    audio.play();
+                    slowmode();
+                    addSlowTaskbarStyle();
+                    document.getElementById('taskbar').classList.remove('taskbar-fullscreen');
+                    menu.style.display = 'none';
+                };
+            } else {
+                closeBtn.style.display = 'none';
+            }
+
+            // Hide the context menu when clicked outside
+            window.addEventListener('click', () => { menu.style.display='none'; }, { once: true });
+        }
+
+
+    /* Live updates */
+    window.addEventListener('storage', e => {
+        if (e.key.startsWith('slot_') || e.key === 'savedTaskbarApps') {
+            updateStartMenu();
+          const audio = new Audio('./audio/new.mp3');
+          audio.play();
+        }
+    });
+
+    // Initialize
+    updateStartMenu();
+    </script>
+
+
+
+
+
+<script>
+    document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
+
+    document.onkeydown = function (e) {
+      if (event.keyCode == 123) {
+        return false;
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.keyCode == "I".charCodeAt(0)) {
+        return false;
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.keyCode == "C".charCodeAt(0)) {
+        return false;
+      }
+
+      if (e.ctrlKey && e.keyCode == "U".charCodeAt(0)) {
+        return false;
+      }
+    };
+  </script>
+
+<script>
+function fastmode() {
+addFastTaskbarStyle();
+    function replaceText(element) {
+        if (element.nodeType === 3) { // TEXT_NODE
+            element.nodeValue = element.nodeValue
+                .replace(/\b(filter)\b/gi, "blafilt")
+                .replace(/\b(transition)\b/gi, "blatransiti");
+        } else {
+            for (let i = 0; i < element.childNodes.length; i++) {
+                replaceText(element.childNodes[i]);
+            }
+        }
+    }
+
+    replaceText(document.body);
+}
+
+function slowmode() {
+    function replaceText(element) {
+        if (element.nodeType === 3) { // TEXT_NODE
+            element.nodeValue = element.nodeValue
+                .replace(/\bblafilt\b/gi, "filter")
+                .replace(/\bblatransiti\b/gi, "transition");
+        } else {
+            for (let i = 0; i < element.childNodes.length; i++) {
+                replaceText(element.childNodes[i]);
+            }
+        }
+    }
+
+    replaceText(document.body);
+}
+
+function addFastTaskbarStyle() {
+  // Create a style element
+  var style = document.createElement('style');
+  // Set the inner text of the style element
+  style.innerText = `
+    .taskbar-fullscreen {
+      opacity: 0;
+    }`;
+
+  // Append the style element to the body
+  document.body.appendChild(style);
+}
+
+function addSlowTaskbarStyle() {
+  // Create a style element
+  var style = document.createElement('style');
+  // Set the inner text of the style element
+  style.innerText = `
+    .taskbar-fullscreen {
+      opacity: 0.5;
+    }`;
+
+  // Append the style element to the body
+  document.body.appendChild(style);
+}
+
+// Use these functions as needed
+// fastmode(); // Uncomment to add
+// slowmode(); // Uncomment to undo
+</script>
+    <script>
+        // Function to be triggered
+        function triggeredAppstoreFunction() {
+                    setActiveIcon(this);
+                    document.getElementById('iframeNameInput').value ='Appstore';
+                    document.getElementById('iframeIconInput').value ='./appstore/apps.png';
+		    document.getElementById('jsContentInput').value ='/* Version 3.1 */ ';
+                    document.getElementById('htmlContentInput').value ='ovalangloiframe frameborder=ovalquote0ovalquote style=ovalquoteheightovalcolon 100%ovalsolon widthovalcolon 100%ovalsolonovalquote src=ovalquote./appstore.htmlovalquoteovalanglcovalanglo/iframeovalanglc';
+                    document.getElementById('iframex').value ='97.8';
+document.getElementById('iframey').value ='93';
+                    document.getElementById('iframetop').value ='';
+                    document.getElementById('iframeleft').value ='1';
+                    createIframe(); dismissappstorereminderpopup();
+            // Clear the trigger from localStorage
+            localStorage.removeItem('triggerAppstoreFunction');
+        }
+
+        // Check localStorage for the trigger when the page loads
+        if (localStorage.getItem('triggerAppstoreFunction') === 'true') {
+            triggeredAppstoreFunction();
+        }
+
+        // Optional: You can also monitor localStorage changes dynamically
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'triggerAppstoreFunction' && event.newValue === 'true') {
+                triggeredAppstoreFunction();
+            }
+        });
+    </script>
+    <script>
+        // Function to be triggered
+        function triggeredOvalmojiFunction() {
+                    setActiveIcon(this);
+                    document.getElementById('iframeNameInput').value ='Appstore';
+                    document.getElementById('iframeIconInput').value ='./appstore/apps.png';
+		    document.getElementById('jsContentInput').value ='/* Version 3.1 */ ';
+                    document.getElementById('htmlContentInput').value ='ovalangloiframe frameborder=ovalquote0ovalquote style=ovalquoteheightovalcolon 100%ovalsolon widthovalcolon 100%ovalsolonovalquote src=ovalquote./ovalmoji/studio/index.htmlovalquoteovalanglcovalanglo/iframeovalanglc';
+                    document.getElementById('iframex').value ='90';
+                    document.getElementById('iframey').value ='90';
+                    document.getElementById('iframetop').value ='3';
+                    document.getElementById('iframeleft').value ='5';
+                    createIframe(); dismissappstorereminderpopup();
+            // Clear the trigger from localStorage
+            localStorage.removeItem('triggerOvalmojiFunction');
+        }
+
+        // Check localStorage for the trigger when the page loads
+        if (localStorage.getItem('triggerOvalmojiFunction') === 'true') {
+            triggeredOvalmojiFunction();
+        }
+
+        // Optional: You can also monitor localStorage changes dynamically
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'triggerOvalmojiFunction' && event.newValue === 'true') {
+                triggeredOvalmojiFunction();
+            }
+        });
+    </script>
+<script>
+function checkButtonPressAndEnterSetup() {
+    const buttonPressed = localStorage.getItem('setupcompleted');
+    
+    if (!buttonPressed) {
+        enterSetup();
+    } else {
+        // Create a new script element
+        const script = document.createElement('script');
+        // Set the src attribute to the desired script
+        script.src = './security/loginscript.js';
+        // Append the script to the document's head or body
+        document.head.appendChild(script); // or document.body.appendChild(script);
+    }
+}
+
+
+// Call the function to perform the check
+checkButtonPressAndEnterSetup();
+</script>
+<script>
+denyApp();
+</script>
+    <script>
+    const START_SHEET_ID = '1GL_INyPJ89oXl6QUrT9LnNfjCz6QkXeML__e8xkCtG0';
+    const START_SHEET_NAME = 'Sheet1';
+
+    const hFilters = {
+      gray: 'grayscale(100%)',
+      brown: 'hue-rotate(280deg) contrast(200%) brightness(150%)',
+      black: 'brightness(0%)',
+      blonde: 'hue-rotate(290deg) contrast(120%) brightness(300%)',
+      red: 'hue-rotate(260deg) contrast(190%) brightness(300%)'
+    };
+
+    const miiState = new Map();
+    let hasNewMessages = false;
+
+    /* -----------------------------
+       HELPERS
+    ----------------------------- */
+    function isToday(md) {
+      if (!md) return false;
+      const [m, d] = md.split('/').map(Number);
+      const t = new Date();
+      return t.getMonth() + 1 === m && t.getDate() === d;
+    }
+
+    function decodeLayers(raw) {
+      return raw.split(',').map(s => decodeURIComponent(s.trim()));
+    }
+
+    function getCurrentUserGroup() {
+      const input = document.getElementById('colH');
+      return input ? input.value.trim() : '';
+    }
+
+    /* -----------------------------
+       FETCH SHEET
+    ----------------------------- */
+    async function fetchSheet() {
+      const url =
+        `https://docs.google.com/spreadsheets/d/${START_SHEET_ID}/gviz/tq`
+        + `?sheet=${encodeURIComponent(START_SHEET_NAME)}&tqx=out:json`;
+
+      const res = await fetch(url);
+      const txt = await res.text();
+      const json = JSON.parse(txt.replace(/^[^(]*\(|\);?$/g, ''));
+      return json.table.rows;
+    }
+
+    /* -----------------------------
+       MAIN UPDATER
+    ----------------------------- */
+        const hoveredIcons = new WeakSet();
+
+    async function updateStartMenuMiis() {
+      const rows = await fetchSheet();
+      let detectedChange = false;
+      const userGroup = getCurrentUserGroup();
+
+      const appItems = [...document.querySelectorAll('#sortable .sortable-item')];
+      const iconMap = new Map();
+
+        appItems.forEach(li => {
+          const img = li.querySelector('img');
+          if (!img) return;
+
+          iconMap.set(img.src, li);
+
+          if (!li.querySelector('.app-mii-layer')) {
+            const layer = document.createElement('div');
+            layer.className = 'app-mii-layer';
+            li.style.position = 'relative';
+            li.appendChild(layer);
+          }
+
+          // 🔥 Hover detection
+          li.addEventListener('mouseenter', () => {
+            hoveredIcons.add(li);
+            layoutMiisForIcon(li); // 🚀 instant
+          });
+
+          li.addEventListener('mouseleave', () => {
+            hoveredIcons.delete(li);
+            layoutMiisForIcon(li); // 🚀 instant
+          });
+
+        });
+
+
+      const activeMiiIds = new Set();
+
+      rows.forEach(row => {
+        const [
+          idC,
+          ,
+          layersC,
+          hairC,
+          msgC,
+          dateC,
+          iconC,
+          groupC
+        ] = row.c;
+
+        if (!idC || !layersC || !iconC) return;
+
+        const sheetGroup = groupC?.v?.trim() || '';
+
+        if (userGroup && sheetGroup !== userGroup) return;
+
+        const id = idC.v.toString();
+        activeMiiIds.add(id);
+
+        const iconUrl = iconC.v.trim();
+        const targetLI = iconMap.get(iconUrl);
+        if (!targetLI) return;
+
+        const layerContainer = targetLI.querySelector('.app-mii-layer');
+
+        let state = miiState.get(id);
+        const message = msgC?.v?.trim() || '';
+        const dateStr = dateC?.v?.trim() || '';
+        const validMessage = message && isToday(dateStr);
+
+        if (!state) {
+          const mii = document.createElement('div');
+          mii.className = 'start-mii';
+          mii.dataset.miiId = id;
+
+          const floatWrap = document.createElement('div');
+          floatWrap.className = 'mii-float';
+
+          decodeLayers(layersC.v).forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            if (src.includes('/hairs/') && hFilters[hairC?.v]) {
+              img.style.filter = hFilters[hairC.v];
+            }
+            floatWrap.appendChild(img);
+          });
+
+          mii.appendChild(floatWrap);
+
+          state = {
+            el: mii,
+            message: null,
+            date: null,
+            version: 0,
+            lastUpdated: 0,
+            hasEverMessaged: false,
+            timeout: null
+          };
+
+          miiState.set(id, state);
+        }
+
+        if (state.message !== message || state.date !== dateStr) {
+          const hadMessageBefore = !!state.message;
+          state.message = message;
+          state.date = dateStr;
+          state.version++;
+
+          if (message && dateStr) {
+            state.hasEverMessaged = true;
+            state.lastUpdated = Date.now();
+            detectedChange = true;
+          } else if (!hadMessageBefore && !state.hasEverMessaged) {
+            state.lastUpdated = state.lastUpdated || Date.now() - 1;
+          }
+
+          const oldBubble = state.el.querySelector('.chat-bubble');
+          if (oldBubble) oldBubble.remove();
+          clearTimeout(state.timeout);
+        }
+
+        if (state.el.parentElement !== layerContainer) {
+          layerContainer.appendChild(state.el);
+        }
+
+        const existingBubble = state.el.querySelector('.chat-bubble');
+
+        if (validMessage) {
+          if (!existingBubble) {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.textContent = message;
+            state.el.appendChild(bubble);
+
+            const version = state.version;
+
+            function showBubble() {
+              if (version !== state.version) return;
+              bubble.classList.add('visible');
+
+              setTimeout(() => {
+                bubble.classList.remove('visible');
+                state.timeout = setTimeout(
+                  showBubble,
+                  8000 + Math.random() * 8000
+                );
+              }, 3000);
+            }
+
+            showBubble();
+          }
+        } else if (existingBubble) {
+          existingBubble.remove();
+          clearTimeout(state.timeout);
+        }
+      });
+
+      miiState.forEach((state, id) => {
+        if (!activeMiiIds.has(id)) {
+          state.el.remove();
+          miiState.delete(id);
+        }
+      });
+
+      iconMap.forEach(li => {
+        layoutMiisForIcon(li);
+      });
+
+
+
+      const startBtn = document.querySelector('.taskbar');
+      if (detectedChange && startBtn) {
+        startBtn.classList.add('has-new-messages');
+      }
+    }
+
+    document.querySelector('.taskbar-startbutton')
+      ?.addEventListener('click', () => {
+        document
+          .querySelector('.taskbar')
+          .classList.remove('has-new-messages');
+      });
+
+    updateStartMenuMiis();
+    setInterval(updateStartMenuMiis, 2000);
+
+      function layoutMiisForIcon(li) {
+        const layer = li.querySelector('.app-mii-layer');
+        if (!layer) return;
+
+        const states = [...layer.children]
+          .map(el => miiState.get(el.dataset.miiId))
+          .filter(Boolean)
+          .sort((a, b) => (b.lastUpdated || 0) - (a.lastUpdated || 0));
+
+        const isHovered = hoveredIcons.has(li);
+        const maxVisible = isHovered ? 4 : 2;
+
+        const visibleStates = states.slice(0, maxVisible);
+
+        const GAP = 40;
+        const totalWidth = (visibleStates.length - 1) * GAP;
+        const startX = -totalWidth / 2;
+
+        visibleStates.forEach((state, i) => {
+          const x = startX + i * GAP;
+
+          state.el.style.display = '';
+          state.el.style.opacity = '1';
+          state.el.style.pointerEvents = 'none';
+          state.el.style.zIndex = 100 + (visibleStates.length - i);
+          state.el.style.transform = `translate(${x}px, 0) scale(1)`;
+        });
+
+        states.slice(maxVisible).forEach(state => {
+          state.el.style.opacity = '0';
+          state.el.style.transform = 'translateY(8px) scale(0.95)';
+        });
+      }
+
+    </script>
+
+        <script>
+          // Icon elements
+          const settingsIcon = document.getElementById('settingsIcon');
+          const settingsIconDos = document.getElementById('settingsIcon2');
+          const speakBtn = document.getElementById('speakBtn');
+          const settingsBtn = document.getElementById('settingsBtn');
+          const settingsBtnDos = document.getElementById('settingsBtn2');
+          const refreshIcon = document.getElementById('refreshIcon');
+          const refreshBtn = document.getElementById('refreshBtn');
+
+
+
+
+          function getUrl() {return document.getElementById('scriptUrl').value.trim();}
+
+          function loadData() {
+            return new Promise((resolve, reject) => {
+              const url = getUrl();
+              const id = document.getElementById('idInput').value.trim();
+              if (!url || !id) {
+               // alert('Enter script URL and ID');
+                logincheck();
+                return reject('Missing URL or ID');
+              }
+              localStorage.setItem('savedID', id);
+              fetch(url + '?action=get&id=' + encodeURIComponent(id))
+                .then(r => r.json())
+                .then(data => {
+                  if (data.error) {
+                   // alert(data.error);
+                    return reject(data.error);
+                  }
+                  ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach((col, i) => {
+                    document.getElementById('col' + col).value = data.values[i];
+                  });
+                  resolve(); // Data loaded successfully
+                })
+                .catch(err => {
+                  logincheck();
+                 // console.error(err);
+                  //reject(err);
+                });
+            });
+          }
+
+
+          document.getElementById('loadBtn').addEventListener('click', loadData);
+
+          let offline = false;
+
+          function setOfflineMode(state) {
+            offline = state;
+          }
+
+          // Update sheet API
+          function submitUpdate(values) {
+            if (offline) return;
+
+            const url = getUrl();
+            const id = document.getElementById('idInput').value.trim();
+            fetch(url, {
+              method: 'POST',
+              body: JSON.stringify({ action: 'update', id, values })
+            })
+              .then(r => r.json());
+            // .then(resp => alert(resp.error || resp.status));
+          }
+
+
+          // Manual update from modal
+              document.getElementById('updateBtn').addEventListener('click', () => {
+            const vals = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].map(col =>
+              document.getElementById('col' + col).value
+            );
+            submitUpdate(vals);
+          });
+
+          function updatemyoos() {
+            const vals = ['B', 'C', 'D', 'E', 'F', 'G', 'H'].map(col =>
+              document.getElementById('col' + col).value
+            );
+            submitUpdate(vals);
+          }
+
+
+
+          // Main input: update E and F automatically on Enter
+          document.getElementById('sayMain').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+              const message = this.value.trim();
+              if (!message) return;
+              // retrieve existing B,C,D,G,H
+              const b = document.getElementById('colB').value || '';
+              const c = document.getElementById('colC').value || '';
+              const d = document.getElementById('colD').value || '';
+              const gPrev = document.getElementById('colG').value || '';
+              const h = document.getElementById('colH').value || '';
+              const i = document.getElementById('colI').value || '';
+              const dateStr = document.getElementById('colF').value || '';
+              // build values: B,C,D,E=message,F=date,G=original,Gprev,H
+              const full = [b, c, d, message, dateStr, gPrev, h, i];
+              submitUpdate(full);
+              this.value = '';
+              document.getElementById('sayMain').value = '';
+            }
+          });
+
+          // Main input: update E and F automatically on Enter
+          document.getElementById('sayMain').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+              const message = this.value.trim();
+              if (!message) return;
+              // retrieve existing B,C,D,G,H
+              const b = document.getElementById('colB').value || '';
+              const c = document.getElementById('colC').value || '';
+              const d = document.getElementById('colD').value || '';
+              const gPrev = document.getElementById('colG').value || '';
+              const h = document.getElementById('colH').value || '';
+              const i = document.getElementById('colI').value || '';
+              const dateStr = document.getElementById('colF').value || '';
+              // build values: B,C,D,E=message,F=date,G=original,Gprev,H
+              const full = [b, c, d, message, dateStr, gPrev, h, i];
+              submitUpdate(full);
+              this.value = '';
+              document.getElementById('sayMain').value = '';
+            }
+          });
+
+          function sendGameMessage() {
+            const input = document.getElementById('sayMain');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Retrieve existing B, C, D, G, H, I
+            const b = document.getElementById('colB').value || '';
+            const c = document.getElementById('colC').value || '';
+            const d = document.getElementById('colD').value || '';
+            const gPrev = document.getElementById('colG').value || '';
+            const h = document.getElementById('colH').value || '';
+            const i = document.getElementById('colI').value || '';
+
+            const dateStr = document.getElementById('colF').value || '';
+
+            // Build values: B, C, D, E=message, F=date, G=original, Gprev, H
+            const full = [b, c, d, message, dateStr, gPrev, h, i];
+
+            submitUpdate(full);
+            input.value = '';
+          document.getElementById("sayMain").value = "";
+          document.getElementById("colE").value = "";
+          }
+
+
+          // Autofill saved ID on load
+          window.addEventListener('DOMContentLoaded', () => {
+            const savedID = localStorage.getItem('savedID');
+            if (savedID) document.getElementById('idInput').value = savedID;
+            loadData().then(() => {
+
+        }).catch(err => {
+         logincheck();
+          });
+          });
+
+
+        </script>
+    <script>
+    // Keys in localStorage
+    const layersKey    = 'mii_layers';
+    const hairColorKey = 'mii_hair_color';
+
+    // Grab the two inputs
+    const layersInput = document.getElementById('colC');
+    const hairInput   = document.getElementById('colD');
+
+    if (!layersInput || !hairInput) {
+      console.error('Missing #colC or #colD in the DOM:', {
+        layersInput,
+        hairInput
+      });
+    }
+
+    // 1) On load, pull the “correct” values from localStorage
+    const storedLayers = localStorage.getItem(layersKey) || '';
+    const storedHair   = localStorage.getItem(hairColorKey) || '';
+
+    layersInput.value = storedLayers;
+    hairInput.value   = storedHair;
+
+    // 2) Initialize “previous” snapshots to exactly what was in localStorage
+    let prevLayersValue = storedLayers;
+    let prevHairValue   = storedHair;
+
+    // 3) Skip the very first pollSync so we don’t accidentally treat 
+    //    the initial load as “new data.” After that, canSave isn’t needed.
+    let skipFirstSync = true;
+
+    function pollSync() {
+      if (skipFirstSync) {
+        // Ensure the inputs match whatever is in localStorage right now,
+        // then set prev… to those values, and bail out.
+        const sLayers = localStorage.getItem(layersKey) || '';
+        const sHair   = localStorage.getItem(hairColorKey) || '';
+
+        layersInput.value   = sLayers;
+        hairInput.value     = sHair;
+        prevLayersValue     = sLayers;
+        prevHairValue       = sHair;
+        skipFirstSync       = false;
+
+        console.log('Initial sync complete. Loaded values:', {
+          layers: sLayers,
+          hair:   sHair
+        });
+        return;
+      }
+
+      // —— LAYERS FIELD ——
+      const currentLayers    = layersInput.value;
+      const storedLayersNow  = localStorage.getItem(layersKey) || '';
+
+      if (currentLayers !== prevLayersValue) {
+        // 🖉 The user (or JS) typed something new into “layers”:
+        console.log('User entered new layers data:', currentLayers);
+
+        localStorage.setItem(layersKey, currentLayers);
+        console.log('Saved layers to localStorage:', currentLayers);
+
+        prevLayersValue = currentLayers;
+        if (typeof updatemyoos === 'function') updatemyoos();
+
+      } else if (storedLayersNow !== prevLayersValue) {
+        // ↻ Some other tab (or code) changed “mii_layers” in localStorage:
+        console.log('Detected external update for layers:', storedLayersNow);
+
+        layersInput.value = storedLayersNow;
+        prevLayersValue   = storedLayersNow;
+        if (typeof updatemyoos === 'function') updatemyoos();
+      }
+
+      // —— HAIR FIELD ——
+      const currentHair   = hairInput.value;
+      const storedHairNow = localStorage.getItem(hairColorKey) || '';
+
+      if (currentHair !== prevHairValue) {
+        // 🖉 The user (or JS) typed something new into “hair”:
+        console.log('User entered new hair data:', currentHair);
+
+        localStorage.setItem(hairColorKey, currentHair);
+        console.log('Saved hair to localStorage:', currentHair);
+
+        prevHairValue = currentHair;
+        if (typeof updatemyoos === 'function') updatemyoos();
+
+      } else if (storedHairNow !== prevHairValue) {
+        // ↻ Some other tab (or code) changed “mii_hair_color” in localStorage:
+        console.log('Detected external update for hair:', storedHairNow);
+
+        hairInput.value = storedHairNow;
+        prevHairValue   = storedHairNow;
+        if (typeof updatemyoos === 'function') updatemyoos();
+      }
+    }
+
+    // 4) Run pollSync() every 500ms
+    setInterval(pollSync, 500);
+
+    // 5) Also respond immediately if a storage event comes from another tab
+    window.addEventListener('storage', (e) => {
+      if (e.key === layersKey || e.key === hairColorKey) {
+        console.log('Storage event detected:', e.key, '→', e.newValue);
+        pollSync();
+      }
+    });
+
+    // 6) Optional manual save function (always writes what’s currently in the inputs)
+    window.savemiimakerdata = function () {
+      const cLayers = layersInput.value;
+      const cHair   = hairInput.value;
+
+      console.log('Manual save called with values:', {
+        layers: cLayers,
+        hair:   cHair
+      });
+
+      localStorage.setItem(layersKey, cLayers);
+      localStorage.setItem(hairColorKey, cHair);
+
+      prevLayersValue = cLayers;
+      prevHairValue   = cHair;
+    };
+    </script>
+
+
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("sayMain").addEventListener("input", function () {
+          document.getElementById("colE").value = this.value;
+        });
+      });
+
+    </script>
+    <script>
+    (() => {
+      const source = document.getElementById('iframeIconInput');
+      const target = document.getElementById('colG');
+      const updateBtn = document.getElementById('updateBtn');
+
+      if (!source || !target || !updateBtn) return;
+
+      let lastValue = source.value;
+
+      function handleChange() {
+        const val = source.value;
+
+        if (!val || val === lastValue) return;
+
+        lastValue = val;
+        target.value = val;
+
+        // Let all other code finish first
+        setTimeout(() => {
+          updateBtn.click();
+        }, 0);
+      }
+
+      /* 1️⃣ Manual typing / paste */
+      source.addEventListener('input', handleChange);
+      source.addEventListener('change', handleChange);
+
+      /* 2️⃣ JS-driven updates (polling, collision-safe) */
+      setInterval(() => {
+        if (source.value !== lastValue) {
+          handleChange();
+        }
+      }, 50); // fast enough, safe enough
+    })();
+
+        function toggleFullscreen(element) {
+        var audio=new Audio('./audio/fullscreen.mp3');audio.play();
+          var iframeWrapper = element.parentNode;
+          var contentContainer = iframeWrapper.querySelector(".app-content");
+          var dragBar = iframeWrapper.querySelector(".iframe-drag-bar");
+          var resizableHandles = iframeWrapper.querySelectorAll(".ui-resizable-handle");
+
+          if (!iframeWrapper.classList.contains("fullscreen")) {
+            document.getElementById("taskbar").classList.add('taskbar-fullscreen');
+            var prevPosition = {
+              left: iframeWrapper.style.left,
+              top: iframeWrapper.style.top,
+              borderRadius: contentContainer.style.borderRadius,
+              pointerEvents: getComputedStyle(dragBar).pointerEvents,
+            };
+
+            var prevSize = {
+              width: contentContainer.style.width,
+              height: contentContainer.style.height
+            };
+
+            iframeWrapper.classList.add("fullscreen");
+            iframeWrapper.style.left = "0";
+            iframeWrapper.style.top = "0";
+            contentContainer.style.borderRadius = "0";
+            dragBar.style.borderRadius = "0";
+            dragBar.style.pointerEvents = "none";
+
+            for (var i = 0; i < resizableHandles.length; i++) {
+              resizableHandles[i].style.pointerEvents = "none";
+            }
+
+            var exitFullscreenButton = document.createElement("div");
+            exitFullscreenButton.classList.add("exit-fullscreen-button");
+            exitFullscreenButton.setAttribute("onclick", "exitFullscreen(this);");
+            iframeWrapper.appendChild(exitFullscreenButton);
+
+            // Store the previous position, border radius, and pointer events in data attributes for reference when exiting fullscreen
+            iframeWrapper.dataset.prevPosition = JSON.stringify(prevPosition);
+
+            // Store the previous size in data attributes for reference when exiting fullscreen
+            iframeWrapper.dataset.prevSize = JSON.stringify(prevSize);
+
+            // Set the iframe wrapper size to fill the screen
+            iframeWrapper.style.width = "100vw";
+            iframeWrapper.style.height = "100vh";
+            contentContainer.style.width = "100%";
+            contentContainer.style.height = "100%";
+            iframeWrapper.classList.add("exitfullscreen");
+            setTimeout(function() {
+              iframeWrapper.classList.remove("exitfullscreen");
+            }, 800);
+          } else {
+            iframeWrapper.classList.remove("fullscreen");
+            document.getElementById("taskbar").classList.remove('taskbar-fullscreen');
+
+            var exitFullscreenButton = iframeWrapper.querySelector(".exit-fullscreen-button");
+            exitFullscreenButton.remove();
+
+            // Reset to the default/original state
+            iframeWrapper.style.left = "";
+            iframeWrapper.style.top = "";
+            contentContainer.style.borderRadius = "";
+            dragBar.style.borderRadius = "";
+            dragBar.style.pointerEvents = "";
+
+            for (var i = 0; i < resizableHandles.length; i++) {
+              resizableHandles[i].style.pointerEvents = "";
+            }
+
+            iframeWrapper.style.width = "";
+            iframeWrapper.style.height = "";
+            contentContainer.style.width = "100%";
+            contentContainer.style.height = "100%";
+          }
+        }
+    </script>
+  <script>
+    const potatoToggle = document.getElementById("potatoToggle");
+    const ROOT = document.documentElement;
+    const STORAGE_KEY = "potatoMode";
+
+    function enablePotatoMode() {
+      ROOT.classList.add("potato-mode");
+      addSlowTaskbarStyle();
+      updateActiveOvalStyle();
+      localStorage.setItem(STORAGE_KEY, "on");
+    }
+
+    function disablePotatoMode() {
+      ROOT.classList.remove("potato-mode");
+      removeSlowTaskbarStyle();
+      unupdateActiveOvalStyle();
+      localStorage.setItem(STORAGE_KEY, "off");
+    }
+
+    // Restore saved state on load
+    const savedMode = localStorage.getItem(STORAGE_KEY);
+
+    if (savedMode === "on") {
+      potatoToggle.checked = true;
+      enablePotatoMode();
+    }
+
+    // Listen for toggle changes
+    potatoToggle.addEventListener("change", () => {
+      if (potatoToggle.checked) {
+        enablePotatoMode();
+      } else {
+        disablePotatoMode();
+      }
+    });
+
+    function addSlowTaskbarStyle() {
+      // Create a style element
+      var style = document.createElement('style');
+      // Set the inner text of the style element
+      style.innerText = `
+        .taskbar-fullscreen {
+          opacity: 0.05;
+        }`;
+
+      // Append the style element to the body
+      document.body.appendChild(style);
+    }
+    function removeSlowTaskbarStyle() {
+      // Create a style element
+      var style = document.createElement('style');
+      // Set the inner text of the style element
+      style.innerText = `
+        .taskbar-fullscreen {
+          opacity: .5;
+        }`;
+
+      // Append the style element to the body
+      document.body.appendChild(style);
+    }
+    function updateActiveOvalStyle() {
+        // Create a new <style> element
+        const style = document.createElement('style');
+        style.type = 'text/css';
+
+        // Define the new style for .activeoval
+        const newStyle = `
+            .activeoval {
+                opacity: 0.4;
+                transform: scale(0.9);
+            }
+        `;
+
+        // Add the style to the <style> element
+        style.appendChild(document.createTextNode(newStyle));
+
+        // Append the <style> element to the <head> of the document
+        document.head.appendChild(style);
+
+        console.log('.activeoval style added with opacity: 0.4');
+    }
+    function unupdateActiveOvalStyle() {
+        // Create a new <style> element
+        const style = document.createElement('style');
+        style.type = 'text/css';
+
+        // Define the new style for .activeoval
+        const newStyle = `
+            .activeoval {
+                opacity: 1;
+            }
+        `;
+
+        // Add the style to the <style> element
+        style.appendChild(document.createTextNode(newStyle));
+
+        // Append the <style> element to the <head> of the document
+        document.head.appendChild(style);
+
+        console.log('.activeoval style added with opacity: 0.4');
+    }
+  </script>
+  <script>
+    function logincheck() {
+      if (navigator.onLine) {
+        window.location.href = '../failconnect.html';
+      } else {
+        // Device is offline, do nothing
+        console.log("No internet connection. Staying on current page.");
+      }
+    }
+  </script>
+
+
+
+  <script  src="./scripts/clockscript.js"></script>
+</html>
