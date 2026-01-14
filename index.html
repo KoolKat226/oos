@@ -4612,7 +4612,7 @@ style="background: white; position:absolute;top:0;left:0;border:none;width:100%;
   <iframe style="z-index: 4; opacity: 1;" id="tutorialFrame" src="./tutorial/index.html"></iframe>
   <script>
     // Check localStorage to see if tutorial should be skipped
-    if (localStorage.getItem('tutorialSeen') === 'true') {
+    if (localStorage.getItem('tutorialSeen3') === 'true') {
       document.getElementById('tutorialFrame').style.display = 'none';
       document.getElementById('mainApp').style.display = 'flex';
     }
@@ -4620,7 +4620,7 @@ style="background: white; position:absolute;top:0;left:0;border:none;width:100%;
     // Listen for tutorial complete or skip
     window.addEventListener('message', (event) => {
       if (event.data === 'tutorialComplete') {
-        localStorage.setItem('tutorialSeen', 'true');
+        localStorage.setItem('tutorialSeen3', 'true');
         document.getElementById('tutorialFrame').style.display = 'none';
         document.getElementById('mainApp').style.display = 'flex';
       }
