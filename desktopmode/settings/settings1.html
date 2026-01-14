@@ -1,0 +1,645 @@
+<html><head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+   {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;
+}
+</style>
+    <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 20px;
+	    border-radius: 100%;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+	    border-radius: 30px;
+        }
+
+.slider:hover {
+filter: drop-shadow(0 3mm 4mm rgb(89, 89, 89));
+transition: 0.5s ease;
+}
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+	    border-radius: 30px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #71ad97;
+        }
+
+        input:focus + .slider {
+    transform: scale(.9);
+transition: transform 0.3s ease;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+	    border-radius: 30px;
+        }
+    </style>
+<style>
+body {
+  font-family: Inter, sans-serif;
+}
+
+.sidenav {
+  font-family: Inter, sans-serif;
+  height: 100%;
+  width: 270px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+background:rgba(217, 217, 217,.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Horizontally center */
+  justify-content: center; /* Vertically center */
+}
+
+
+
+.sidenav a {
+  text-decoration: none;
+  color: #818181;
+  display: block;
+  font-family: SF Pro Display Semi-Bold;
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #4E4E4E;
+  background: #fff4ec;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0.5px 1px;
+  user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  width: 150px;
+  height: 30px;
+  margin: 2px auto; /* Center horizontally */
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Horizontally center */
+  justify-content: center; /* Vertically center */
+transition:.2s;
+cursor:pointer;
+}
+
+.sidenav a:hover {
+transform: scale(1.05);
+transition:.2s;
+}
+
+.sidenav a.active {
+  background: #b5ada7;
+}
+
+.sidenav a:focus {
+transform: scale(.9);
+transition:.2s;
+}
+
+.main {
+  margin-left: 270px; /* Same as the width of the sidenav */
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+</style>
+<style>
+html,body{
+    -webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+-o-user-select: none;
+user-select: none;
+}
+        img {
+  pointer-events: none;
+}
+
+</style>
+
+<style>
+@font-face { font-family: Inter; src: url('./Inter-SemiBold.ttf'); } 
+h4 {text-align: center;}
+</style>
+<style>
+.center {
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+<style>
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.btn {
+  border: 0px solid gray;
+  color: gray;
+  background-color: #e0e0e0;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-size: 20px;
+  font-weight: bold;
+font-family: 'Inter', sans-serif;
+}
+
+settingcool {
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+settingcool:hover {
+filter: drop-shadow(0 3mm 4mm rgb(89, 89, 89));
+transition: 0.5s ease;
+}
+
+settingcool:focus {
+    transform: scale(.9);
+transition: transform 0.3s ease;
+}
+
+.upload-btn-wrapper input[type=file] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+hr.rounded {
+  border-top: 8px solid #bbb;
+  border-radius: 5px;
+  border: 4px solid gray;
+width: 70%
+}
+
+@font-face {
+  font-family: SF Pro Display Semi-Bold;
+  src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+@font-face {
+  font-family: SF Pro Display;
+  src: url(./font/pro/SF-Pro-Display-Regular.otf);
+}
+
+@font-face {
+  font-family: SF Pro Display Bold;
+  src: url(./font/pro/SF-Pro-Display-Bold.otf);
+}
+
+div {
+  font-family: SF Pro Display Semi-Bold;
+}
+
+p {
+  font-family: SF Pro Display Bold;
+}
+
+        input {
+
+margin-left: 12%;
+            height: 52px;
+            padding: 10px;
+  font-family: SF Pro Display Bold;
+            font-size: 20px;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            color: #333;
+            overflow: hidden; /* Hide the scrollbar */
+            resize: none; /* Disable resizing */
+        }
+
+  #image-container {
+    cursor: pointer;
+width: 100%;
+  }
+
+  #main-image {
+    width: 40px;
+    height: 40px;
+margin-left: -180%;
+border-radius: 100%;
+pointer-events: auto;
+    cursor: pointer;
+transition: transform 0.3s ease;
+  }
+
+  #main-image:focus {
+    transform: scale(.8);
+transition: transform 0.3s ease;
+  }
+
+  #custom-image-input {
+    display: none;
+pointer-events: auto;
+  }
+
+.profiledata {
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+width: 90%;
+border-radius: 200px;
+      background: rgba(201, 201, 201, .8);
+margin-bottom: 20px;
+transition: 0.5s ease;
+
+}
+
+.profiledata:hover {
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31));
+transition: 0.5s ease;
+}
+
+.profiledata:focus {
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31));
+transition: 0.5s ease;
+}
+
+.main a {
+  text-decoration: none;
+  color: #818181;
+  display: block;
+  font-family: SF Pro Display Semi-Bold;
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #4E4E4E;
+  background: #fff4ec;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0.5px 1px;
+  user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  margin: 2px auto; /* Center horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Horizontally center */
+  justify-content: center; /* Vertically center */
+transition:.2s;
+cursor:pointer;
+border-radius: 200px;
+background: rgba(201, 201, 201, .8); 
+}
+
+.main a:hover {
+transform: scale(1.05);
+transition:.2s;
+}
+
+.main a.active {
+  background: #b5ada7;
+}
+
+.main a:focus {
+transform: scale(.9);
+transition:.2s;
+}
+
+.switchboxthing {
+  text-align: center;
+display: flex;
+  justify-content: center;
+  align-items: center;
+color: #303030;
+}
+</style>
+
+</head>
+<body>
+
+<div class="sidenav">
+<div tabindex="0" class="profiledata">
+<div>
+    <input tabindex="0" maxlength="15" placeholder="Human" id="myInput" type="text" oninput="saveInputValue(this.value)" value="">
+    
+    <script>
+        // Load the saved value from local storage, if available
+        window.onload = function() {
+            var savedValue = localStorage.getItem('olexosuservalue');
+            if (savedValue) {
+                document.getElementById('myInput').value = savedValue;
+            }
+        }
+        
+        // Save the input value to local storage
+        function saveInputValue(value) {
+            localStorage.setItem('olexosuservalue', value);
+        }
+    </script>
+</div>
+<div id="image-container">
+  <img tabindex="0" id="main-image" src="https://upload.wikimedia.org/wikipedia/en/4/4e/Spoonman.jpg" alt="Main Image">
+</div>
+<input style="" type="file" id="custom-image-input" accept="image/*">
+
+<script>
+document.getElementById('image-container').addEventListener('click', function() {
+  document.getElementById('custom-image-input').click();
+});
+
+document.getElementById('custom-image-input').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function() {
+    const imageDataUrl = reader.result;
+    localStorage.setItem('customImage', imageDataUrl);
+    document.getElementById('main-image').setAttribute('src', imageDataUrl);
+  };
+
+  reader.readAsDataURL(file);
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  const customImage = localStorage.getItem('customImage');
+  if (customImage) {
+    document.getElementById('main-image').setAttribute('src', customImage);
+  }
+});
+
+function switchPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.main').forEach(function(page) {
+    page.style.display = 'none';
+  });
+  
+  // Display the selected page
+  document.getElementById(pageId).style.display = 'block';
+  
+  // Remove 'active' class from all links
+  document.querySelectorAll('.sidenav a').forEach(function(link) {
+    link.classList.remove('active');
+  });
+  
+  // Add 'active' class to the clicked link
+  document.querySelector('a[data-page="' + pageId + '"]').classList.add('active');
+}
+</script>
+</div>
+
+  <a tabindex="0" invtouch="true" data-page="page1" class="active" onclick="switchPage('page1')">Customize</a>
+  <a tabindex="0" invtouch="true" data-page="page2" onclick="switchPage('page2')">Security</a>
+  <a tabindex="0" invtouch="true" data-page="page3" onclick="switchPage('page3')">System</a>
+  <a tabindex="0" invtouch="true" data-page="page4" onclick="switchPage('page4')">Developer</a>
+</div>
+
+<div id="page1" style="display:block" class="main">
+<div style="margin-left: 20px; margin-top: 55px;"><p style="font-size: 37px; font-family: SF Pro Display Bold;">Customize</p></div>
+<div style="margin-left: 20%">
+
+<div style=" margin-top:30px;">
+<iframe style=" width: 70%; height: 210px; border-radius:20px;" frameBorder="0" src="../system/wallpaperengine/setwall.html"></iframe>
+</div>
+
+<div style="width: 70%;" class="settingcool"><a style="color: #303030; font-size: 16px; height: 30px; margin-top: 10px;" tabindex="0" data-page="page2" onclick="document.getElementById('wallpaperfiles').click(); saveURL('./wallpaperengine/custom/view.html');">Upload Wallpaper</a>  <input type="file" id="wallpaperfiles" name="files[]" multiple style="display: none;" />
+<output style="display:none" id="wallpaper"></output></div>
+
+
+<div>
+<div class="switchboxthing" style=" border-radius: 200px;
+     background: rgba(201, 201, 201, .8); height: 44px; width: 70%; margin-top:10px;">
+<p style="font-family: SF Pro Display Semi-Bold; font-size: 16px;">Dark Mode</p>
+    <label style="margin-left: 20px;"  class="switch">
+        <input type="checkbox" onclick="window.open('../index.html', '_parent'); toggleFunction('ovalosdarkmode')" id="ovalosdarkmode">
+        <span class="slider"></span>
+    </label>
+</div>
+
+<div style="display:none;" class="otherswitches">
+    <label class="switch">
+        <input type="checkbox" onclick="toggleFunction('toggleSwitch2')" id="toggleSwitch2">
+        <span class="slider"></span>
+    </label>
+
+    <label class="switch">
+        <input type="checkbox" onclick="toggleFunction('toggleSwitch3')" id="toggleSwitch3">
+        <span class="slider"></span>
+    </label>
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="page2" style="display:none" class="main">
+something cooler
+
+</div>
+
+<div id="page3" style="display:none" class="main">
+<br>
+<div class="center">
+<img style="height: 70px;" src="../images/ovaloslogo.png">
+</div>
+<div class="center">
+  <p style="width:550px; color: #666666;font-size: 18px;">
+
+OvalOS Desktop - Version 6.0.0
+
+</p> 
+</div>
+<br>
+<div class="center">
+  <p style="width:550px; color: #777777;font-size: 15px;">
+
+OVALOS TERMS AND CONDITIONS
+<br>
+Copyright (c) 2024 Jackson Coleman (Jacsyn)
+<br>
+All rights reserved.
+<br>
+This software and associated documentation files (the "Software") are the property of Jackson Coleman (Jacsyn) and are protected by copyright law and international treaties. Unauthorized reproduction or distribution of the Software, or any portion thereof, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+This license does not grant you any rights to copy, modify, distribute, or create derivative works of the Software. You are not permitted to sell, license, sublicense, or otherwise exploit the Software for any commercial purpose or any other purpose whatsoever.
+
+This license does not grant you any rights in the trademarks or service marks of Jackson Coleman (Jacsyn), or any third party.
+
+The Software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall Jackson Coleman (Jacsyn) be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
+
+By using the Software, you agree to be bound by the terms and conditions of this license. If you do not agree to these terms and conditions, you are not authorized to use the Software.
+
+All rights reserved.
+
+</p> 
+</div>
+
+<br>
+<br>
+
+
+</div>
+
+<div id="page4" style="display:none" class="main">
+something amazing
+
+</div>
+
+<div style="z-index: -1; position: fixed; top: 0px; background:rgba(255, 246, 237); width:100%; height: 100%;   margin-left: 262px; /* Same as the width of the sidenav */">
+</div>
+
+<!-- DARK MODE START-->
+
+<script>
+  function invertColors() {
+    function invert(str,type){
+      var t1 = str.split("(");
+      var t2 = t1[1].split(")");
+      var t3 = t2[0].split(",");
+      t3.forEach(function(v,i){
+        if(i<3){
+          if(type=="color")
+            t3[i] = (255 - parseInt(v))<50?120:(255 - parseInt(v));
+          else
+            t3[i] = (255 - parseInt(v));
+        }
+      })
+      t3 = t3.join(",");
+      return t1[0]+"("+t3+")";
+    }
+
+    //invert color and backgroundcolor of every dom node
+    document.querySelectorAll('*:not([invTouch])').forEach(function(node) {
+      var style  = window.getComputedStyle(node);
+      node.style.backgroundColor = invert(style.backgroundColor,"back");
+      node.style.color = invert(style.color,"color");
+      node.setAttribute("invTouch", "true");
+    });
+    console.log("Colors Inverted!");
+  }
+
+  // Call the function to invert colors when needed
+</script>
+
+<script>
+function changePowerDark() {
+    // Get all image elements
+    var darkmodeimages = document.getElementsByTagName('img');
+    
+    // Loop through each image element
+    for (var i = 0; i < darkmodeimages.length; i++) {
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/power.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/powerdark.svg');
+        }
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/lock.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/lockdark.svg');
+        }
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/search.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/searchdark.svg');
+        }
+        if (darkmodeimages[i].getAttribute('src') === './images/startbuttons/darkmode.svg') {
+            darkmodeimages[i].setAttribute('src', './images/startbuttons/darkmodedark.svg');
+        }
+    }
+}
+
+</script>
+
+<!-- DARK MODE END-->
+
+<!-- OVALOS CUSTOM SETTINGS START-->
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+        if (isEnabled) {
+  invertColors();
+        } else {
+
+        }
+    </script>
+<!-- OVALOS CUSTOM SETTINGS END-->
+ 
+    <script>
+        function toggleFunction(toggleId) {
+            const toggleSwitch = document.querySelector(`#${toggleId}`);
+            if (toggleSwitch.checked) {
+                // Toggle switch is enabled
+                localStorage.setItem(`${toggleId}Enabled`, 'true');
+            } else {
+                // Toggle switch is disabled
+                localStorage.setItem(`${toggleId}Enabled`, 'false');
+            }
+        }
+
+        // Check localStorage for the previous state of toggle switch 1
+        const isovalosdarkmodeEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+        const ovalosdarkmode = document.querySelector('#ovalosdarkmode');
+        // Update toggle switch 1 state based on localStorage
+        ovalosdarkmode.checked = isovalosdarkmodeEnabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const istoggleSwitch2Enabled = localStorage.getItem('toggleSwitch2Enabled') === 'true';
+        const toggleSwitch2 = document.querySelector('#toggleSwitch2');
+        // Update toggle switch 1 state based on localStorage
+        toggleSwitch2.checked = istoggleSwitch2Enabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const istoggleSwitch3Enabled = localStorage.getItem('toggleSwitch3Enabled') === 'true';
+        const toggleSwitch3 = document.querySelector('#toggleSwitch3');
+        // Update toggle switch 1 state based on localStorage
+        toggleSwitch3.checked = istoggleSwitch3Enabled;
+
+
+    </script>
+<script>
+        function saveURL(url) {
+            localStorage.setItem('savedURL', url);
+        }
+</script>
+<script src="./wallpaper.js"></script>
+
+</body>
+</html>

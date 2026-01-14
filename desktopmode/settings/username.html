@@ -1,0 +1,17 @@
+
+    <input tabindex="0" maxlength="15" placeholder="Human" id="myInput" type="text" oninput="saveInputValue(this.value)" value="">
+    
+    <script>
+        // Load the saved value from local storage, if available
+        window.onload = function() {
+            var savedValue = localStorage.getItem('olexosuservalue');
+            if (savedValue) {
+                document.getElementById('myInput').value = savedValue;
+            }
+        }
+        
+        // Save the input value to local storage
+        function saveInputValue(value) {
+            localStorage.setItem('olexosuservalue', value);
+        }
+    </script>

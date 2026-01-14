@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customizable Image Page</title>
+<style>
+  #image-container {
+    width: 300px;
+    height: 300px;
+    cursor: pointer;
+  }
+  #custom-image-input {
+    display: none;
+  }
+</style>
+</head>
+<body>
+<div id="image-container">
+  <img id="main-image" src="https://upload.wikimedia.org/wikipedia/en/4/4e/Spoonman.jpg" alt="Main Image">
+</div>
+<input type="file" id="custom-image-input" accept="image/*">
+
+<script>
+document.getElementById('image-container').addEventListener('click', function() {
+  document.getElementById('custom-image-input').click();
+});
+
+document.getElementById('custom-image-input').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function() {
+    const imageDataUrl = reader.result;
+    localStorage.setItem('customImage', imageDataUrl);
+    document.getElementById('main-image').setAttribute('src', imageDataUrl);
+  };
+
+  reader.readAsDataURL(file);
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  const customImage = localStorage.getItem('customImage');
+  if (customImage) {
+    document.getElementById('main-image').setAttribute('src', customImage);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- DARK MODE START-->
+<script>
+function applyBackgroundToSliders() {
+    // Select all elements with the class "otherslider" or "slider"
+    const elements = document.querySelectorAll('.otherslider, .slider');
+    
+    // Loop through each element and apply the background color
+    elements.forEach(function(element) {
+        element.style.backgroundColor = "rgb(51, 51, 51)";
+    });
+}
+
+function applyBackgroundToPasswordInput() {
+    // Select the element with the ID "passwordInput"
+    const element = document.querySelector('#passwordInput');
+    
+    // Check if the element exists, then apply the background color
+    if (element) {
+        element.style.backgroundColor = "rgb(51, 51, 51)";
+    }
+}
+
+// Call the function to apply the background color
+
+</script>
+<script>
+function applyBackgroundToSliders() {
+    // Select all elements with the class "otherslider" or "slider"
+    const elements = document.querySelectorAll('.otherslider, .slider');
+    
+    // Loop through each element and apply the background color
+    elements.forEach(function(element) {
+        element.style.backgroundColor = "rgb(51, 51, 51)";
+    });
+}
+</script>
+<script>
+function checkAndApplyToggleSwitchState() {
+    // Check localStorage for the previous state of toggle switch 1
+    const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+    if (isEnabled) {
+        invertColors();
+applyBackgroundToSliders();
+applyBackgroundToPasswordInput();
+    } else {
+return;
+    }
+}
+</script>
+<script>
+  function invertColors() {
+    function invert(str,type){
+      var t1 = str.split("(");
+      var t2 = t1[1].split(")");
+      var t3 = t2[0].split(",");
+      t3.forEach(function(v,i){
+        if(i<3){
+          if(type=="color")
+            t3[i] = (255 - parseInt(v))<50?120:(255 - parseInt(v));
+          else
+            t3[i] = (255 - parseInt(v));
+        }
+      })
+      t3 = t3.join(",");
+      return t1[0]+"("+t3+")";
+    }
+
+    //invert color and backgroundcolor of every dom node
+    document.querySelectorAll('*:not([invTouch])').forEach(function(node) {
+      var style  = window.getComputedStyle(node);
+      node.style.backgroundColor = invert(style.backgroundColor,"back");
+      node.style.color = invert(style.color,"color");
+      node.setAttribute("invTouch", "true");
+    });
+    console.log("Colors Inverted!");
+changeImgDark();
+  }
+
+  // Call the function to invert colors when needed
+</script>
+
+<!-- DARK MODE END-->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings</title>
+<style>
+   {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;
+}
+</style>
+    <style>
+
+#passwordInput {
+font-family: SF Pro Display Semi-Bold;
+}
+
+        .sortableitem {
+            text-align: left;
+            display: flex;
+            align-items: center;
+            border-radius: 0px;
+            height: 50px;
+            margin-top: 5%;
+            background: rgba(245, 243, 240, .8);
+            font-family: SF Pro Display Semi-Bold;
+            cursor: url('../assets/cursors/Link.cur'), pointer;
+            justify-content: space-between;
+            transition: .4s;
+            padding: 0 20px;
+        }
+
+        .sortableitemicon {
+            height: 45px;
+            width: 45px;
+            border-radius: 13px;
+        }
+
+        .sortableitemname {
+            margin-left: 20px;
+        }
+    </style>
+<style>
+body {
+    background: rgba(238, 238, 238, .5);
+}
+
+@font-face {
+    font-family: SF Pro Display Semi-Bold;
+    src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+@font-face {
+    font-family: SF Pro Display;
+    src: url(./font/pro/SF-Pro-Display-Regular.otf);
+}
+
+@font-face {
+    font-family: SF Pro Display Bold;
+    src: url(./font/pro/SF-Pro-Display-Bold.otf);
+}
+
+div {
+    font-family: SF Pro Display Semi-Bold;
+}
+
+.tile {
+    border-radius: 30px;
+    margin-top: 5%;
+    width: 30%;
+overflow: auto; 
+    height: 100%;
+    background: rgba(245, 245, 245, .7);
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31, .2));
+      backdrop-filter: saturate(180%) blur(14px);
+    transition:.3s;
+}
+
+.installbtn {
+cursor: url('../assets/cursors/Link.cur'), pointer; color: #242424; border-radius: 20px; font-family: SF Pro Display Semi-bold; width: 80px; background-color: #c9c9c9; border: none; padding: 10px; transition:.3s;
+}
+
+.installbtn:hover {
+transform: scale(.9);
+    transition:.3s;
+}
+
+.installbtn:focus {
+transform: scale(.8);
+background-color: #757575;
+    transition:.3s;
+}
+
+.clockbtn {
+cursor: url('../assets/cursors/Link.cur'), pointer; color: #242424; border-radius: 20px; font-family: SF Pro Display Semi-bold; width: 70px; background-color: #c9c9c9; border: none; padding: 10px; transition:.3s; 
+transform: scale(.9);
+}
+
+.clockbtn:hover {
+transform: scale(.87);
+border: 0px solid #71ad97;
+    transition:.3s;
+}
+
+
+.applied {
+    background: rgba(79, 102, 73, .8);
+            border-radius: 20px;
+transform: scale(1.2);
+    transition:.3s;
+}
+
+.center {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tilesparent {
+    height: 80vh; /* 80% of the viewport height */
+    display: flex;
+    flex-wrap: wrap; /* Ensure tiles wrap to the next line if there isn't enough space */
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+}
+
+
+.settingheader {
+    color: #3b3b3b;
+    font-size: 30px;
+    margin-top: 20px;
+}
+
+.settingbutton {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    border-radius: 0px;
+    height: 50px;
+    margin-top: 5%;
+    background: rgba(245, 243, 240, .8);
+    cursor: pointer;
+    justify-content: space-between; /* Changed to space-between */
+    transition: .4s;
+    padding: 0 20px; /* Added padding to give space between text and switch */
+}
+
+.settingbutton:focus {
+    transform: scale(.9);
+    border-radius: 20px;
+    transition: .4s;
+    outline: none; /* Ensure no default focus outline */
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    border-radius: 100%;
+    margin-left: auto; /* Pushes the switch to the right */
+}
+
+.switch:hover {
+  border-color: #fff9e8;
+}
+
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: url('../assets/cursors/Link.cur'), pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+	    border-radius: 30px;
+        }
+
+.slider:hover {
+transition: 0.2s ease;
+transform: scale(.9);
+            background-color: #ada99e;
+}
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+	    border-radius: 30px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #71ad97;
+        }
+
+        input:focus + .slider {
+    transform: scale(1);
+transition: transform 0.3s ease;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+	    border-radius: 30px;
+        }
+
+.otherslider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #71ad97; /* Make the default color (when off) the on color */
+    -webkit-transition: .4s;
+    transition: .4s;
+    border-radius: 30px;
+}
+
+.otherslider:hover {
+    transition: 0.2s ease;
+    transform: scale(.9);
+    background-color: #ada99e;
+}
+
+.otherslider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    border-radius: 30px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+#toggleSpeedPopupSwitch:not(:checked) + .otherslider {
+    background-color: #71ad97; /* On color */
+}
+
+#toggleSpeedPopupSwitch:not(:checked) + .otherslider:before {
+    -webkit-transform: translateX(26px); /* Move the slider to the right */
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+    border-radius: 30px;
+}
+
+#toggleSpeedPopupSwitch:checked + .otherslider {
+    background-color: #ccc; /* Off color */
+}
+
+#toggleSpeedPopupSwitch:checked + .otherslider:before {
+    -webkit-transform: translateX(0); /* Move the slider to the left */
+    -ms-transform: translateX(0);
+    transform: translateX(0);
+    border-radius: 30px;
+}
+
+#toggleSpeedPopupSwitch:focus + .otherslider {
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+#ovalmojiSwitch:not(:checked) + .otherslider {
+    background-color: #71ad97; /* On color */
+}
+
+#ovalmojiSwitch:not(:checked) + .otherslider:before {
+    -webkit-transform: translateX(26px); /* Move the slider to the right */
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+    border-radius: 30px;
+}
+
+#ovalmojiSwitch:checked + .otherslider {
+    background-color: #ccc; /* Off color */
+}
+
+#ovalmojiSwitch:checked + .otherslider:before {
+    -webkit-transform: translateX(0); /* Move the slider to the left */
+    -ms-transform: translateX(0);
+    transform: translateX(0);
+    border-radius: 30px;
+}
+
+#uisoundswitch:focus + .otherslider {
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+#uisoundswitch:not(:checked) + .otherslider {
+    background-color: #71ad97; /* On color */
+}
+
+#uisoundswitch:not(:checked) + .otherslider:before {
+    -webkit-transform: translateX(26px); /* Move the slider to the right */
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+    border-radius: 30px;
+}
+
+#uisoundswitch:checked + .otherslider {
+    background-color: #ccc; /* Off color */
+}
+
+#uisoundswitch:checked + .otherslider:before {
+    -webkit-transform: translateX(0); /* Move the slider to the left */
+    -ms-transform: translateX(0);
+    transform: translateX(0);
+    border-radius: 30px;
+}
+
+#uisoundswitch:focus + .otherslider {
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+
+
+
+
+
+#updateReminderSwitch:focus + .otherslider {
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+#updateReminderSwitch:not(:checked) + .otherslider {
+    background-color: #71ad97; /* On color */
+}
+
+#updateReminderSwitch:not(:checked) + .otherslider:before {
+    -webkit-transform: translateX(26px); /* Move the slider to the right */
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+    border-radius: 30px;
+}
+
+#updateReminderSwitch:checked + .otherslider {
+    background-color: #ccc; /* Off color */
+}
+
+#updateReminderSwitch:checked + .otherslider:before {
+    -webkit-transform: translateX(0); /* Move the slider to the left */
+    -ms-transform: translateX(0);
+    transform: translateX(0);
+    border-radius: 30px;
+}
+
+#updateReminderSwitch:focus + .otherslider {
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+         input[type=text] { 
+
+
+width: 90%;
+            height: 32px;
+            padding: 0px;
+  font-family: SF Pro Display Bold;
+            font-size: 20px;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            color: #333;
+            overflow: hidden; /* Hide the scrollbar */
+            resize: none; /* Disable resizing */
+        }
+
+  #image-container {
+    height: 40px;
+width: 40%;
+float: right;
+  }
+
+  #main-image {
+    width: 40px;
+    height: 40px;
+float: right;
+border-radius: 100%;
+pointer-events: auto;
+    cursor: pointer;
+transition: transform 0.3s ease;
+  }
+
+  #main-image:focus {
+    transform: scale(.8);
+transition: transform 0.3s ease;
+  }
+
+  #custom-image-input {
+    display: none;
+pointer-events: auto;
+  }
+
+.profiledata {
+    text-align: center;
+    display: flex;
+
+    align-items: center;
+width: 70%;
+
+border-radius: 200px;
+      background: rgba(201, 201, 201, .8);
+transition: 0.5s ease;
+
+}
+
+.profiledata:hover {
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31));
+transition: 0.5s ease;
+}
+
+.profiledata:focus {
+filter: drop-shadow(0 3mm 4mm rgb(31, 31, 31));
+transition: 0.5s ease;
+}
+
+ input[type=password] {
+font-family: SF Pro Display;
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #3D3D3D;
+  background: #d1dbe0;
+  border: none;
+  box-shadow: 0px 0.5px 1px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  text-align: center;
+  width:50%;
+  height:30px;
+  margin-left: 5px;
+    box-sizing:border-box;
+    transition:.3s;
+  }
+
+  input[type=password]:hover{
+background: #bfb6aa;
+}
+  
+  input[type=password]:focus{
+    border-color:#42ffc0;
+background: #bfb6aa;
+  }
+
+.logonbutton {
+  padding: 6px 14px;
+  border-radius: 30px;
+  color: #3D3D3D;
+  margin-left: 5px;
+  height:20px;
+  background: #d1dbe0;
+cursor:pointer;
+    transition:.3s;
+}
+
+.logonbutton:hover {
+    border-color:#42ffc0;
+  background: #bfb6aa;
+    transition:.3s;
+}
+
+.logonbutton:focus {
+transform: scale(.8);
+    transition:.3s;
+}
+</style>
+</head>
+<body>
+
+<div class="tilesparent">
+    <div class="tile">
+        <div class="center"><a class="settingheader">Customize</a></div>
+        <iframe style="margin-top: 10px; width: 100%; height: 210px; border-radius: 0px;" frameBorder="0" src="../system/wallpaperengine/setwall.html"></iframe>
+            <div onclick="document.getElementById('wallpaperfiles').click(); saveURL('./wallpaperengine/custom/view.html');" tabindex="0" class="settingbutton">
+                <a tabindex="-1" style="color: #303030; font-size: 16px; height: 30px; margin-top: 10px;" data-page="page2">Upload Wallpaper</a> <img style="height: 43px;" src="./upload.png">
+                <input type="file" id="wallpaperfiles" name="files[]" multiple style="display: none;" />
+                <output style="display:none" id="wallpaper"></output>
+        </div>
+        <div class="settingbutton"><p style="color: #303030; font-size: 16px;">Dark Mode</p>
+    <label style="margin-left: 4%;"  class="switch">
+        <input type="checkbox" onclick="window.open('../index.html', '_parent'); toggleFunction('ovalosdarkmode')" id="ovalosdarkmode">
+        <span class="slider"></span>
+    </label></div>
+<div style="display:none" class="settingbutton"><p style="color: #303030; font-size: 16px;">Ovalmoji</p>
+    <label style="margin-left: 4%;"  class="switch">
+        <input type="checkbox" onclick="window.open('../index.html', '_parent'); toggleFunction('ovalmojiSwitch')" id="ovalmojiSwitch">
+        <span class="otherslider"></span>
+    </label></div>
+<div class="settingbutton">
+    <p style="color: #303030; font-size: 16px;">Manage Clock:</p><br>
+    <button id="analogBtn" class="clockbtn" onclick="buttonClickHandler(this, './clock/install.html', 'labloader');">Analog</button>
+    <button id="digitalBtn" class="clockbtn" onclick="buttonClickHandler(this, './digitalclock/install.html', 'labloader');">Digital</button>
+    <button id="fancyBtn" class="clockbtn" onclick="buttonClickHandler(this, './cooldigitalclock/install.html', 'labloader');">Fancy</button>
+</div>
+
+<script>
+    // Function to handle button click and store the last clicked button
+    function buttonClickHandler(button, url, target) {
+        // Remove focus class from all buttons
+        document.querySelectorAll('.clockbtn').forEach(btn => btn.classList.remove('focus-class'));
+
+        // Add focus class to the clicked button
+        button.classList.add('focus-class');
+
+        // Store the id of the clicked button in localStorage
+        localStorage.setItem('lastClickedButton', button.id);
+
+        // Open the URL
+        window.open(url, target);
+    }
+
+    // Function to apply focus class to the last clicked button on page load
+    function applyLastClickedButtonFocus() {
+        const lastClickedButtonId = localStorage.getItem('lastClickedButton');
+        if (lastClickedButtonId) {
+            const button = document.getElementById(lastClickedButtonId);
+            if (button) {
+                button.classList.add('focus-class');
+            }
+        }
+    }
+
+    // Apply the focus class on page load
+    applyLastClickedButtonFocus();
+</script>
+
+<style>
+    .focus-class {
+transform: scale(1);
+    transition:.3s;
+        border: 2px solid #71ad97;
+    }
+</style>
+
+<br>
+    </div>
+    <div id="securitytile" style="z-index: 2; margin-left: 10px;" class="tile">
+        <div class="center"><a class="settingheader">Manage</a></div>
+<div style="margin-top: 15px;" class="center">
+<div tabindex="0" class="profiledata">
+<div>
+    <input tabindex="0" maxlength="15" placeholder="Human" id="myInput" type="text" oninput="saveInputValue(this.value)" value="">
+    
+    <script>
+        // Load the saved value from local storage, if available
+        window.onload = function() {
+            var savedValue = localStorage.getItem('olexosuservalue');
+            if (savedValue) {
+                document.getElementById('myInput').value = savedValue;
+            }
+        }
+        
+        // Save the input value to local storage
+        function saveInputValue(value) {
+            localStorage.setItem('olexosuservalue', value);
+        }
+    </script>
+</div>
+<div id="image-container">
+  <img tabindex="0" id="main-image" src="../images/defaultpic.png" alt="Main Image">
+</div>
+<input style="" type="file" id="custom-image-input" accept="image/*">
+
+<script>
+document.getElementById('image-container').addEventListener('click', function() {
+  document.getElementById('custom-image-input').click();
+});
+
+document.getElementById('custom-image-input').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function() {
+    const imageDataUrl = reader.result;
+    localStorage.setItem('customImage', imageDataUrl);
+    document.getElementById('main-image').setAttribute('src', imageDataUrl);
+  };
+
+  reader.readAsDataURL(file);
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  const customImage = localStorage.getItem('customImage');
+  if (customImage) {
+    document.getElementById('main-image').setAttribute('src', customImage);
+  }
+});
+</script>
+</div>
+
+</div>
+    <div style="margin-top: 15px;" class="center">
+            <input style="display:none" type="password" id="passwordInput" placeholder="Set a password...">
+            <img style="display:none" tabindex="0" class="logonbutton" src="../images/go.png" onclick="setPassword()">
+</div>
+
+<div style="display:none" class="settingbutton"><p style="color: #303030; font-size: 16px;">Speed Prompts</p>
+    <label class="switch">
+        <input type="checkbox" onclick="window.open('../index.html', '_parent'); toggleFunction('toggleSpeedPopupSwitch')" id="toggleSpeedPopupSwitch">
+        <span class="otherslider"></span>
+    </label></div>
+
+
+<div class="settingbutton"><p style="color: #303030; font-size: 16px;">Night Light</p>
+    <label class="switch">
+        <input type="checkbox" onclick="window.open('../index.html', '_parent'); toggleFunction('nightlightswitch')" id="nightlightswitch">
+        <span class="slider"></span>
+    </label></div>
+
+<div class="settingbutton"><p style="color: #303030; font-size: 16px;">UI Sounds</p>
+    <label class="switch">
+        <input type="checkbox" onclick="window.open('../index.html', '_parent'); toggleFunction('uisoundswitch')" id="uisoundswitch">
+        <span class="otherslider"></span>
+    </label></div>
+
+<div style="display:none" class="settingbutton"><p style="color: #303030; font-size: 16px;">Update Reminders</p>
+    <label class="switch">
+        <input type="checkbox" onclick="toggleFunction('updateReminderSwitch')" id="updateReminderSwitch">
+        <span class="otherslider"></span>
+    </label></div>
+
+<div style="display:none" class="settingbutton"><p style="color: #303030; font-size: 16px;">Manage Startup Apps:</p></div>
+
+<div style="display:none" id="appsContainer"></div>
+<div style="display:none" class="settingbutton"><p style="color: #303030; font-size: 16px;">Developer Mode</p>
+    <button style="" class="installbtn" onclick="window.open('./labsinstaller.html', 'labloader');">Install</button>
+</div>
+
+</div>
+    <div style="margin-left: 10px;" class="tile">
+        <div class="center"><a class="settingheader">System</a></div>
+<br>
+<div class="center">
+<img style="height: 70px;" src="../images/ovaloslogo.png">
+</div>
+<div class="center">
+  <p style="width:550px; color: #383e4f;font-size: 18px;">
+
+OlexOS 7 Desktop - 7.0.0
+
+</p> 
+</div>
+<div class="center">
+  <p style="width:550px; color: #9e9e9e;font-size: 15px;">
+
+OlexOS 7 Desktop TERMS AND CONDITIONS
+<br>
+Copyright (c) 2026 Jackson Coleman (Jacsyn)
+<br>
+All rights reserved.
+<br>
+This software and associated documentation files (the "Software") are the property of Jackson Coleman (Jacsyn) and are protected by copyright law and international treaties. Unauthorized reproduction or distribution of the Software, or any portion thereof, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+
+This license does not grant you any rights to copy, modify, distribute, or create derivative works of the Software. You are not permitted to sell, license, sublicense, or otherwise exploit the Software for any commercial purpose or any other purpose whatsoever.
+
+This license does not grant you any rights in the trademarks or service marks of Jackson Coleman (Jacsyn), or any third party.
+
+The Software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall Jackson Coleman (Jacsyn) be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
+
+By using the Software, you agree to be bound by the terms and conditions of this license. If you do not agree to these terms and conditions, you are not authorized to use the Software.
+
+All rights reserved.
+
+</p> 
+</div>
+
+<br>
+<br>
+
+    </div>
+</div>
+<script>
+function changeImgDark() {
+    // Get all image elements
+    var darkmodeimages = document.getElementsByTagName('img');
+    
+    // Loop through each image element
+    for (var i = 0; i < darkmodeimages.length; i++) {
+        if (darkmodeimages[i].getAttribute('src') === './upload.png') {
+            darkmodeimages[i].setAttribute('src', './uploadd.png');
+        }
+    }
+}
+</script>
+<script>
+    function saveURL(url) {
+        localStorage.setItem('savedURL', url);
+    }
+
+    // Add event listener to set focus when the settingbutton is clicked
+    document.querySelectorAll('.settingbutton').forEach(button => {
+        button.addEventListener('click', function() {
+            this.focus();
+        });
+    });
+</script>
+
+<!-- OVALOS CUSTOM SETTINGS START-->
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+        if (isEnabled) {
+  invertColors();
+        } else {
+
+        }
+    </script>
+<!-- OVALOS CUSTOM SETTINGS END-->
+ 
+<script>
+function replaceBackgroundColor(oldColor, newColor) {
+    // Get all elements in the document
+    const allElements = document.querySelectorAll('*');
+
+    // Loop through each element
+    allElements.forEach(element => {
+        // Get the computed style of the element
+        const computedStyle = window.getComputedStyle(element);
+        // Check if the background color matches the oldColor
+        if (computedStyle.backgroundColor === oldColor) {
+            // Replace the background color with the newColor
+            element.style.backgroundColor = newColor;
+        }
+    });
+}
+
+// Replace background color from rgb(142, 82, 104) to rgb(51, 51, 51)
+</script>
+
+    <script>
+        function toggleFunction(toggleId) {
+            const toggleSwitch = document.querySelector(`#${toggleId}`);
+            if (toggleSwitch.checked) {
+                // Toggle switch is enabled
+                localStorage.setItem(`${toggleId}Enabled`, 'true');
+            } else {
+                // Toggle switch is disabled
+                localStorage.setItem(`${toggleId}Enabled`, 'false');
+            }
+        }
+
+        // Check localStorage for the previous state of toggle switch 1
+        const isovalosdarkmodeEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+        const ovalosdarkmode = document.querySelector('#ovalosdarkmode');
+        // Update toggle switch 1 state based on localStorage
+        ovalosdarkmode.checked = isovalosdarkmodeEnabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const istoggleSpeedPopupSwitchEnabled = localStorage.getItem('toggleSpeedPopupSwitchEnabled') === 'true';
+        const toggleSpeedPopupSwitch = document.querySelector('#toggleSpeedPopupSwitch');
+        // Update toggle switch 1 state based on localStorage
+        toggleSpeedPopupSwitch.checked = istoggleSpeedPopupSwitchEnabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const isnightlightswitchEnabled = localStorage.getItem('nightlightswitchEnabled') === 'true';
+        const nightlightswitch = document.querySelector('#nightlightswitch');
+        // Update toggle switch 1 state based on localStorage
+        nightlightswitch.checked = isnightlightswitchEnabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const isuisoundswitchEnabled = localStorage.getItem('uisoundswitchEnabled') === 'true';
+        const uisoundswitch = document.querySelector('#uisoundswitch');
+        // Update toggle switch 1 state based on localStorage
+        uisoundswitch.checked = isuisoundswitchEnabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const isovalmojiSwitchEnabled = localStorage.getItem('ovalmojiSwitchEnabled') === 'true';
+        const ovalmojiSwitch = document.querySelector('#ovalmojiSwitch');
+        // Update toggle switch 1 state based on localStorage
+        ovalmojiSwitch.checked = isovalmojiSwitchEnabled;
+
+        // Check localStorage for the previous state of toggle switch 1
+        const isupdateReminderSwitchEnabled = localStorage.getItem('updateReminderSwitchEnabled') === 'true';
+        const updateReminderSwitch = document.querySelector('#updateReminderSwitch');
+        // Update toggle switch 1 state based on localStorage
+        updateReminderSwitch.checked = isupdateReminderSwitchEnabled;
+    </script>
+
+
+<script>
+function newHandleKeyPress(event) {
+    if (event.key === "Enter") {
+        setPassword();
+    }
+}
+
+var passwordInput = document.getElementById("passwordInput");
+passwordInput.addEventListener("keydown", newHandleKeyPress);
+</script>
+
+<!-- START OvalOS CURSOR ADDON -->
+
+<style>
+.wallpaperbarrier {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+</style>
+<div style="z-index: -3;" id="backgroundbarrier" class="wallpaperbarrier"></div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get all elements
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        const style = getComputedStyle(element);
+        if (style.cursor === 'pointer') {
+            element.style.cursor = "url('../assets/cursors/Link.cur'), pointer";
+        }
+    });
+});
+
+</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+            const activeSwitches = JSON.parse(localStorage.getItem('activeSwitches')) || [];
+            const appsContainer = document.getElementById('appsContainer');
+
+            savedApps.forEach(app => {
+                // Modify icon URL if it starts with ./
+                let iconUrl = app.iframeIcon;
+                if (iconUrl.startsWith('./')) {
+                    iconUrl = iconUrl.replace('./', '../');
+                }
+
+                const appHTML = `
+                    <div class="sortableitem">
+                        <img class="sortableitemicon" src="${iconUrl}">
+                        <p class="sortableitemname">${app.iframeName}</p>
+                        <label class="switch">
+                            <input type="checkbox" ${activeSwitches.includes(app.iframeName) ? 'checked' : ''} onclick="toggleAppStartup('${app.iframeName}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                `;
+                appsContainer.innerHTML += appHTML;
+            });
+checkAndApplyToggleSwitchState();
+
+        });
+
+        function toggleAppStartup(appName, isChecked) {
+            let activeSwitches = JSON.parse(localStorage.getItem('activeSwitches')) || [];
+            if (isChecked) {
+                if (!activeSwitches.includes(appName)) {
+                    activeSwitches.push(appName);
+                }
+            } else {
+                activeSwitches = activeSwitches.filter(name => name !== appName);
+            }
+            localStorage.setItem('activeSwitches', JSON.stringify(activeSwitches));
+
+            if (window.opener) {
+                window.opener.postMessage({ type: 'toggleApp', appName: appName }, '*');
+            } else {
+                console.log('No opener window found.');
+            }
+        }
+    </script>
+<link rel="stylesheet" href="../cursor.css">
+<iframe style="display:none;" name="labloader" src=""></iframe>
+ 
+
+
+<!-- END OvalOS CURSOR ADDON -->
+
+<script src="./wallpaper.js"></script>
+<script src="../security/loginscript.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customizable Image Page</title>
+<style>
+  #image-container {
+    width: 100%;
+    height: 100%;
+  }
+  #custom-ovalwallpaper-input {
+    display: none;
+  }
+
+#wallpaper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
+z-index: 1;
+}
+</style>
+</head>
+<body>
+<div id="image-container">
+  <img id="wallpaper" src="https://upload.wikimedia.org/wikipedia/en/4/4e/Spoonman.jpg" alt="Main Image">
+</div>
+<input type="file" id="custom-ovalwallpaper-input" accept="image/*">
+
+<script>
+document.getElementById('image-container').addEventListener('click', function() {
+  document.getElementById('custom-ovalwallpaper-input').click();
+});
+
+document.getElementById('custom-ovalwallpaper-input').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function() {
+    const imageDataUrl = reader.result;
+    localStorage.setItem('ovalwallpaper', imageDataUrl);
+    document.getElementById('wallpaper').setAttribute('src', imageDataUrl);
+  };
+
+  reader.readAsDataURL(file);
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  const ovalwallpaper = localStorage.getItem('ovalwallpaper');
+  if (ovalwallpaper) {
+    document.getElementById('wallpaper').setAttribute('src', ovalwallpaper);
+  }
+});
+</script>
+</body>
+</html>
