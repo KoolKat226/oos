@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 2</title>
+</head>
+<body>
+    <h1>Page 2</h1>
+    <div id="sortable"></div>
+
+<!-- StartAppScript - START -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script>
+    // Check if localStorage is supported
+    if (typeof(Storage) !== 'undefined') {
+        // Function to update the displayed apps
+        function updateSavedApps() {
+            // Retrieve saved app data from localStorage
+            const savedApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+
+            // Clear the existing content
+            document.getElementById('sortable').innerHTML = "";
+
+            // Loop through each saved app and create the HTML
+            savedApps.forEach(app => {
+                const savedIframeHTML = `<li class="sortable-item" data-id="${app.iframeName}" oncontextmenu="showContextMenu(event, '${app.iframeName}'); return false;" onclick="setActiveIcon(this); document.getElementById('iframeNameInput').value ='${app.iframeName}'; document.getElementById('iframeIconInput').value ='${app.iframeIcon}'; document.getElementById('iframeURLInput').value ='${app.iframeURL}'; document.getElementById('iframex').value ='${app.iframex}'; document.getElementById('iframey').value ='${app.iframey}'; document.getElementById('iframetop').value ='${app.iframetop}'; document.getElementById('iframeleft').value ='${app.iframeleft}'; ${app.jsCode}; ${app.iframemode === 'fullscreen' ? 'createFullscreenIframe();' : app.iframemode === 'none' ? '' : 'createIframe();'}; toggleStartMenu();" tabindex="0"><img src="${app.iframeIcon}">
+                        <p>${app.iframeName}</p>
+                    </li>`;
+
+                // Append the saved app HTML to the container
+                document.getElementById('sortable').innerHTML += savedIframeHTML;
+            });
+
+            // Enable drag-and-drop functionality
+            new Sortable(document.getElementById('sortable'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onUpdate: saveOrderToLocalStorage
+            });
+        }
+
+        // Function to save the order to localStorage after rearranging
+        function saveOrderToLocalStorage() {
+            const sortedItems = Array.from(document.getElementById('sortable').children);
+            const newOrder = sortedItems.map(item => item.dataset.id);
+
+            // Retrieve saved app data from localStorage
+            const savedApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+
+            // Create a new array with the sorted order
+            const updatedApps = newOrder.map(iframeName => savedApps.find(app => app.iframeName === iframeName));
+
+            // Save the updated array to localStorage
+            localStorage.setItem('savedApps', JSON.stringify(updatedApps));
+        }
+
+        // Initial update when the page loads
+        updateSavedApps();
+
+        // Listen for changes in localStorage and update the displayed apps
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'savedApps') {
+                updateSavedApps();
+            }
+        });
+
+        // Function to add app to taskbar manually
+// Function to add app to taskbar manually
+function addAppToTaskbar(iframeName) {
+    // Retrieve saved taskbar apps from localStorage
+    let savedTaskbarApps = JSON.parse(localStorage.getItem('savedTaskbarApps')) || [];
+    
+    // Check if the app with the same name already exists in the taskbar
+    const appExists = savedTaskbarApps.some(app => app.iframeName === iframeName);
+    if (!appExists) {
+        // If the app doesn't exist, retrieve its data from savedApps
+        const appData = JSON.parse(localStorage.getItem('savedApps')).find(app => app.iframeName === iframeName);
+        
+        // Push the app data to the taskbar apps array
+        savedTaskbarApps.push(appData);
+        
+        // Save the updated taskbar apps array to localStorage
+        localStorage.setItem('savedTaskbarApps', JSON.stringify(savedTaskbarApps));
+        
+        // Update the displayed taskbar apps
+        updateSavedTaskbarApps();
+    }
+}
+
+
+        // Function to show context menu
+        function showContextMenu(event, iframeName) {
+            event.preventDefault();
+            const contextMenu = document.getElementById('contextMenu');
+            const saveAppButton = document.getElementById('saveAppButton');
+            const deleteAppButton = document.getElementById('deleteAppButton');
+
+            // Position the context menu
+            contextMenu.style.left = event.clientX + 'px';
+            contextMenu.style.top = event.clientY + 'px';
+
+            // Show the context menu
+            contextMenu.style.display = 'block';
+
+            // Add click event to the save button
+            saveAppButton.onclick = function() {
+                addAppToTaskbar(iframeName);
+                contextMenu.style.display = 'none';
+            };
+
+            // Add click event to the delete button
+            deleteAppButton.onclick = function() {
+                deleteApp(iframeName);
+                contextMenu.style.display = 'none';
+updateSavedTaskbarApps();
+            };
+
+            // Hide the context menu when clicked outside
+            window.addEventListener('click', function() {
+                contextMenu.style.display = 'none';
+            });
+        }
+
+document.getElementById("deleteAppButton").addEventListener("click", function() {
+    // Find the parent iframe wrapper of the delete button
+    var iframeWrapperFullscreen = document.querySelector('.iframe-wrapper.fullscreen.scaling-up');
+    var iframeWrapper = document.querySelector('.iframe-wrapper.scaling-up');
+    if (iframeWrapperFullscreen) {
+        removeIframeWrapper(iframeWrapperFullscreen.querySelector(".iframe-option-bar"));
+removeIframeWrapper(iframeWrapper.querySelector(".iframe-option-bar"));
+    document.getElementById("taskbar").classList.remove('taskbar-fullscreen');
+    }
+    if (iframeWrapper) {
+        removeIframeWrapper(iframeWrapper.querySelector(".iframe-option-bar"));
+removeIframeWrapper(iframeWrapperFullscreen.querySelector(".iframe-option-bar"));
+    document.getElementById("taskbar").classList.remove('taskbar-fullscreen');
+    }
+});
+
+
+        // Function to delete an app
+        function deleteApp(iframeName) {
+            // Retrieve saved app data from localStorage
+            const savedApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+            const savedTaskbarApps = JSON.parse(localStorage.getItem('savedTaskbarApps')) || [];
+
+            // Find and remove the app with the specified iframeName from both arrays
+            const updatedApps = savedApps.filter(app => app.iframeName !== iframeName);
+            const updatedTaskbarApps = savedTaskbarApps.filter(app => app.iframeName !== iframeName);
+
+            // Save the updated arrays to localStorage
+            localStorage.setItem('savedApps', JSON.stringify(updatedApps));
+            localStorage.setItem('savedTaskbarApps', JSON.stringify(updatedTaskbarApps));
+
+            // Update the displayed apps
+            updateSavedApps();
+        }
+    } else {
+        alert('Sorry, your browser does not support localStorage.');
+    }
+</script>
+<!-- StartAppScript - END -->
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 1</title>
+</head>
+<body>
+    <h1>Page 1</h1>
+    <label for="iframeName">Iframe Name:</label>
+    <input type="text" id="iframeName" />
+    <br>
+    <label for="iframeIcon">Iframe Icon URL:</label>
+    <input type="text" id="iframeIcon" />
+    <br>
+    <label for="iframeURL">Iframe URL:</label>
+    <input type="text" id="iframeURL" />
+    <br>
+    <label for="iframemode">Mode:</label>
+    <input type="text" id="iframemode" />
+    <br>
+    <label for="jsCode">JS code:</label>
+    <textarea id="jsCode"></textarea> <!-- Changed to textarea for multiline input -->
+    <br>
+    <label for="iframex">Iframe X:</label>
+    <input type="text" id="iframex" />
+    <br>
+    <label for="iframey">Iframe Y:</label>
+    <input type="text" id="iframey" />
+    <br>
+    <label for="iframetop">Iframe Top:</label>
+    <input type="text" id="iframetop" />
+    <br>
+    <label for="iframeleft">Iframe Left:</label>
+    <input type="text" id="iframeleft" />
+    <br>
+    <button onclick="saveData()">Save</button>
+
+    <script>
+        function saveData() {
+            // Get values from input fields
+            const iframeName = document.getElementById('iframeName').value;
+            const iframeIcon = document.getElementById('iframeIcon').value;
+            const iframeURL = document.getElementById('iframeURL').value;
+            const iframemode = document.getElementById('iframemode').value.toLowerCase(); // Convert to lowercase for case-insensitivity
+            const jsCode = document.getElementById('jsCode').value; // Get JS code
+            const iframex = document.getElementById('iframex').value;
+            const iframey = document.getElementById('iframey').value;
+            const iframetop = document.getElementById('iframetop').value;
+            const iframeleft = document.getElementById('iframeleft').value;
+
+            // Check if localStorage is supported
+            if (typeof(Storage) !== 'undefined') {
+                // Retrieve existing app data from localStorage or initialize an empty array for start menu and taskbar
+                const savedApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+                const savedTaskbarApps = JSON.parse(localStorage.getItem('savedTaskbarApps')) || [];
+
+                // Check if an app with the same icon already exists in start menu
+                const existingAppIndex = savedApps.findIndex(app => app.iframeIcon === iframeIcon);
+
+                if (existingAppIndex !== -1) {
+                    // Update the existing app with the new data in start menu
+                    savedApps[existingAppIndex] = { iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft };
+                } else {
+                    // Add new app data to the array in start menu
+                    savedApps.push({ iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft });
+                }
+
+                // Check if an app with the same icon already exists in taskbar
+                const existingTaskbarAppIndex = savedTaskbarApps.findIndex(app => app.iframeIcon === iframeIcon);
+
+                if (existingTaskbarAppIndex !== -1) {
+                    // Update the existing app with the new data in taskbar
+                    savedTaskbarApps[existingTaskbarAppIndex] = { iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft };
+                } else {
+                    // Add new app data to the array in taskbar
+                    savedTaskbarApps.push({ iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft });
+                }
+
+                // Save the updated arrays to localStorage
+                localStorage.setItem('savedApps', JSON.stringify(savedApps));
+                localStorage.setItem('savedTaskbarApps', JSON.stringify(savedTaskbarApps));
+
+                // Redirect to the second page
+                window.location.href = 'secondPage.html';
+            } else {
+                alert('Sorry, your browser does not support localStorage.');
+            }
+        }
+    </script>
+</body>
+</html>
