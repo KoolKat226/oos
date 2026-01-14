@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Store</title>
+<!-- DARK MODE START-->
+
+<script>
+  function invertColors() {
+    function invert(str,type){
+      var t1 = str.split("(");
+      var t2 = t1[1].split(")");
+      var t3 = t2[0].split(",");
+      t3.forEach(function(v,i){
+        if(i<3){
+          if(type=="color")
+            t3[i] = (255 - parseInt(v))<50?120:(255 - parseInt(v));
+          else
+            t3[i] = (255 - parseInt(v));
+        }
+      })
+      t3 = t3.join(",");
+      return t1[0]+"("+t3+")";
+    }
+
+    //invert color and backgroundcolor of every dom node
+    document.querySelectorAll('*:not([invTouch])').forEach(function(node) {
+      var style  = window.getComputedStyle(node);
+      node.style.backgroundColor = invert(style.backgroundColor,"back");
+      node.style.color = invert(style.color,"color");
+      node.setAttribute("invTouch", "true");
+    });
+    console.log("Colors Inverted!");
+  }
+
+  // Call the function to invert colors when needed
+
+
+
+</script>
+
+<!-- DARK MODE END-->
+<style>
+   {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;
+}
+</style>
+    <style>
+@font-face {
+  font-family: SF Pro Display;
+  src: url(./font/pro/SF-Pro-Display-Semibold.otf);
+}
+        body {
+            font-family: SF Pro Display;
+            margin: 0;
+            padding: 0;
+            background: rgba(255, 255, 255, .7);
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            background-color: #ffffff;
+            width: 250px;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+        }
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #6da4ffff;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 30px;
+transition: 0.2s ease;
+display: flex;
+
+  align-items: center;
+            transition: background-color 0.2s;
+        }
+        nav a:hover {
+            background-color: #e5e5e5;
+transition: 0.2s ease;
+        }
+	nav a:focus {
+    transform: scale(.9);
+transition: 0.2s ease;
+}
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #e5e5e5;
+            padding: 5px 10px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+transition: 0.2s ease;
+        }
+	.search-bar:focus {
+	transform: scale(.9);
+	transition: 0.2s ease;
+}
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+font-family: SF Pro Display;
+            padding: 5px;
+            font-size: 16px;
+            width: 100%;
+    transform: scale(.9);
+transition: 0.2s ease;
+        }
+        .container {
+            flex-grow: 1;
+            padding: 20px;
+            margin-left: 280px;
+            margin-top: 20px;
+        }
+        h2 {
+            font-size: 44px;
+            margin-bottom: 10px;
+	    color: #404040;
+        }
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .app-card {
+            background-color: #fff;
+            border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 16px;
+            text-align: center;
+	    margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+        }
+        .app-card img {
+            width: 100px;
+            height: 100px;
+            border-radius: 20%;
+        }
+        .app-card h3 {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .app-card p {
+            font-size: 14px;
+            color: #666;
+        }
+        .app-card .get-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+	    font-family: SF Pro Display;
+            background-color: #0073e6;
+            color: white;
+	    border: none;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .app-card .get-button:hover {
+            background-color: #005bb5;
+        }
+        .hidden {
+            display: none;
+        }
+        .form-container {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .form-container label {
+            display: block;
+            margin-top: 10px;
+        }
+        .form-container input, .form-container textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+	.navimg {
+	height: 30px;
+	}
+        .loading {
+            background: url('./appstore/load.svg') no-repeat center center;
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            color: white;
+	    border: none;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+<div style="display:none;" class="hidden" id="fileUploader">
+    <h1>Upload .oval File and Fill Data</h1>
+    <br><br>
+    <div style="display:none">
+        <h1>Page 1</h1>
+        <form id="dataForm">
+            <input placeholder="Name" type="text" id="iframeName" />
+            <br>
+            <input placeholder="Icon" type="text" id="iframeIcon" />
+            <br>
+            <input placeholder="Code" type="text" id="iframeURL" />
+            <br>
+            <input placeholder="Mode" type="text" id="iframemode" />
+            <br>
+            <textarea placeholder="Data" id="jsCode"></textarea> <!-- Changed to textarea for multiline input -->
+            <br>
+            <input placeholder="X Dimension" type="text" id="iframex" />
+            <br>
+            <input placeholder="Y Dimension" type="text" id="iframey" />
+            <br>
+            <input placeholder="Top Distance" type="text" id="iframetop" />
+            <br>
+            <input placeholder="Left Distance" type="text" id="iframeleft" />
+            <br>
+            <textarea oninput="replaceCharacters()" id="widgetInput" placeholder="Widget"></textarea>
+            <input type="text" id="iframeNameInput" placeholder="Name (again)">
+            <button type="button" onclick="saveData()">Save</button>
+            <button type="button" onclick="saveHTML()">Save HTML Code</button>
+        </form>
+    </div>
+</div>
+    <aside class="sidebar">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search" oninput="searchApps()">
+        </div>
+        <nav>
+            <a href="#popular"><img class="navimg" src="./appstore/popular.png"><div style="margin-left: 15px;" >Popular</div></a>
+            <a href="#apps"><img class="navimg" src="./appstore/apps.png"><div style="margin-left: 15px;" >Apps</div></a>
+            <a href="#games"><img class="navimg" src="./appstore/games.png"><div style="margin-left: 15px;" >Games</div></a>
+            <a href="#updates" id="updatesButton"><img class="navimg" src="./appstore/updates.png"><div style="margin-left: 15px;" >Updates</div></a>
+	    <input type="file" id="fileInput" accept=".oval" style="display: none;">
+<a tabindex="0" id="sideloadButton">
+  <img class="navimg" src="./appstore/sideload.png" alt="Sideload">
+  <div style="margin-left: 15px;">Sideload</div>
+</a>
+
+<script>
+  document.getElementById('sideloadButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent default link behavior
+    document.getElementById('fileInput').click(); // Trigger the file input click
+  });
+
+  document.getElementById('fileInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('Selected file:', file.name);
+      // Add your file handling logic here
+    }
+  });
+</script>
+
+        </nav>
+    </aside>
+    <div class="container" id="appContainer">
+        <!-- Dynamic content will be inserted here -->
+
+
+    </div>
+    <div style="display:none" class="form-container">
+        <label for="iframeName">Iframe Name:</label>
+        <input type="text" id="iframeName" />
+        <br>
+        <label for="iframeIcon">Iframe Icon URL:</label>
+        <input type="text" id="iframeIcon" />
+        <br>
+        <label for="iframeURL">Iframe URL:</label>
+        <input type="text" id="iframeURL" />
+        <br>
+        <label for="iframemode">Mode:</label>
+        <input type="text" id="iframemode" />
+        <br>
+        <label for="jsCode">JS code:</label>
+        <textarea id="jsCode"></textarea>
+        <br>
+        <label for="iframex">Iframe X:</label>
+        <input type="text" id="iframex" />
+        <br>
+        <label for="iframey">Iframe Y:</label>
+        <input type="text" id="iframey" />
+        <br>
+        <label for="iframetop">Iframe Top:</label>
+        <input type="text" id="iframetop" />
+        <br>
+        <label for="iframeleft">Iframe Left:</label>
+        <input type="text" id="iframeleft" />
+        <br>
+        <label for="widgetInput">Widget HTML:</label>
+        <textarea oninput="replaceCharacters()" id="widgetInput" placeholder="Enter HTML code here..."></textarea>
+    </div>
+    <div style="display:none;" id="savedIframesTaskbar" class="apps"></div>
+    <div id="taskbarContextMenu" style="display:none;position:absolute;background-color:white;border:1px solid #ccc;padding:10px;z-index:1000;">
+        <button class="removeAppButton">Remove App</button>
+    </div>
+    <script src="./appstore/appstore.js"></script>
+    <script>
+        const Games = {
+            "Popular": [],
+            "Apps": [],
+            "Games": [],
+            "Updates": []
+        };
+
+        // Populate Games with apps
+        apps.forEach(app => {
+            if (Games[app.category]) {
+                Games[app.category].push(app);
+            }
+        });
+
+        const container = document.getElementById('appContainer');
+
+        // Get saved taskbar apps
+        const savedTaskbarApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+
+        for (const [category, apps] of Object.entries(Games)) {
+            const section = document.createElement('section');
+            section.id = category.toLowerCase().replace(' ', '-');
+            section.innerHTML = `<h2>${category}</h2>`;
+            
+            const appGrid = document.createElement('div');
+            appGrid.classList.add('app-grid');
+
+            apps.forEach(app => {
+                const isInstalled = savedTaskbarApps.some(savedApp => savedApp.iframeName === app.name);
+
+                const appCard = document.createElement('div');
+                appCard.classList.add('app-card');
+                appCard.setAttribute('data-title', app.name);
+                appCard.innerHTML = `
+                    <img src="${app.icon}" alt="${app.name}">
+                    <h3>${app.name}</h3>
+                    <p>${app.developer}</p>
+                    <button class="get-button" ${isInstalled ? 'disabled style="pointer-events: none; background-color: #d3d3d3;"' : ''} onclick="${!isInstalled ? `fillForm(${JSON.stringify(app).replace(/"/g, '&quot;')}); sendRequest(this);` : ''}">
+                        ${isInstalled ? 'Installed' : 'Get'}
+                    </button>
+                `;
+                appGrid.appendChild(appCard);
+            });
+
+            section.appendChild(appGrid);
+            container.appendChild(section);
+        }
+
+        function fillForm(app) {
+            document.getElementById('iframeName').value = app.name;
+            document.getElementById('iframeIcon').value = app.icon;
+            document.getElementById('iframeURL').value = app.code;
+            document.getElementById('iframemode').value = app.mode;
+            document.getElementById('jsCode').value = app.data;
+            document.getElementById('iframex').value = app.x_dimension;
+            document.getElementById('iframey').value = app.y_dimension;
+            document.getElementById('iframetop').value = app.top_distance;
+            document.getElementById('iframeleft').value = app.left_distance;
+            document.getElementById('widgetInput').value = app.widget;
+            replaceCharacters();
+        }
+
+        function searchApps() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const sections = document.querySelectorAll('.container section');
+
+            sections.forEach(section => {
+                let hasVisibleApp = false;
+                const appCards = section.querySelectorAll('.app-card');
+
+                appCards.forEach(card => {
+                    const title = card.getAttribute('data-title').toLowerCase();
+                    if (title.includes(query)) {
+                        card.classList.remove('hidden');
+                        hasVisibleApp = true;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                if (hasVisibleApp) {
+                    section.querySelector('h2').classList.remove('hidden');
+                } else {
+                    section.querySelector('h2').classList.add('hidden');
+                }
+            });
+        }
+
+	function saveSoftware() {
+saveData(); saveHTML();
+}
+
+        function updateSavedTaskbarApps() {
+            const savedTaskbarApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+            document.getElementById('savedIframesTaskbar').innerHTML = "";
+
+            savedTaskbarApps.forEach(savedApp => {
+                const appInStore = apps.find(app => app.name === savedApp.iframeName);
+
+                if (appInStore) {
+                    let updateNeeded = false;
+
+                    // Compare specified properties
+                    if (
+                        appInStore.code !== savedApp.iframeURL ||
+                        appInStore.data !== savedApp.jsCode
+                    ) {
+                        updateNeeded = true;
+                    }
+
+                    // Display alert message based on update status
+                    if (updateNeeded) {
+                        addAppToUpdateSection(appInStore);
+                    }
+
+                    const onclickAttribute = `
+                        setActiveIcon(this);
+                        document.getElementById('iframeName').value ='${savedApp.iframeName}';
+                        document.getElementById('iframeIcon').value ='${savedApp.iframeIcon}';
+                        document.getElementById('iframeURL').value ='${savedApp.iframeURL}';
+                        document.getElementById('iframex').value ='${savedApp.iframex}';
+                        document.getElementById('iframey').value ='${savedApp.iframey}';
+                        document.getElementById('iframetop').value ='${savedApp.iframetop}';
+                        document.getElementById('iframeleft').value ='${savedApp.iframeleft}';
+                        ${savedApp.iframemode === 'fullscreen' ? 'createFullscreenIframe();' : savedApp.iframemode === 'none' ? '' : 'createIframe();'};
+                        ${savedApp.jsCode}`;
+
+                    const savedIframeHTML = `
+                        <div class="app-container" data-iframe-name="${savedApp.iframeName}">
+                            <a onclick="${onclickAttribute}" tabindex="0" class="taskbar-button">
+                                <img src="${savedApp.iframeIcon}">
+                            </a>
+                        </div>`;
+
+                    document.getElementById('savedIframesTaskbar').innerHTML += savedIframeHTML;
+                }
+            });
+
+            document.getElementById('savedIframesTaskbar').addEventListener('contextmenu', function(event) {
+                event.preventDefault();
+                const target = event.target.closest('.app-container');
+                if (target) {
+                    const iframeName = target.dataset.iframeName;
+                    showTaskbarContextMenu(event.clientX, event.clientY, iframeName);
+                }
+            });
+        }
+
+function addAppToUpdateSection(app) {
+    const updatesSection = document.getElementById('updates');
+    if (!updatesSection) return;
+
+    const appGrid = updatesSection.querySelector('.app-grid');
+    if (!appGrid) return;
+
+    const appCard = document.createElement('div');
+    appCard.classList.add('app-card');
+    appCard.setAttribute('data-title', app.name);
+    appCard.innerHTML = `
+        <img src="${app.icon}" alt="${app.name}">
+        <h3>${app.name}</h3>
+        <p>${app.developer}</p>
+        <button class="get-button" onclick="fillForm(${JSON.stringify(app).replace(/"/g, '&quot;')}); saveData(); location.reload();">Update</button>
+    `;
+    appGrid.appendChild(appCard);
+
+    // Check if the dark mode or feature is enabled
+    const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+    if (isEnabled) {
+        // Invert colors and remove specific styles if enabled
+        invertColors();
+
+        const getButtons = document.querySelectorAll('.get-button');
+        getButtons.forEach(button => {
+            if (!button.hasAttribute('disabled')) {
+                button.style.backgroundColor = ''; // Remove background color
+                button.style.color = ''; // Remove text color
+            }
+        });
+
+        // Get all elements with the specified colors
+        const elementsToRemove = document.querySelectorAll('[style*="color: rgb(109, 164, 135);"], [style*="color: rgb(146, 91, 120);"]');
+
+        // Remove the color styles
+        elementsToRemove.forEach((element) => {
+            element.style.removeProperty('color');
+        });
+
+        // Uncomment if you want to set a different color instead of removing
+        // elementsToRemove.forEach((element) => {
+        //     element.style.color = 'your-desired-color';
+        // });
+    }
+}
+
+
+function checkForUpdates() {
+    const updatesSection = document.getElementById('updates');
+    const updatesButton = document.getElementById('updatesButton');
+    const appCards = updatesSection.querySelectorAll('.app-card');
+    
+    const updatesNeeded = appCards.length > 0;
+
+    // Save the update status in localStorage
+    localStorage.setItem('updatesNeeded', updatesNeeded);
+
+    if (!updatesNeeded) {
+        updatesButton.style.display = 'none';
+        updatesSection.style.display = 'none';
+    } else {
+        updatesButton.style.display = 'flex';
+        updatesSection.style.display = 'block';
+    }
+}
+
+// Call this function on page load and after any action that affects updates
+document.addEventListener('DOMContentLoaded', function() {
+    updateSavedTaskbarApps();
+    checkForUpdates();
+});
+
+    </script>    <script>
+function saveHTML() {
+const iframeName = document.getElementById('iframeName').value;
+    const htmlCode = document.getElementById('widgetInput').value;
+    if (htmlCode.trim() === '' || iframeName.trim() === '') {
+        return;
+    }
+
+    let savedCodes = JSON.parse(localStorage.getItem('savedCodes')) || [];
+    const existingIndex = savedCodes.findIndex(code => code.iframeName === iframeName);
+
+    if (existingIndex !== -1) {
+        savedCodes[existingIndex].htmlCode = htmlCode;  // Update the existing code
+    } else {
+        savedCodes.push({ htmlCode, iframeName });
+    }
+
+    localStorage.setItem('savedCodes', JSON.stringify(savedCodes));
+    document.getElementById('widgetInput').value = '';
+}
+        function saveData() {
+            // Get values from input fields
+            const iframeIcon = document.getElementById('iframeIcon').value;
+const iframeName = document.getElementById('iframeName').value;
+            const iframeURL = document.getElementById('iframeURL').value;
+            const iframemode = document.getElementById('iframemode').value.toLowerCase(); // Convert to lowercase for case-insensitivity
+            const jsCode = document.getElementById('jsCode').value; // Get JS code
+            const iframex = document.getElementById('iframex').value;
+            const iframey = document.getElementById('iframey').value;
+            const iframetop = document.getElementById('iframetop').value;
+            const iframeleft = document.getElementById('iframeleft').value;
+
+            // Check if localStorage is supported
+            if (typeof(Storage) !== 'undefined') {
+                // Retrieve existing app data from localStorage or initialize an empty array for start menu and taskbar
+                const savedApps = JSON.parse(localStorage.getItem('savedApps')) || [];
+                const savedTaskbarApps = JSON.parse(localStorage.getItem('savedTaskbarApps')) || [];
+
+                // Check if an app with the same icon already exists in start menu
+                const existingAppIndex = savedApps.findIndex(app => app.iframeIcon === iframeIcon);
+
+                if (existingAppIndex !== -1) {
+                    // Update the existing app with the new data in start menu
+                    savedApps[existingAppIndex] = { iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft };
+                } else {
+                    // Add new app data to the array in start menu
+                    savedApps.push({ iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft });
+                }
+
+                // Check if an app with the same icon already exists in taskbar
+                const existingTaskbarAppIndex = savedTaskbarApps.findIndex(app => app.iframeIcon === iframeIcon);
+
+                if (existingTaskbarAppIndex !== -1) {
+                    // Update the existing app with the new data in taskbar
+                    savedTaskbarApps[existingTaskbarAppIndex] = { iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft };
+                } else {
+                    // Add new app data to the array in taskbar
+                    savedTaskbarApps.push({ iframeName, iframeIcon, iframeURL, iframemode, jsCode, iframex, iframey, iframetop, iframeleft });
+                }
+
+                // Save the updated arrays to localStorage
+                localStorage.setItem('savedApps', JSON.stringify(savedApps));
+                localStorage.setItem('savedTaskbarApps', JSON.stringify(savedTaskbarApps));
+            } else {
+                alert('Sorry, your browser does not support localStorage.');
+            }
+        }
+
+
+    </script>
+
+    <script>
+        function replaceCharacters() {
+            const inputBox = document.getElementById('widgetInput');
+            const inputValue = inputBox.value;
+
+            // Define character replacements
+            const replacements = {
+                '(ovalquote)': '"',
+                '(ovalapost)': "'",
+                '(ovalcurlo)': '{',
+                '(ovalcurlc)': '}',
+                '(ovalbraco)': '[',
+                '(ovalbracc)': ']',
+                '(ovalcomma)': ',',
+                '(ovalbtick)': '`',
+                '(ovalanglo)': '<',
+                '(ovalanglc)': '>',
+                '(ovalcolon)': ':',
+                '(ovalsolon)': ';'
+            };
+
+            // Replace characters
+            let replacedValue = inputValue;
+            for (const key in replacements) {
+                replacedValue = replacedValue.replace(new RegExp(key, 'g'), replacements[key]);
+            }
+
+            inputBox.value = replacedValue; // Update the input box value
+        }
+    </script>
+
+<script>
+    function sendRequest(button) {
+        // Clear any old response before sending a new request
+        localStorage.removeItem('response');
+
+        button.classList.add('loading');
+        button.classList.remove('get-button');
+        button.textContent = '‎ ‎ ‎ ‎ ‎ ‎ ';
+        button.disabled = true;
+        
+        // Simulating a request to the second page
+        localStorage.setItem('requestSent', 'true');
+        
+        // Wait for the second page to process the request
+        setTimeout(() => checkResponse(button), 1000);
+    }
+
+    function checkResponse(button) {
+        const response = localStorage.getItem('response');
+        
+        if (response === 'yes') {
+            console.log('Response is yes, executing function1');
+            function1();
+            localStorage.removeItem('response');
+            resetRequestButton(button);
+        } else if (response === 'no') {
+            console.log('Response is no, resetting button');
+            resetRequestButton(button);
+            localStorage.removeItem('response');
+        } else {
+            console.log('No response yet, retrying after 2 seconds');
+            setTimeout(() => checkResponse(button), 2000); // Increased delay to 2 seconds
+        }
+    }
+
+    function resetRequestButton(button) {
+        button.classList.remove('loading');
+        button.classList.add('get-button');
+        button.textContent = 'Get';
+        button.disabled = false;
+    }
+
+    function function1() {
+        console.log('Function1 executed');
+        saveSoftware();
+        location.reload();
+    }
+</script>
+
+
+    <script>
+    function sendRequestsideload() {
+        // Clear any old response before sending a new request
+        localStorage.removeItem('responseSideload');
+
+        // Simulating a request to the second page
+        localStorage.setItem('requestSideloadSent', 'true');
+        
+        // Wait for the second page to process the request
+        setTimeout(checkResponsesideload, 1000);
+    }
+
+    function checkResponsesideload() {
+        const response = localStorage.getItem('responseSideload');
+        
+        if (response === 'yes') {
+            console.log('Response is yes, executing function1sideload');
+            function1sideload();
+            localStorage.removeItem('responseSideload');
+        } else if (response === 'no') {
+            console.log('Response is no, clearing localStorage for responseSideload');
+            localStorage.removeItem('responseSideload');
+        } else {
+            console.log('No response found, retrying after 2 seconds');
+            setTimeout(checkResponsesideload, 2000); // Increase timeout to 2 seconds
+        }
+    }
+
+    function function1sideload() {
+        console.log('Function1Sideload executed');
+        saveData();
+        saveHTML();
+	clearForm();
+	location.reload();
+    }
+    </script>
+
+
+<!-- START OvalOS CURSOR ADDON -->
+
+<style>
+.wallpaperbarrier {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+</style>
+<div style="z-index: -3;" id="backgroundbarrier" class="wallpaperbarrier"></div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get all elements
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        const style = getComputedStyle(element);
+        if (style.cursor === 'pointer') {
+            element.style.cursor = "url('./assets/cursors/Link.cur'), pointer";
+        }
+    });
+});
+
+</script>
+<link rel="stylesheet" href="./cursor.css">
+
+<!-- END OvalOS CURSOR ADDON -->
+
+<!-- OVALOS CUSTOM SETTINGS START-->
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+        if (isEnabled) {
+  invertColors();
+const getButtons = document.querySelectorAll('.get-button');
+getButtons.forEach(button => {
+    if (!button.hasAttribute('disabled')) {
+        button.style.backgroundColor = ''; // Remove background color
+        button.style.color = ''; // Remove text color
+    }
+});
+// Get all elements with the specified colors
+const elementsToRemove = document.querySelectorAll('[style*="color: rgb(109, 164, 135);"], [style*="color: rgb(146, 91, 120);"]');
+
+// Remove the color styles
+elementsToRemove.forEach((element) => {
+    element.style.removeProperty('color');
+});
+
+// Alternatively, if you want to set a different color, you can do:
+// elementsToRemove.forEach((element) => {
+//     element.style.color = 'your-desired-color';
+// });
+
+        } else {
+
+        }
+    </script>
+<script>
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file && file.name.endsWith('.oval')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+
+                // Use regular expressions to extract values between quotes and backticks
+                const name = content.match(/name:\s*"(.*?)"/)?.[1] || '';
+                const developer = content.match(/developer:\s*"(.*?)"/)?.[1] || '';
+                const category = content.match(/category:\s*"(.*?)"/)?.[1] || '';
+                const icon = content.match(/icon:\s*"(.*?)"/)?.[1] || '';
+                const mode = content.match(/mode:\s*"(.*?)"/)?.[1] || '';
+                const data = content.match(/data:\s*"(.*?)"/)?.[1] || '';
+                const x_dimension = content.match(/x_dimension:\s*(\d*)/)?.[1] || '';
+                const y_dimension = content.match(/y_dimension:\s*(\d*)/)?.[1] || '';
+                const top_distance = content.match(/top_distance:\s*(\d*)/)?.[1] || '';
+                const left_distance = content.match(/left_distance:\s*(\d*)/)?.[1] || '';
+                const code = content.match(/code:\s*"(.*?)"/)?.[1] || '';
+                const widget = content.match(/widget:\s*`(.*?)`/)?.[1] || '';
+
+                // Populate the form fields with the extracted values
+                document.getElementById('iframeName').value = name;
+                document.getElementById('iframeIcon').value = icon;
+                document.getElementById('iframeURL').value = code;
+                document.getElementById('iframemode').value = mode;
+                document.getElementById('jsCode').value = data;
+                document.getElementById('iframex').value = x_dimension;
+                document.getElementById('iframey').value = y_dimension;
+                document.getElementById('iframetop').value = top_distance;
+                document.getElementById('iframeleft').value = left_distance;
+                document.getElementById('widgetInput').value = widget;
+                document.getElementById('iframeNameInput').value = name;
+
+                // Automatically save the loaded data and clear the form
+                replaceCharacters();
+sendRequestsideload();
+            };
+            reader.readAsText(file);
+        } else {
+            alert('Please upload a valid .oval file.');
+        }
+    });
+
+    // Display file uploader form when "Sideload" button is clicked
+    document.querySelector('nav a[href="#updates"]').addEventListener('click', function() {
+        document.getElementById('fileUploader').classList.toggle('hidden');
+    });
+
+    function clearForm() {
+        document.getElementById('dataForm').reset();
+        document.getElementById('fileInput').value = '';
+    }
+</script>
+
+<!-- OVALOS CUSTOM SETTINGS END-->
+
+</body>
+</html>

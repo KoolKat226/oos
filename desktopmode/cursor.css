@@ -1,0 +1,61 @@
+/* Default custom cursors */
+body {
+    cursor: url('assets/cursors/Normal.cur'), auto;
+}
+
+.link-cursor {
+    cursor: url('assets/cursors/Link.cur'), pointer;
+}
+
+a {
+    cursor: url('assets/cursors/Link.cur'), pointer;
+}
+
+textarea, input[type="text"], input[type="password"], input[type="email"], input[type="search"], input[type="url"], input[type="tel"], input[type="number"] {
+    cursor: url('assets/cursors/Text.cur'), text;
+}
+
+.help {
+    cursor: url('assets/cursors/Help.cur'), help;
+}
+
+.working {
+    cursor: url('assets/cursors/Working.ani'), progress;
+}
+
+.busy {
+    cursor: url('assets/cursors/Busy.ani'), wait;
+}
+
+.unavailable {
+    cursor: url('assets/cursors/Unavailable.cur'), not-allowed;
+}
+
+.vertical-resize {
+    cursor: url('assets/cursors/Vertical Resize.cur'), ns-resize;
+}
+
+.horizontal-resize {
+    cursor: url('assets/cursors/Horizontal Resize.cur'), ew-resize;
+}
+
+.diagonal-resize-1 {
+    cursor: url('assets/cursors/Diagonal Resize 1.cur'), nwse-resize;
+}
+
+.diagonal-resize-2 {
+    cursor: url('assets/cursors/Diagonal Resize 2.cur'), nesw-resize;
+}
+
+.move {
+    cursor: url('assets/cursors/Move.cur'), move;
+}
+
+.precision {
+    cursor: url('assets/cursors/Precision.cur'), crosshair;
+}
+
+.alternate {
+    cursor: url('assets/cursors/Alternate.cur'), alias;
+}
+
