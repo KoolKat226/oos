@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convert Iframe to Image</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  iframe {
+    display: none; /* Hide the iframe */
+  }
+  canvas {
+    border: 1px solid black;
+    max-width: 100%;
+    height: auto;
+  }
+</style>
+</head>
+<body>
+<iframe id="targetIframe" src="file:///C:/Users/jacks/Stuff/OLEX/OlexOS%206/system/wallpaperengine/openwall.html"></iframe>
+<canvas id="canvas"></canvas>
+
+<script>
+window.onload = function() {
+    var iframe = document.getElementById('targetIframe');
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+
+    // Wait for the iframe content to load
+    iframe.onload = function() {
+        // Set canvas dimensions to match iframe content
+        canvas.width = iframe.contentWindow.document.body.scrollWidth;
+        canvas.height = iframe.contentWindow.document.body.scrollHeight;
+
+        // Draw iframe content onto the canvas
+        ctx.drawImage(iframe, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to data URL
+        var dataURL = canvas.toDataURL();
+
+        // Create an image element to display the image
+        var image = new Image();
+        image.src = dataURL;
+
+        // Append the image to the body
+        document.body.appendChild(image);
+    };
+};
+</script>
+
+</body>
+</html>
