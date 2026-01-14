@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oval Loader</title>
+</head>
+<body>
+    <h1>Paste .oval File Contents and Fill Data</h1>
+    <textarea id="fileContentInput" rows="10" cols="50" placeholder="Paste .oval file contents here">{
+    name: "Settings",
+    widget: `ovalangloiframe style=ovalquotepointer-eventsovalcolon noneovalsolon background-colorovalcolon rgba(255ovalcomma 255ovalcomma 255ovalcomma 0)ovalsolon colorovalcolon rgb(120ovalcomma 120ovalcomma 120)ovalsolonovalquote src=ovalquote./settings/clock/index.htmlovalquote frameborder=ovalquote0ovalquote width=ovalquote250ovalquote height=ovalquote250ovalquote invtouch=ovalquotetrueovalquoteovalanglcovalanglo/iframeovalanglc`
+  },</textarea>
+    <br><br>
+    <button type="button" onclick="processFileContent()">Process</button>
+    <br><br>
+<div style="display:none">
+    <h1>Page 1</h1>
+    <form id="dataForm">
+        <textarea oninput="replaceCharacters()" id="widgetInput" placeholder="Widget"></textarea>
+        <input type="text" id="iframeNameInput" placeholder="Name (again)">
+        <button type="button" onclick="saveData()">Save</button>
+        <button type="button" onclick="saveHTML()">Save HTML Code</button>
+    </form>
+
+    <script>
+        function processFileContent() {
+            const content = document.getElementById('fileContentInput').value;
+
+            // Use regular expressions to extract values between quotes and backticks
+            const name = content.match(/name:\s*"(.*?)"/)?.[1] || '';
+            const widget = content.match(/widget:\s*`(.*?)`/)?.[1] || '';
+
+            // Populate the form fields with the extracted values
+            document.getElementById('widgetInput').value = widget;
+            document.getElementById('iframeNameInput').value = name;
+
+            // Automatically save the loaded data and clear the form
+            replaceCharacters();
+            saveHTML();
+            clearForm();
+        }
+
+        function saveHTML() {
+            const htmlCode = document.getElementById('widgetInput').value;
+            const iframeName = document.getElementById('iframeNameInput').value;
+            if (htmlCode.trim() === '' || iframeName.trim() === '') {
+                return;
+            }
+
+            let savedCodes = JSON.parse(localStorage.getItem('savedCodes')) || [];
+            const existingIndex = savedCodes.findIndex(code => code.iframeName === iframeName);
+
+            if (existingIndex !== -1) {
+                savedCodes[existingIndex].htmlCode = htmlCode;
+            } else {
+                savedCodes.push({ htmlCode, iframeName });
+            }
+
+            localStorage.setItem('savedCodes', JSON.stringify(savedCodes));
+            document.getElementById('widgetInput').value = '';
+            document.getElementById('iframeNameInput').value = '';
+        }
+
+        function clearForm() {
+            document.getElementById('dataForm').reset();
+            document.getElementById('fileContentInput').value = '';
+        }
+
+        function replaceCharacters() {
+            const inputBox = document.getElementById('widgetInput');
+            const inputValue = inputBox.value;
+
+            // Define character replacements
+            const replacements = {
+                '(ovalquote)': '"',
+                '(ovalapost)': "'",
+                '(ovalcurlo)': '{',
+                '(ovalcurlc)': '}',
+                '(ovalbraco)': '[',
+                '(ovalbracc)': ']',
+                '(ovalcomma)': ',',
+                '(ovalbtick)': '`',
+                '(ovalanglo)': '<',
+                '(ovalanglc)': '>',
+                '(ovalcolon)': ':',
+                '(ovalsolon)': ';'
+            };
+
+            // Replace characters
+            let replacedValue = inputValue;
+            for (const key in replacements) {
+                replacedValue = replacedValue.replace(new RegExp(key, 'g'), replacements[key]);
+            }
+
+            inputBox.value = replacedValue; // Update the input box value
+        }
+    </script>
+<script>
+processFileContent();
+</script>
+</div>
+</body>
+</html>
