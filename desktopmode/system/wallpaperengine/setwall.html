@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Save URLs</title>
+<!-- DARK MODE START-->
+<script>
+  function invertColors() {
+    function invert(str,type){
+      var t1 = str.split("(");
+      var t2 = t1[1].split(")");
+      var t3 = t2[0].split(",");
+      t3.forEach(function(v,i){
+        if(i<3){
+          if(type=="color")
+            t3[i] = (255 - parseInt(v))<50?120:(255 - parseInt(v));
+          else
+            t3[i] = (255 - parseInt(v));
+        }
+      })
+      t3 = t3.join(",");
+      return t1[0]+"("+t3+")";
+    }
+
+    //invert color and backgroundcolor of every dom node
+    document.querySelectorAll('*:not([invTouch])').forEach(function(node) {
+      var style  = window.getComputedStyle(node);
+      node.style.backgroundColor = invert(style.backgroundColor,"back");
+      node.style.color = invert(style.color,"color");
+      node.setAttribute("invTouch", "true");
+    });
+    console.log("Colors Inverted!");
+  }
+
+  // Call the function to invert colors when needed
+</script>
+<script>
+function checkAndApplyToggleSwitchState() {
+    // Check localStorage for the previous state of toggle switch 1
+    const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+    if (isEnabled) {
+        invertColors();
+    } else {
+return;
+    }
+}
+</script>
+
+<!-- DARK MODE END-->
+
+<style>
+   {
+    overflow: scroll;
+    overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;
+}
+</style>
+<style>
+
+.middlepls {
+     display: flex;
+    justify-content: center; /* Horizontally center */
+    align-items: center;
+}
+  .container {
+    position: relative;
+    width: 300px; /* Adjust width as needed */
+    height: 150px; /* Adjust height as needed */
+    overflow: hidden;
+    border-radius: 25px;
+  }
+  .background-image, .overlay-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .overlay-image {
+    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+    z-index: 1;
+  }
+
+    #custom-url-input {
+        display: block;
+        width: 80%;
+        margin: 10px auto;
+        padding: 10px;
+        font-size: 16px;
+    }
+
+@font-face {
+  font-family: SF Pro Display;
+  src: url(../../font/pro/SF-Pro-Display-Semibold.otf);
+}
+
+.btn {
+        display: block;
+        margin: 10px auto;
+        text-align: center;
+      padding: 5px 10px;
+    background: rgba(245, 243, 240, .8);
+      color: #3172C9;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      height: 40px;
+    width: 60%;
+font-size: 15px;
+font-family: SF Pro Display;
+transition: 0.3s;
+}
+
+.btn:hover {
+      background-color: #d1dbe0;
+transition: 0.3s;
+}
+
+.btn:focus {
+scale: .8;
+transition: 0.3s;
+}
+</style>
+</head>
+<body>
+    <input style="display:none;" type="text" id="custom-url-input" placeholder="Enter custom URL">
+<div class="middlepls">
+<div class="container">
+  <img class="background-image" src="./ovalwalls/OvalOSdefault.jpeg" alt="Background Image">
+  <img class="overlay-image" src="./ovalwalls/OvalOSdefaultdark.jpeg" alt="Overlay Image">
+</div>
+</div>
+    <button style="display:none;" class="btn" onmouseup="removeFocus(this)" onclick="saveCustomURL()">Save Custom URL</button>
+<button class="btn" onmouseup="removeFocus(this)" onclick="saveURL('./wallpaperengine/wallpaperanimateoval/wallpaper.html'); window.open('../wallpaper.html', 'ovalwallpaper');">Set Default</button>
+<div class="middlepls">
+<div class="container">
+  <img class="background-image" src="./ovalwalls/OvalOScitywallpaper.png" alt="Background Image">
+  <img class="overlay-image" src="./ovalwalls/OvalOScitywallpaperdark.png" alt="Overlay Image">
+</div>
+</div>
+    <button class="btn" onmouseup="removeFocus(this)" onclick="saveURL('./wallpaperengine/ovalcityanimate/wallpaper.html'); window.open('../wallpaper.html', 'ovalwallpaper');">Set Oval City</button>
+<div class="middlepls">
+<div class="container">
+  <img class="background-image" src="./ovalwalls/OvalOSmayo.jpg" alt="Background Image">
+  <img class="overlay-image" src="./ovalwalls/OvalOSmayodark.jpg" alt="Overlay Image">
+</div>
+</div>
+    <button class="btn" onmouseup="removeFocus(this)" onclick="saveURL('./wallpaperengine/ovalwalls/mayo.html'); window.open('../wallpaper.html', 'ovalwallpaper');">Set Mayonnaise</button>
+<div class="middlepls">
+<div class="container">
+  <img class="background-image" src="./ovalwalls/OvalOSlava.png" alt="Background Image">
+  <img class="overlay-image" src="./ovalwalls/OvalOSlavadark.png" alt="Overlay Image">
+</div>
+</div>
+    <button class="btn" onmouseup="removeFocus(this)" onclick="saveURL('./wallpaperengine/ovallavaanimate/wallpaper.html'); window.open('../wallpaper.html', 'ovalwallpaper');">Set Lava Lamp</button>
+<div class="middlepls">
+<div class="container">
+  <img class="background-image" src="./ovalwalls/OvalOSsandplanet.png" alt="Background Image">
+  <img class="overlay-image" src="./ovalwalls/OvalOSsandplanetdark.png" alt="Overlay Image">
+</div>
+</div>
+    <button class="btn" onmouseup="removeFocus(this)" onclick="saveURL('./wallpaperengine/ovalsandplanet/wallpaper.html'); window.open('../wallpaper.html', 'ovalwallpaper');">Set Sand Planet</button>
+<div class="middlepls">
+<div class="container">
+  <img class="background-image" src="./ovalwalls/OvalOSmaterial.png" alt="Background Image">
+  <img class="overlay-image" src="./ovalwalls/OvalOSmaterialdark.png" alt="Overlay Image">
+</div>
+</div>
+    <button class="btn" onmouseup="removeFocus(this)" onclick="saveURL('./wallpaperengine/material/index.html'); window.open('../wallpaper.html', 'ovalwallpaper');">Set Material</button>
+
+    <script>
+        function saveURL(url) {
+            localStorage.setItem('savedURL', url);
+        }
+
+        function saveCustomURL() {
+            var customURL = document.getElementById('custom-url-input').value;
+            if (customURL.trim() !== '') {
+                localStorage.setItem('savedURL', customURL);
+            } else {
+                alert('Please enter a valid URL');
+            }
+        }
+    </script>
+
+<!-- START OvalOS CURSOR ADDON -->
+
+<style>
+.wallpaperbarrier {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+</style>
+<div style="z-index: -3;" id="backgroundbarrier" class="wallpaperbarrier"></div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get all elements
+    const allElements = document.querySelectorAll('*');
+    
+    allElements.forEach(element => {
+        const style = getComputedStyle(element);
+        if (style.cursor === 'pointer') {
+            element.style.cursor = "url('../../assets/cursors/Link.cur'), pointer";
+        }
+    });
+checkAndApplyToggleSwitchState();
+});
+
+</script>
+<link rel="stylesheet" href="../../cursor.css">
+  <script>
+    function removeFocus(button) {
+      button.blur();
+    }
+  </script>
+
+<!-- END OvalOS CURSOR ADDON -->
+
+</body>
+</html>

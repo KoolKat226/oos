@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customizable Image Page</title>
+<style>
+  #image-container {
+    width: 100%;
+    height: 100%;
+  }
+  #custom-ovalwallpaper-input {
+    display: none;
+  }
+
+  #wallpaper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    object-fit: cover;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div id="image-container">
+  <div id="wallpaper"></div>
+  <input type="file" id="custom-ovalwallpaper-input" accept="image/*">
+</div>
+
+<script>
+  function handleFileSelect(evt) {
+    var files = evt.target.files; // FileList object
+
+    // Loop through the FileList and render image files as thumbnails.
+    for (var i = 0, f; f = files[i]; i++) {
+
+      // Only process image files.
+      if (!f.type.match('image.*')) {
+        continue;
+      }
+
+      var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+        return function(e) {
+          // Render thumbnail.
+          var div = document.createElement('div');
+          div.innerHTML = ['<img class="wallpaper" src="', e.target.result,
+                            '" title="', escape(theFile.name), '"/>'].join('');
+            
+          document.getElementById('wallpaper').appendChild(div);
+          localStorage.setItem('ovalwallpaper', e.target.result);
+        };
+      })(f);
+
+      // Read in the image file as a data URL.
+      reader.readAsDataURL(f);
+    }
+  }
+
+  document.getElementById('custom-ovalwallpaper-input').addEventListener('change', handleFileSelect, false);
+
+  window.addEventListener('DOMContentLoaded', function() {
+    const ovalwallpaper = localStorage.getItem('ovalwallpaper');
+    if (ovalwallpaper) {
+      var div = document.createElement('div');
+      div.innerHTML = ['<img class="wallpaper" src="', ovalwallpaper,
+                            '" title=""/>'].join('');
+      document.getElementById('wallpaper').appendChild(div);
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redirecting to Saved URL</title>
+</head>
+<body>
+    <script>
+        // Retrieve saved URL from local storage
+        var savedURL = localStorage.getItem('savedURL');
+        if (savedURL) {
+            // Redirect to the saved URL
+            window.location.href = savedURL;
+        } else {
+            // If no URL is saved, redirect to a default URL
+            window.location.href = 'default.html';
+        }
+    </script>
+</body>
+</html>
