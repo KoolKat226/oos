@@ -460,6 +460,44 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+  <script>
+    function rand(max) {
+      return Math.floor(Math.random() * max) + 1;
+    }
+
+    function generateRandomMii() {
+      const mii = [
+        `./emoji/orbs/${rand(4)}.png`,
+        `./emoji/mouths/${rand(4)}.png`,
+        `./emoji/eyes/${rand(14)}.png`,
+        `./emoji/hairs/${rand(12)}.png`,
+        `./emoji/eyewear/${rand(6)}.png`,
+        `./emoji/hats/${rand(15)}.png`
+      ].join(', ');
+
+      const colC = document.getElementById('colC');
+      colC.value = mii;
+
+      // sync with your existing system
+      localStorage.setItem('mii_layers', mii);
+
+      // update create button state
+      if (typeof updateCreateState === 'function') {
+        updateCreateState();
+      }
+    }
+
+    // Auto-generate if empty on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const colC = document.getElementById('colC');
+      if (!colC.value.trim()) {
+        generateRandomMii();
+      }
+    });
+
+    // Optional: expose for manual regen
+    window.generateRandomMii = generateRandomMii;
+  </script>
 
 </body>
 </html>
