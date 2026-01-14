@@ -2,7 +2,7 @@
 // File: /service-worker.js
 // ────────────────────────────────────────────────────────────────────
 
-const CACHE_NAME = 'oosv2.8';
+const CACHE_NAME = 'oosv3.0';
 
 // ─── Install Event: Activate Immediately ────────────────────────────
 self.addEventListener('install', (evt) => {
