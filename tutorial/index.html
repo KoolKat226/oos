@@ -330,7 +330,7 @@
     }
 
 function endTutorial() {
-  localStorage.setItem('tutorialSeen', 'true');
+  localStorage.setItem('tutorialSeen3', 'true');
   if (window.parent !== window) {
     window.parent.postMessage('tutorialComplete', '*');
     window.parent.location.reload();
