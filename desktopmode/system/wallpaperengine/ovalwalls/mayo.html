@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body, html {
+  height: 100%;
+  margin: 0;
+}
+
+.bg {
+  /* The image used */
+  background-image: url("./OvalOSmayo.jpg");
+
+  /* Full height */
+  height: 100%; 
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+</body>
+    <script>
+        // Check localStorage for the previous state of toggle switch 1
+        const isEnabled = localStorage.getItem('ovalosdarkmodeEnabled') === 'true';
+
+        if (isEnabled) {
+// Create a <style> element
+var style = document.createElement('style');
+style.type = 'text/css';
+
+// Define the CSS rules
+var css = '.bg { background-image: url("OvalOSmayodark.jpg"); }';
+
+// Add the CSS rules to the <style> element
+if (style.styleSheet) {
+  // For IE
+  style.styleSheet.cssText = css;
+} else {
+  // For other browsers
+  style.appendChild(document.createTextNode(css));
+}
+
+// Add the <style> element to the <head> of the document
+document.head.appendChild(style);
+
+        } else {
+
+        }
+    </script>
+</html>
